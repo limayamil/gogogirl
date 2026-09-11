@@ -1,0 +1,64 @@
+# GoGoGirl
+
+App personal de productividad con tres vistas: **Hoy**, **Categorias** y **Semana**.
+
+- **Hoy** — lista simple de lo que toca hoy (titulo, color de categoria y status, nada mas),
+  con la columna de categorias a la derecha. Arrastra una tarea a Hoy para agendarla: la tarea
+  se marca como "en Hoy" y **sigue viviendo en su categoria**.
+- **Categorias** — mosaico tipo Pinterest; cada tarjeta es una categoria con su color pastel
+  y sus tareas, con mas detalle (urgencia, deadline, progreso de subtareas).
+- **Semana** — lunes a domingo, solo tareas con deadline. Arrastrar una tarjeta de un dia a
+  otro cambia su deadline.
+
+Dos FABs flotantes: **⚡** abre el checklist de tareas rapidas y **➕** el formulario completo.
+
+Las tareas **no vencen solas**: lo que esta en Hoy se queda hasta que lo ocultes con el ojito.
+
+## Stack
+
+React + Vite + TypeScript, Neon Postgres, funciones serverless en `/api` (Vercel).
+Drag & drop con dnd-kit, datos con TanStack Query y mutaciones optimistas.
+
+## Puesta en marcha
+
+```bash
+npm install
+cp .env.example .env        # pega la connection string de Neon en DATABASE_URL
+npm run db:migrate          # crea las tablas
+npm run dev                 # front en :5173, API en :3001
+```
+
+`npm run dev` levanta Vite y un servidor Express que monta los mismos handlers de `api/`
+que Vercel ejecuta en produccion, asi que no hace falta `vercel dev` ni estar logueado.
+
+## Comandos
+
+| Comando | Que hace |
+|---|---|
+| `npm run dev` | Front + API en modo desarrollo |
+| `npm run build` | Typecheck y build de produccion |
+| `npm test` | Tests de Vitest (validacion de payloads, fechas) |
+| `npm run db:migrate` | Aplica las migraciones pendientes de `db/migrations` |
+
+## Adjuntos
+
+Los archivos van a un bucket S3-compatible via URL prefirmada (el navegador sube directo,
+sin pasar por la funcion). Se configura con `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION`,
+`S3_ACCESS_KEY_ID` y `S3_SECRET_ACCESS_KEY`. Sin esas variables la app funciona igual:
+solo el boton de subir archivo responde que el almacenamiento no esta configurado.
+
+## Estructura
+
+```
+api/              Funciones serverless (mismos handlers en dev y en produccion)
+  _lib/           Conexion a Neon, helpers HTTP, validacion, storage
+db/migrations/    SQL versionado
+scripts/          Servidor de desarrollo y runner de migraciones
+src/
+  app/            Shell, navegacion y host de modales
+  components/     Modales, FABs, status toggle, iconos
+  lib/            Cliente de API, cache de React Query, paleta, fechas
+  views/          TodayView, CategoriesView, WeekView
+  shared/types.ts Contrato compartido entre front y API
+design/           Boceto original y referencias esteticas
+```

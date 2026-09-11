@@ -1,0 +1,269 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.label {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--line);
+  background: var(--surface-2);
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--accent-2);
+  background: var(--surface);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: transform 120ms ease;
+}
+
+.chip:hover {
+  transform: translateY(-1px);
+}
+
+.chipOn {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--r-pill);
+}
+
+.segment {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  border: 1.5px solid var(--line);
+}
+
+.segmentItem {
+  padding: 7px 15px;
+  border-radius: var(--r-pill);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.segmentOn {
+  box-shadow: var(--shadow-sm);
+}
+
+.subtasks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.subtask {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 7px 10px;
+  border-radius: var(--r-sm);
+  font-size: 14.5px;
+}
+
+.subtask:hover {
+  background: var(--surface-2);
+}
+
+.subtask span {
+  flex: 1;
+}
+
+.subtaskDone {
+  color: var(--ink-faint);
+  text-decoration: line-through;
+}
+
+.checkbox {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.addRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.addButton {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.attachment {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+}
+
+.attachment:hover {
+  background: var(--surface-2);
+}
+
+.attachmentName {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.attachmentName:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  color: var(--ink-faint);
+}
+
+.iconButton:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.hint {
+  font-size: 13.5px;
+  color: var(--ink-faint);
+}
+
+.error {
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.primary {
+  padding: 10px 20px;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--surface);
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.primary:hover {
+  opacity: 0.88;
+}
+
+.ghost {
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  color: var(--ink-soft);
+  font-weight: 700;
+  font-size: 14px;
+  align-self: flex-start;
+}
+
+.ghost:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.ghost:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.danger {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.danger:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+@media (max-width: 560px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}
