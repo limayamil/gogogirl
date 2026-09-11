@@ -2,14 +2,43 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="GoGoGirl: tu lista de Hoy, categorías y semana. Anotá tareas, subtareas y fechas límite."
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#fbf6f3" />
+    <meta property="og:title" content="GoGoGirl" />
+    <meta
+      property="og:description"
+      content="App personal de productividad: Hoy, categorías y semana."
+    />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:type" content="website" />
     <title>GoGoGirl</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem('gogogirl-theme')
+          if (theme === 'dark' || theme === 'light') {
+            document.documentElement.dataset.theme = theme
+          }
+          if (theme === 'dark') {
+            var meta = document.querySelector('meta[name="theme-color"]')
+            if (meta) meta.setAttribute('content', '#17141c')
+          }
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

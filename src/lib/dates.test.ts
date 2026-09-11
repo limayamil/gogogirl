@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { startOfWeek, toDateKey, weekKeys } from './dates'
+import { DAY_NAMES, formatTodayHeading, startOfWeek, toDateKey, weekKeys } from './dates'
+
+describe('DAY_NAMES', () => {
+  it('lleva tildes en miércoles y sábado', () => {
+    expect(DAY_NAMES).toEqual(['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'])
+  })
+})
+
+describe('formatTodayHeading', () => {
+  it('capitaliza solo el primer carácter y deja "de" en minúscula', () => {
+    expect(formatTodayHeading(new Date(2026, 8, 11))).toBe('Viernes, 11 de septiembre')
+  })
+})
 
 describe('startOfWeek', () => {
   it('devuelve el lunes de esa semana', () => {

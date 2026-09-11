@@ -4,7 +4,7 @@
  * convierte a UTC y corre el dia.
  */
 
-export const DAY_NAMES = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'] as const
+export const DAY_NAMES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] as const
 
 export function toDateKey(date: Date): string {
   const y = date.getFullYear()
@@ -56,4 +56,14 @@ export function formatWeekRange(anchor: Date): string {
   const sunday = addDays(monday, 6)
   const fmt = (date: Date) => date.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
   return `${fmt(monday)} – ${fmt(sunday)}`
+}
+
+/** "Viernes, 11 de septiembre" — sin capitalizar el "de". */
+export function formatTodayHeading(date: Date): string {
+  const raw = date.toLocaleDateString('es-AR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+  return raw.charAt(0).toUpperCase() + raw.slice(1)
 }

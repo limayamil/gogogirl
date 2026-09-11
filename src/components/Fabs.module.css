@@ -1,7 +1,7 @@
 .dock {
   position: fixed;
-  right: var(--space-5);
-  bottom: var(--space-5);
+  right: max(var(--space-5), env(safe-area-inset-right));
+  bottom: max(var(--space-5), env(safe-area-inset-bottom));
   z-index: 40;
   display: flex;
   flex-direction: column;
@@ -118,6 +118,15 @@
   background: var(--surface-2);
 }
 
+.itemLabel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  cursor: pointer;
+}
+
 .item span {
   flex: 1;
   overflow-wrap: anywhere;
@@ -153,6 +162,16 @@
 .itemDelete:hover {
   color: var(--accent);
   background: var(--accent-soft);
+}
+
+.itemDelete:focus-visible {
+  color: var(--ink);
+}
+
+@media (hover: none) {
+  .itemDelete {
+    color: var(--ink-faint);
+  }
 }
 
 .empty {

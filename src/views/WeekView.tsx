@@ -64,7 +64,7 @@ export function WeekView() {
     setDragging(tasks.find((task) => task.id === event.active.id) ?? null)
   }
 
-  if (isPending) return <p className={styles.state}>Cargando...</p>
+  if (isPending) return <p className={styles.state} role="status" aria-live="polite">Cargando...</p>
   if (error) {
     return (
       <p className={styles.stateError}>
@@ -80,7 +80,7 @@ export function WeekView() {
           <h1 className={styles.title}>Semana</h1>
           <p className={styles.subtitle}>
             {formatWeekRange(anchor)}
-            {withoutDeadline > 0 ? ` · ${withoutDeadline} tarea(s) sin deadline no se ven aca` : ''}
+            {withoutDeadline > 0 ? ` · ${withoutDeadline} tarea(s) sin fecha límite no se ven acá` : ''}
           </p>
         </div>
 

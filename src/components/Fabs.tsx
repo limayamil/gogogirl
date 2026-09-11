@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { IconBolt, IconPlus, IconTrash } from './Icons'
 import { useModals } from '../app/modals'
 import {
@@ -10,11 +11,12 @@ import {
 import styles from './Fabs.module.css'
 
 /**
- * Los dos FABs del boceto: el rayo abre el checklist de tareas rapidas por encima
- * del boton, y el mas abre el formulario completo de tarea.
+ * Los dos FABs del boceto: el rayo abre el checklist de tareas rápidas por encima
+ * del botón, y el más abre el formulario completo de tarea.
  */
 export function Fabs() {
   const { openTask } = useModals()
+  const { pathname } = useLocation()
   const { data } = useAppState()
   const quickTasks = data?.quickTasks ?? []
 
@@ -26,7 +28,6 @@ export function Fabs() {
   const [draft, setDraft] = useState('')
   const container = useRef<HTMLDivElement>(null)
 
-  // Click afuera o Escape cierran el desplegable.
   useEffect(() => {
     if (!open) return
     const onPointerDown = (event: MouseEvent) => {
@@ -55,27 +56,29 @@ export function Fabs() {
   return (
     <div className={styles.dock} ref={container}>
       {open ? (
-        <div className={styles.popover} role="dialog" aria-label="Tareas rapidas">
+        <div className={styles.popover} role="dialog" aria-label="Tareas rápidas">
           <header className={styles.popHeader}>
-            <h3 className={styles.popTitle}>Tareas rapidas</h3>
+            <h3 className={styles.popTitle}>Tareas rápidas</h3>
             <span className={styles.popCount}>{pending} pendientes</span>
           </header>
 
           {quickTasks.length === 0 ? (
-            <p className={styles.empty}>Nada por aca. Anota algo suelto y listo.</p>
+            <p className={styles.empty}>Nada por acá. Anotá algo suelto y listo.</p>
           ) : (
             <ul className={styles.list}>
               {quickTasks.map((quick) => (
                 <li key={quick.id} className={styles.item}>
-                  <input
-                    type="checkbox"
-                    className={styles.checkbox}
-                    checked={quick.done}
-                    onChange={(e) =>
-                      updateQuickTask.mutate({ id: quick.id, patch: { done: e.target.checked } })
-                    }
-                  />
-                  <span className={quick.done ? styles.itemDone : undefined}>{quick.title}</span>
+                  <label className={styles.itemLabel}>
+                    <input
+                      type="checkbox"
+                      className={styles.checkbox}
+                      checked={quick.done}
+                      onChange={(e) =>
+                        updateQuickTask.mutate({ id: quick.id, patch: { done: e.target.checked } })
+                      }
+                    />
+                    <span className={quick.done ? styles.itemDone : undefined}>{quick.title}</span>
+                  </label>
                   <button
                     type="button"
                     className={styles.itemDelete}
@@ -92,7 +95,7 @@ export function Fabs() {
           <div className={styles.addRow}>
             <input
               className={styles.addInput}
-              placeholder="Agregar tarea rapida"
+              placeholder="Agregar tarea rápida"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
@@ -112,7 +115,7 @@ export function Fabs() {
           className={`${styles.fab} ${styles.fabQuick} ${open ? styles.fabQuickOpen : ''}`}
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
-          aria-label="Tareas rapidas"
+          aria-label="Tareas rápidas"
         >
           <IconBolt size={21} />
           {pending > 0 ? <span className={styles.badge}>{pending}</span> : null}
@@ -121,7 +124,7 @@ export function Fabs() {
         <button
           type="button"
           className={`${styles.fab} ${styles.fabAdd}`}
-          onClick={() => openTask({ taskId: null })}
+          onClick={() => openTask({ taskId: null, defaults: { inToday: pathname === '/' } })}
           aria-label="Nueva tarea"
         >
           <IconPlus size={24} />
