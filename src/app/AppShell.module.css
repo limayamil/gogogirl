@@ -35,6 +35,7 @@
   color: #fff;
   font-size: 17px;
   box-shadow: var(--shadow-sm);
+  animation: logo-sway 4.5s ease-in-out infinite;
 }
 
 .brandName {
@@ -63,18 +64,20 @@
   font-weight: 700;
   font-size: 14px;
   text-decoration: none;
-  transition: background 160ms ease, color 160ms ease;
+  transition: background var(--dur) ease, color var(--dur) ease, transform var(--dur-fast) var(--ease-out);
 }
 
 .tab:hover {
   background: var(--surface-2);
   color: var(--ink);
+  transform: translateY(-1px);
 }
 
 .tabActive,
 .tabActive:hover {
   background: var(--ink);
   color: var(--surface);
+  transform: none;
 }
 
 .themeButton {
@@ -87,12 +90,16 @@
   background: var(--surface);
   color: var(--ink-soft);
   box-shadow: var(--shadow-sm);
-  transition: color 160ms ease, transform 160ms ease;
+  transition: color var(--dur) ease, transform var(--dur) var(--ease-out);
 }
 
 .themeButton:hover {
   color: var(--accent);
   transform: translateY(-1px);
+}
+
+.themeButton svg {
+  animation: fade-in var(--dur) ease both;
 }
 
 .main {

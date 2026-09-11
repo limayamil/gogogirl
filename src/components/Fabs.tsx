@@ -62,7 +62,10 @@ export function Fabs() {
           </header>
 
           {quickTasks.length === 0 ? (
-            <p className={styles.empty}>Nada por aca. Anota algo suelto y listo.</p>
+            <p className={styles.empty}>
+              <IconBolt size={20} />
+              Nada por aca. Anota algo suelto y listo.
+            </p>
           ) : (
             <ul className={styles.list}>
               {quickTasks.map((quick) => (

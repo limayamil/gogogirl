@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { Modal } from './Modal'
-import { IconPaperclip, IconPlus, IconTrash } from './Icons'
+import { IconPaperclip, IconPlus, IconSpinner, IconTrash } from './Icons'
 import { api } from '../lib/api'
 import { useColorOf } from '../lib/palette'
 import {
@@ -166,8 +166,22 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
           <button type="button" className={styles.ghost} onClick={onClose}>
             Cancelar
           </button>
-          <button type="button" className={styles.primary} onClick={handleSave}>
-            {isEdit ? 'Guardar' : 'Crear tarea'}
+          <button
+            type="button"
+            className={styles.primary}
+            onClick={handleSave}
+            disabled={createTask.isPending || updateTask.isPending}
+          >
+            {createTask.isPending || updateTask.isPending ? (
+              <>
+                <IconSpinner size={16} className={styles.spinner} />
+                Guardando
+              </>
+            ) : isEdit ? (
+              'Guardar'
+            ) : (
+              'Crear tarea'
+            )}
           </button>
         </>
       }
@@ -379,7 +393,17 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
               disabled={uploading}
               onClick={() => fileInput.current?.click()}
             >
-              {uploading ? 'Subiendo...' : 'Subir archivo'}
+              {uploading ? (
+                <>
+                  <IconSpinner size={16} className={styles.spinner} />
+                  Subiendo
+                </>
+              ) : (
+                <>
+                  <IconPaperclip size={16} />
+                  Subir archivo
+                </>
+              )}
             </button>
           </>
         ) : (

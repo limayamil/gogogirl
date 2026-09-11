@@ -3,17 +3,6 @@
   margin: 0 auto;
 }
 
-.state,
-.stateError {
-  padding: var(--space-6);
-  text-align: center;
-  color: var(--ink-faint);
-}
-
-.stateError {
-  color: var(--accent-ink);
-}
-
 .header {
   display: flex;
   align-items: flex-start;
@@ -23,7 +12,14 @@
 }
 
 .title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   font-size: 30px;
+}
+
+.title svg {
+  color: var(--accent-2);
 }
 
 .subtitle {
@@ -43,6 +39,7 @@
   font-weight: 700;
   font-size: 14px;
   color: var(--ink-soft);
+  transition: color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
 }
 
 .newCategory:hover {
@@ -62,6 +59,11 @@
   padding: var(--space-4);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--dur) ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
 }
 
 .cardHeader {
@@ -119,6 +121,12 @@
   padding: 11px 13px;
   border-radius: var(--r-sm);
   box-shadow: var(--shadow-sm);
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) ease;
+}
+
+.task:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .taskMain {
@@ -152,6 +160,7 @@
   border-radius: var(--r-pill);
   color: #fff;
   flex-shrink: 0;
+  animation: check-pop var(--dur) var(--ease-out) both;
 }
 
 .taskDescription {
@@ -172,6 +181,9 @@
 }
 
 .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 2px 9px;
   border-radius: var(--r-pill);
   background: var(--surface-sunken);
@@ -201,6 +213,13 @@
   background: var(--surface);
   text-align: center;
   box-shadow: var(--shadow-sm);
+  animation: fade-rise var(--dur-slow) var(--ease-out) both;
+}
+
+.emptyIcon {
+  color: var(--accent-2);
+  margin-bottom: var(--space-2);
+  animation: icon-float 2.4s ease-in-out infinite;
 }
 
 .emptyTitle {

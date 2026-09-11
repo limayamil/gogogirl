@@ -1,6 +1,16 @@
 import { useModals } from '../app/modals'
+import { ErrorState, LoadingState } from '../components/Feedback'
 import { StatusToggle } from '../components/StatusToggle'
-import { IconPlus, IconSun } from '../components/Icons'
+import {
+  IconCalendar,
+  IconFolder,
+  IconFlag,
+  IconGrid,
+  IconList,
+  IconPaperclip,
+  IconPlus,
+  IconSun,
+} from '../components/Icons'
 import { useColorOf } from '../lib/palette'
 import { formatShortDate } from '../lib/dates'
 import { useAppState, useUpdateTask } from '../lib/store'
@@ -18,24 +28,21 @@ export function CategoriesView() {
   const { openTask, openCategory } = useModals()
   const colorOf = useColorOf()
 
-  if (isPending) return <p className={styles.state}>Cargando...</p>
-  if (error) {
-    return (
-      <p className={styles.stateError}>
-        No se pudo cargar: {error instanceof Error ? error.message : 'error desconocido'}
-      </p>
-    )
-  }
+  if (isPending) return <LoadingState />
+  if (error) return <ErrorState error={error} />
 
   const categories = data?.categories ?? []
   const tasks = data?.tasks ?? []
   const uncategorized = tasks.filter((task) => task.categoryId === null)
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} pageEnter`}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>Categorias</h1>
+          <h1 className={styles.title}>
+            <IconGrid size={22} />
+            Categorias
+          </h1>
           <p className={styles.subtitle}>Todo lo que tenes anotado, ordenado por color.</p>
         </div>
         <button type="button" className={styles.newCategory} onClick={() => openCategory(null)}>
@@ -46,6 +53,7 @@ export function CategoriesView() {
 
       {categories.length === 0 && uncategorized.length === 0 ? (
         <div className={styles.empty}>
+          <IconFolder size={28} className={styles.emptyIcon} />
           <p className={styles.emptyTitle}>Todavia no hay categorias</p>
           <p className={styles.emptyText}>
             Crea una (Casa, Trabajo, Estudio...) y elegile un color pastel.
@@ -53,7 +61,7 @@ export function CategoriesView() {
         </div>
       ) : null}
 
-      <div className={styles.masonry}>
+      <div className={`${styles.masonry} staggerFade`}>
         {categories.map((category) => {
           const color = colorOf(category.colorKey)
           const own = tasks.filter((task) => task.categoryId === category.id)
@@ -143,18 +151,26 @@ function TaskCard({ task, tint, dot }: { task: Task; tint: string; dot: string }
 
       <div className={styles.meta}>
         <span className={`${styles.badge} ${styles[`urgency_${task.urgency}`]}`}>
+          <IconFlag size={11} />
           {URGENCY_LABEL[task.urgency]}
         </span>
         {task.deadline ? (
-          <span className={styles.badge}>{formatShortDate(task.deadline)}</span>
+          <span className={styles.badge}>
+            <IconCalendar size={11} />
+            {formatShortDate(task.deadline)}
+          </span>
         ) : null}
         {task.subtasks.length > 0 ? (
           <span className={styles.badge}>
+            <IconList size={11} />
             {doneSubtasks}/{task.subtasks.length}
           </span>
         ) : null}
         {task.attachments.length > 0 ? (
-          <span className={styles.badge}>{task.attachments.length} adj.</span>
+          <span className={styles.badge}>
+            <IconPaperclip size={11} />
+            {task.attachments.length}
+          </span>
         ) : null}
       </div>
     </li>
