@@ -1,0 +1,17 @@
+# Deploy en Netlify. El front es un build estatico de Vite y la API son los handlers de
+# api/ servidos por una sola funcion (ver netlify/functions/api.mts).
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+
+# La funcion declara su propia ruta (/api/*) con `export const config`, y las funciones
+# tienen prioridad sobre los redirects. Aca queda solo el fallback del SPA: cualquier
+# path que no sea un archivo del build entra por index.html y lo resuelve React Router.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

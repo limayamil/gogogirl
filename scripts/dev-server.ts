@@ -1,6 +1,6 @@
 /**
- * Servidor de desarrollo. Monta los mismos handlers de api/ que Vercel ejecuta en
- * produccion, asi no hace falta `vercel dev` (ni login) para trabajar en local.
+ * Servidor de desarrollo. Monta los mismos handlers de api/ que la funcion de Netlify
+ * sirve en produccion, asi no hace falta la CLI de Netlify para trabajar en local.
  * Vite proxea /api aca (ver vite.config.ts).
  */
 import 'dotenv/config'
@@ -13,7 +13,10 @@ const PORT = Number(process.env.API_PORT ?? 3001)
 const app = express()
 app.use(express.json({ limit: '1mb' }))
 
-/** Cada entrada refleja un archivo de api/; el `:id` de Express se copia a req.query.id. */
+/**
+ * Cada entrada refleja un archivo de api/; el `:id` de Express se copia a req.query.id.
+ * Si agregas una ruta aca, agregala tambien en netlify/functions/api.mts.
+ */
 const routes: Array<[path: string, module: string]> = [
   ['/api/state', '../api/state.ts'],
   ['/api/categories', '../api/categories/index.ts'],

@@ -1,6 +1,6 @@
-// Utilidades compartidas por todos los handlers. La firma (req, res) es la de las
-// funciones Node de Vercel y tambien la de Express, asi que el mismo handler corre
-// en produccion y en el servidor de desarrollo.
+// Utilidades compartidas por todos los handlers. La firma (req, res) es la de Express,
+// asi que el mismo handler corre en el servidor de desarrollo y, via el adaptador de
+// netlify/lib/router.ts, tambien en produccion.
 
 export interface ApiRequest {
   method?: string

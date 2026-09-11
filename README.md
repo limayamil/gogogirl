@@ -16,8 +16,9 @@ Las tareas **no vencen solas**: lo que esta en Hoy se queda hasta que lo ocultes
 
 ## Stack
 
-React + Vite + TypeScript, Neon Postgres, funciones serverless en `/api` (Vercel).
-Drag & drop con dnd-kit, datos con TanStack Query y mutaciones optimistas.
+React + Vite + TypeScript, Neon Postgres, handlers HTTP en `/api` servidos por una
+Netlify Function. Drag & drop con dnd-kit, datos con TanStack Query y mutaciones
+optimistas.
 
 ## Puesta en marcha
 
@@ -29,7 +30,7 @@ npm run dev                 # front en :5173, API en :3001
 ```
 
 `npm run dev` levanta Vite y un servidor Express que monta los mismos handlers de `api/`
-que Vercel ejecuta en produccion, asi que no hace falta `vercel dev` ni estar logueado.
+que la funcion de Netlify ejecuta en produccion, asi que no hace falta la CLI de Netlify.
 
 ## Comandos
 
@@ -40,6 +41,23 @@ que Vercel ejecuta en produccion, asi que no hace falta `vercel dev` ni estar lo
 | `npm test` | Tests de Vitest (validacion de payloads, fechas) |
 | `npm run db:migrate` | Aplica las migraciones pendientes de `db/migrations` |
 
+## Deploy (Netlify)
+
+El sitio es un build estatico de Vite mas **una sola** Netlify Function que atiende toda
+la familia `/api/*`. Esa funcion (`netlify/functions/api.mts`) no reimplementa nada:
+enruta con una tabla y adapta el `Request`/`Response` del estandar web a la firma
+`(req, res)` que usan los handlers de `api/`, los mismos que corren en `npm run dev`.
+
+Para que el deploy funcione hay que cargar las variables de entorno en
+**Site configuration -> Environment variables**: `DATABASE_URL` y, si queres adjuntos,
+las `S3_*`. Sin `DATABASE_URL` la funcion responde 500 y la app muestra el error.
+
+El `netlify.toml` define el build (`npm run build` -> `dist`) y el fallback del SPA, para
+que refrescar en `/semana` o `/categorias` no devuelva 404.
+
+> Si agregas un endpoint en `api/`, sumalo a las dos tablas de rutas:
+> `netlify/functions/api.mts` (produccion) y `scripts/dev-server.ts` (desarrollo).
+
 ## Adjuntos
 
 Los archivos van a un bucket S3-compatible via URL prefirmada (el navegador sube directo,
@@ -47,14 +65,18 @@ sin pasar por la funcion). Se configura con `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGI
 `S3_ACCESS_KEY_ID` y `S3_SECRET_ACCESS_KEY`. Sin esas variables la app funciona igual:
 solo el boton de subir archivo responde que el almacenamiento no esta configurado.
 
-Las variables se llaman `S3_*` y no `AWS_*` porque Vercel reserva ese prefijo. Hoy apuntan
-a Neon Object Storage; cambiar a R2 o S3 es solo cambiar esos valores.
+Las variables se llaman `S3_*` y no `AWS_*` porque ese prefijo esta reservado en los
+entornos serverless. Hoy apuntan a Neon Object Storage; cambiar a R2 o S3 es solo
+cambiar esos valores.
 
 ## Estructura
 
 ```
-api/              Funciones serverless (mismos handlers en dev y en produccion)
+api/              Handlers HTTP (los mismos en dev y en produccion)
   _lib/           Conexion a Neon, helpers HTTP, validacion, storage
+netlify/
+  functions/      Funcion unica que atiende /api/* y su tabla de rutas
+  lib/            Adaptador Request/Response -> (req, res)
 db/migrations/    SQL versionado
 scripts/          Servidor de desarrollo y runner de migraciones
 src/
