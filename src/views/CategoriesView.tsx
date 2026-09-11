@@ -14,10 +14,10 @@ const URGENCY_LABEL: Record<Urgency, string> = { baja: 'Baja', media: 'Media', a
  * El masonry sale de `columns` en CSS, sin librerias.
  */
 export function CategoriesView() {
-  const { data, isLoading, error } = useAppState()
+  const { data, isPending, error } = useAppState()
   const { openTask, openCategory } = useModals()
 
-  if (isLoading) return <p className={styles.state}>Cargando...</p>
+  if (isPending) return <p className={styles.state}>Cargando...</p>
   if (error) {
     return (
       <p className={styles.stateError}>

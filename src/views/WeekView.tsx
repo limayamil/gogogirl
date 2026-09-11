@@ -28,7 +28,7 @@ import styles from './WeekView.module.css'
 
 /** Semana de lunes a domingo. Solo aparecen las tareas que tienen deadline. */
 export function WeekView() {
-  const { data, isLoading, error } = useAppState()
+  const { data, isPending, error } = useAppState()
   const updateTask = useUpdateTask()
 
   const [anchor, setAnchor] = useState(() => new Date())
@@ -64,7 +64,7 @@ export function WeekView() {
     setDragging(tasks.find((task) => task.id === event.active.id) ?? null)
   }
 
-  if (isLoading) return <p className={styles.state}>Cargando...</p>
+  if (isPending) return <p className={styles.state}>Cargando...</p>
   if (error) {
     return (
       <p className={styles.stateError}>

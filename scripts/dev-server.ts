@@ -5,6 +5,7 @@
  */
 import 'dotenv/config'
 import express from 'express'
+import type { ErrorRequestHandler } from 'express'
 import type { Handler } from '../api/_lib/http.ts'
 
 const PORT = Number(process.env.API_PORT ?? 3001)
@@ -51,6 +52,14 @@ for (const [path, modulePath] of routes) {
 app.use((req, res) => {
   res.status(404).json({ error: `Sin ruta para ${req.method} ${req.path}` })
 })
+
+// Sin esto Express responde su pagina HTML de error, que el cliente no puede leer
+// y termina mostrando un "Error 500" generico en vez del motivo real.
+const onError: ErrorRequestHandler = (error, _req, res, _next) => {
+  console.error('[api]', error)
+  res.status(500).json({ error: error instanceof Error ? error.message : 'Error desconocido' })
+}
+app.use(onError)
 
 app.listen(PORT, () => {
   console.log(`[api] escuchando en http://localhost:${PORT}`)

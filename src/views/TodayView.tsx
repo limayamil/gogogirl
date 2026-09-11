@@ -22,7 +22,7 @@ const TODAY_ZONE = 'zona-hoy'
 const RAIL_ZONE = 'zona-listas'
 
 export function TodayView() {
-  const { data, isLoading, error } = useAppState()
+  const { data, isPending, error } = useAppState()
   const { openTask, openCategory } = useModals()
   const updateTask = useUpdateTask()
 
@@ -65,7 +65,7 @@ export function TodayView() {
     }
   }
 
-  if (isLoading) return <p className={styles.state}>Cargando...</p>
+  if (isPending) return <p className={styles.state}>Cargando...</p>
   if (error) {
     return (
       <p className={styles.stateError}>
