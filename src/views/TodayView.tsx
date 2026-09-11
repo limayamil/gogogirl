@@ -13,7 +13,7 @@ import {
 import { useModals } from '../app/modals'
 import { StatusToggle } from '../components/StatusToggle'
 import { IconChevronDown, IconEye, IconEyeOff, IconPlus, IconSun } from '../components/Icons'
-import { colorOf } from '../lib/palette'
+import { useColorOf } from '../lib/palette'
 import { useAppState, useUpdateSubtask, useUpdateTask } from '../lib/store'
 import type { Category, Task } from '../shared/types'
 import styles from './TodayView.module.css'
@@ -26,6 +26,7 @@ export function TodayView() {
   const { openTask, openCategory } = useModals()
   const updateTask = useUpdateTask()
 
+  const colorOf = useColorOf()
   const [showHidden, setShowHidden] = useState(false)
   const [dragging, setDragging] = useState<Task | null>(null)
 
@@ -180,7 +181,7 @@ function TodayPanel({
 function TodayRow({ task, categories }: { task: Task; categories: Category[] }) {
   const { openTask } = useModals()
   const updateTask = useUpdateTask()
-  const color = colorOf(categoryColorKey(categories, task))
+  const color = useColorOf()(categoryColorKey(categories, task))
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
 
   return (
@@ -287,7 +288,7 @@ function CategoryGroup({
   onAddTask: () => void
 }) {
   const [open, setOpen] = useState(true)
-  const color = colorOf(colorKey)
+  const color = useColorOf()(colorKey)
   const pending = tasks.filter((task) => task.status !== 'hecha').length
 
   return (

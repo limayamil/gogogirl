@@ -13,7 +13,7 @@ import {
 import { useModals } from '../app/modals'
 import { StatusToggle } from '../components/StatusToggle'
 import { IconChevronLeft, IconChevronRight } from '../components/Icons'
-import { colorOf } from '../lib/palette'
+import { useColorOf } from '../lib/palette'
 import {
   DAY_NAMES,
   addDays,
@@ -166,7 +166,7 @@ function WeekCard({ task, categories }: { task: Task; categories: Category[] }) 
   const { openTask } = useModals()
   const updateTask = useUpdateTask()
   const category = categories.find((c) => c.id === task.categoryId)
-  const color = colorOf(category?.colorKey)
+  const color = useColorOf()(category?.colorKey)
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
 
   return (

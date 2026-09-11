@@ -85,7 +85,7 @@
   min-width: 22px;
   padding: 1px 7px;
   border-radius: var(--r-pill);
-  background: rgb(255 255 255 / 60%);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
   font-size: 12px;
 }
 
@@ -95,11 +95,11 @@
   width: 28px;
   height: 28px;
   border-radius: var(--r-pill);
-  background: rgb(255 255 255 / 55%);
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
 }
 
 .cardAdd:hover {
-  background: rgb(255 255 255 / 95%);
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
 }
 
 .cardEmpty {
@@ -182,17 +182,17 @@
 
 .urgency_baja {
   background: color-mix(in srgb, var(--urgency-baja) 20%, transparent);
-  color: color-mix(in srgb, var(--urgency-baja) 75%, black);
+  color: color-mix(in srgb, var(--urgency-baja) 75%, var(--ink));
 }
 
 .urgency_media {
   background: color-mix(in srgb, var(--urgency-media) 24%, transparent);
-  color: color-mix(in srgb, var(--urgency-media) 72%, black);
+  color: color-mix(in srgb, var(--urgency-media) 72%, var(--ink));
 }
 
 .urgency_alta {
   background: color-mix(in srgb, var(--urgency-alta) 22%, transparent);
-  color: color-mix(in srgb, var(--urgency-alta) 78%, black);
+  color: color-mix(in srgb, var(--urgency-alta) 78%, var(--ink));
 }
 
 .empty {

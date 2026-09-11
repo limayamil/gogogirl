@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Modal } from './Modal'
 import { IconPaperclip, IconPlus, IconTrash } from './Icons'
 import { api } from '../lib/api'
-import { colorOf } from '../lib/palette'
+import { useColorOf } from '../lib/palette'
 import {
   useAppState,
   useCreateSubtask,
@@ -37,6 +37,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
   const updateSubtask = useUpdateSubtask()
   const deleteSubtask = useDeleteSubtask()
   const refreshState = useRefreshState()
+  const colorOf = useColorOf()
 
   const [form, setForm] = useState(() => ({
     title: task?.title ?? '',

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { Fabs } from '../components/Fabs'
 import { IconCalendar, IconGrid, IconMoon, IconSun } from '../components/Icons'
 import { ModalProvider } from './modals'
+import { useThemeMode } from './theme'
 import styles from './AppShell.module.css'
 
 const TABS = [
@@ -11,21 +11,8 @@ const TABS = [
   { to: '/semana', label: 'Semana', Icon: IconCalendar },
 ]
 
-function useTheme() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(
-    () => (localStorage.getItem('gogogirl-theme') as 'light' | 'dark') ?? 'light',
-  )
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme
-    localStorage.setItem('gogogirl-theme', theme)
-  }, [theme])
-
-  return { theme, toggle: () => setTheme((t) => (t === 'light' ? 'dark' : 'light')) }
-}
-
 export function AppShell() {
-  const { theme, toggle } = useTheme()
+  const { mode, toggle } = useThemeMode()
 
   return (
     <div className={styles.shell}>
@@ -55,9 +42,9 @@ export function AppShell() {
           type="button"
           className={styles.themeButton}
           onClick={toggle}
-          aria-label={theme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}
+          aria-label={mode === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}
         >
-          {theme === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />}
+          {mode === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />}
         </button>
       </header>
 

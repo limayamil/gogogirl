@@ -1,7 +1,7 @@
 import { useModals } from '../app/modals'
 import { StatusToggle } from '../components/StatusToggle'
 import { IconPlus, IconSun } from '../components/Icons'
-import { colorOf } from '../lib/palette'
+import { useColorOf } from '../lib/palette'
 import { formatShortDate } from '../lib/dates'
 import { useAppState, useUpdateTask } from '../lib/store'
 import type { Task, Urgency } from '../shared/types'
@@ -16,6 +16,7 @@ const URGENCY_LABEL: Record<Urgency, string> = { baja: 'Baja', media: 'Media', a
 export function CategoriesView() {
   const { data, isPending, error } = useAppState()
   const { openTask, openCategory } = useModals()
+  const colorOf = useColorOf()
 
   if (isPending) return <p className={styles.state}>Cargando...</p>
   if (error) {
