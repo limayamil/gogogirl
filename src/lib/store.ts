@@ -8,6 +8,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import { api } from './api'
+import { toastError } from './toast'
 import type { AppState, Category, QuickTask, Task, TaskInput } from '../shared/types'
 
 const KEY = ['state'] as const
@@ -37,8 +38,9 @@ function useOptimistic<TVars, TData>(options: {
       patchCache(client, (state) => options.optimistic(state, vars))
       return { previous }
     },
-    onError(_error, _vars, context) {
+    onError(error, _vars, context) {
       if (context?.previous) client.setQueryData(KEY, context.previous)
+      toastError(error)
     },
     onSettled() {
       void client.invalidateQueries({ queryKey: KEY })
@@ -103,6 +105,9 @@ export function useCreateSubtask() {
           subtasks: [...task.subtasks, subtask],
         })),
       )
+    },
+    onError(error) {
+      toastError(error)
     },
     onSettled() {
       void client.invalidateQueries({ queryKey: KEY })
@@ -183,6 +188,9 @@ export function useCreateQuickTask() {
     mutationFn: (title: string) => api.createQuickTask(title),
     onSuccess(quickTask) {
       patchCache(client, (state) => ({ ...state, quickTasks: [...state.quickTasks, quickTask] }))
+    },
+    onError(error) {
+      toastError(error)
     },
     onSettled() {
       void client.invalidateQueries({ queryKey: KEY })

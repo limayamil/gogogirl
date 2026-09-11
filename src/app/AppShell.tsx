@@ -1,21 +1,38 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { Fabs } from '../components/Fabs'
 import { IconCalendar, IconGrid, IconMoon, IconSun } from '../components/Icons'
 import { ModalProvider } from './modals'
+import { ToastHost } from './ToastHost'
 import { useThemeMode } from './theme'
 import styles from './AppShell.module.css'
 
 const TABS = [
   { to: '/', label: 'Hoy', Icon: IconSun },
-  { to: '/categorias', label: 'Categorias', Icon: IconGrid },
+  { to: '/categorias', label: 'Categorías', Icon: IconGrid },
   { to: '/semana', label: 'Semana', Icon: IconCalendar },
 ]
+
+const TITLES: Record<string, string> = {
+  '/': 'Hoy · GoGoGirl',
+  '/categorias': 'Categorías · GoGoGirl',
+  '/semana': 'Semana · GoGoGirl',
+}
+
+function DocumentTitle() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    document.title = TITLES[pathname] ?? 'GoGoGirl'
+  }, [pathname])
+  return null
+}
 
 export function AppShell() {
   const { mode, toggle } = useThemeMode()
 
   return (
     <div className={styles.shell}>
+      <DocumentTitle />
       <header className={styles.header}>
         <div className={styles.brand}>
           <span className={styles.logo} aria-hidden="true">
@@ -49,11 +66,12 @@ export function AppShell() {
       </header>
 
       <ModalProvider>
-        <main className={styles.main}>
+        <main className={styles.main} id="main">
           <Outlet />
         </main>
 
         <Fabs />
+        <ToastHost />
       </ModalProvider>
     </div>
   )

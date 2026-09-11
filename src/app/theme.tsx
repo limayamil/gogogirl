@@ -26,6 +26,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.dataset.theme = mode
     localStorage.setItem('gogogirl-theme', mode)
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', mode === 'dark' ? '#17141c' : '#fbf6f3')
   }, [mode])
 
   const api = useMemo<ThemeApi>(

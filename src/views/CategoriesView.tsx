@@ -18,7 +18,7 @@ export function CategoriesView() {
   const { openTask, openCategory } = useModals()
   const colorOf = useColorOf()
 
-  if (isPending) return <p className={styles.state}>Cargando...</p>
+  if (isPending) return <p className={styles.state} role="status" aria-live="polite">Cargando...</p>
   if (error) {
     return (
       <p className={styles.stateError}>
@@ -35,20 +35,20 @@ export function CategoriesView() {
     <div className={styles.page}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>Categorias</h1>
-          <p className={styles.subtitle}>Todo lo que tenes anotado, ordenado por color.</p>
+          <h1 className={styles.title}>Categorías</h1>
+          <p className={styles.subtitle}>Todo lo que tenés anotado, ordenado por color.</p>
         </div>
         <button type="button" className={styles.newCategory} onClick={() => openCategory(null)}>
           <IconPlus size={16} />
-          Nueva categoria
+          Nueva categoría
         </button>
       </header>
 
       {categories.length === 0 && uncategorized.length === 0 ? (
         <div className={styles.empty}>
-          <p className={styles.emptyTitle}>Todavia no hay categorias</p>
+          <p className={styles.emptyTitle}>Todavía no hay categorías</p>
           <p className={styles.emptyText}>
-            Crea una (Casa, Trabajo, Estudio...) y elegile un color pastel.
+            Creá una (Casa, Trabajo, Estudio...) y elegile un color pastel.
           </p>
         </div>
       ) : null}
@@ -83,7 +83,7 @@ export function CategoriesView() {
               </header>
 
               {own.length === 0 ? (
-                <p className={styles.cardEmpty}>Sin tareas todavia</p>
+                <p className={styles.cardEmpty}>Sin tareas todavía</p>
               ) : (
                 <ul className={styles.taskList}>
                   {own.map((task) => (
@@ -99,7 +99,7 @@ export function CategoriesView() {
           <section className={styles.card} style={{ background: 'var(--surface-2)' }}>
             <header className={styles.cardHeader}>
               <span className={styles.cardTitle}>
-                Sin categoria
+                Sin categoría
                 <span className={styles.cardCount}>{uncategorized.length}</span>
               </span>
             </header>
@@ -154,7 +154,7 @@ function TaskCard({ task, tint, dot }: { task: Task; tint: string; dot: string }
           </span>
         ) : null}
         {task.attachments.length > 0 ? (
-          <span className={styles.badge}>{task.attachments.length} adj.</span>
+          <span className={styles.badge}>{task.attachments.length} adjuntos</span>
         ) : null}
       </div>
     </li>

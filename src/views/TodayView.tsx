@@ -14,6 +14,7 @@ import { useModals } from '../app/modals'
 import { StatusToggle } from '../components/StatusToggle'
 import { IconChevronDown, IconEye, IconEyeOff, IconPlus, IconSun } from '../components/Icons'
 import { useColorOf } from '../lib/palette'
+import { formatTodayHeading } from '../lib/dates'
 import { useAppState, useUpdateSubtask, useUpdateTask } from '../lib/store'
 import type { Category, Task } from '../shared/types'
 import styles from './TodayView.module.css'
@@ -66,7 +67,7 @@ export function TodayView() {
     }
   }
 
-  if (isPending) return <p className={styles.state}>Cargando...</p>
+  if (isPending) return <p className={styles.state} role="status" aria-live="polite">Cargando...</p>
   if (error) {
     return (
       <p className={styles.stateError}>
@@ -130,11 +131,7 @@ function TodayPanel({
   onToggleHidden: () => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: TODAY_ZONE })
-  const today = new Date().toLocaleDateString('es-AR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
+  const today = formatTodayHeading(new Date())
 
   return (
     <section
@@ -161,9 +158,14 @@ function TodayPanel({
 
       {tasks.length === 0 ? (
         <div className={styles.dropHint}>
-          <p className={styles.dropHintTitle}>Todavia no hay nada para hoy</p>
+          <p className={styles.dropHintTitle}>Todavía no hay nada para hoy</p>
           <p className={styles.dropHintText}>
-            Arrastra una tarea desde las listas de la derecha, o crea una con el boton +.
+            <span className={styles.hintDesktop}>
+              Arrastrá una tarea desde las listas de al costado, o creá una con el botón +.
+            </span>
+            <span className={styles.hintMobile}>
+              Arrastrá una tarea desde las listas de abajo, o creá una con el botón +.
+            </span>
           </p>
         </div>
       ) : (
@@ -244,13 +246,13 @@ function Rail({
         <h2 className={styles.railTitle}>Listas</h2>
         <button type="button" className={styles.railAdd} onClick={onAddCategory}>
           <IconPlus size={15} />
-          Categoria
+          Categoría
         </button>
       </header>
 
       {categories.length === 0 && uncategorized.length === 0 ? (
         <p className={styles.railEmpty}>
-          Crea tu primera categoria para empezar a juntar tareas.
+          Creá tu primera categoría para empezar a juntar tareas.
         </p>
       ) : null}
 
@@ -266,7 +268,7 @@ function Rail({
 
       {uncategorized.length > 0 ? (
         <CategoryGroup
-          name="Sin categoria"
+          name="Sin categoría"
           colorKey={null}
           tasks={uncategorized}
           onAddTask={() => onAddTask(null)}
@@ -357,7 +359,7 @@ function RailTask({ task, tint, dot }: { task: Task; tint: string; dot: string }
           <span className={task.status === 'hecha' ? styles.rowDone : undefined}>{task.title}</span>
         </button>
         {task.inToday ? (
-          <span className={styles.inToday} style={{ background: dot }} title="Ya esta en Hoy">
+          <span className={styles.inToday} style={{ background: dot }} title="Ya está en Hoy">
             <IconSun size={11} />
           </span>
         ) : null}
@@ -367,16 +369,18 @@ function RailTask({ task, tint, dot }: { task: Task; tint: string; dot: string }
         <ul className={styles.subtasks}>
           {task.subtasks.map((subtask) => (
             <li key={subtask.id} className={styles.subtask}>
-              <input
-                type="checkbox"
-                className={styles.subtaskCheck}
-                checked={subtask.done}
-                onPointerDown={(event) => event.stopPropagation()}
-                onChange={(event) =>
-                  updateSubtask.mutate({ id: subtask.id, patch: { done: event.target.checked } })
-                }
-              />
-              <span className={subtask.done ? styles.rowDone : undefined}>{subtask.title}</span>
+              <label className={styles.subtaskLabel}>
+                <input
+                  type="checkbox"
+                  className={styles.subtaskCheck}
+                  checked={subtask.done}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onChange={(event) =>
+                    updateSubtask.mutate({ id: subtask.id, patch: { done: event.target.checked } })
+                  }
+                />
+                <span className={subtask.done ? styles.rowDone : undefined}>{subtask.title}</span>
+              </label>
             </li>
           ))}
         </ul>

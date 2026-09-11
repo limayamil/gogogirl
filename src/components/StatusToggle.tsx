@@ -29,7 +29,7 @@ export function StatusToggle({ status, onChange, size = 'md' }: Props) {
         event.stopPropagation()
         onChange(NEXT[status])
       }}
-      aria-label={`Estado: ${LABEL[status]}. Click para cambiar.`}
+      aria-label={`Estado: ${LABEL[status]}. Tocá para cambiar.`}
       title={LABEL[status]}
     >
       {status === 'hecha' ? (
