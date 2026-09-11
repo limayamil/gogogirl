@@ -102,3 +102,42 @@ export const IconPaperclip = ({ size = 18, className }: Props) => (
     <path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.5 3.5 0 0 1 5 5L10.5 18a2 2 0 0 1-3-3l8-8" />
   </svg>
 )
+
+export const IconSpinner = ({ size = 20, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <circle cx="12" cy="12" r="9" opacity="0.2" />
+    <path d="M21 12a9 9 0 0 0-9-9" />
+  </svg>
+)
+
+export const IconFolder = ({ size = 20, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+  </svg>
+)
+
+export const IconAlert = ({ size = 20, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 8v5M12 16.5h.01" />
+  </svg>
+)
+
+export const IconInbox = ({ size = 20, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <path d="M3 12h5l2 3h4l2-3h5v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+    <path d="M3 12 6.2 4.8A2 2 0 0 1 8 4h8a2 2 0 0 1 1.8.8L21 12" />
+  </svg>
+)
+
+export const IconFlag = ({ size = 20, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <path d="M5 21V4h10l-1.5 4L19 12H5" />
+  </svg>
+)
+
+export const IconList = ({ size = 20, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" />
+  </svg>
+)

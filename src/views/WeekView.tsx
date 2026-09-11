@@ -11,8 +11,9 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { useModals } from '../app/modals'
+import { ErrorState, LoadingState } from '../components/Feedback'
 import { StatusToggle } from '../components/StatusToggle'
-import { IconChevronLeft, IconChevronRight } from '../components/Icons'
+import { IconCalendar, IconChevronLeft, IconChevronRight } from '../components/Icons'
 import { useColorOf } from '../lib/palette'
 import {
   DAY_NAMES,
@@ -64,20 +65,17 @@ export function WeekView() {
     setDragging(tasks.find((task) => task.id === event.active.id) ?? null)
   }
 
-  if (isPending) return <p className={styles.state} role="status" aria-live="polite">Cargando...</p>
-  if (error) {
-    return (
-      <p className={styles.stateError}>
-        No se pudo cargar: {error instanceof Error ? error.message : 'error desconocido'}
-      </p>
-    )
-  }
+  if (isPending) return <LoadingState />
+  if (error) return <ErrorState error={error} />
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} pageEnter`}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>Semana</h1>
+          <h1 className={styles.title}>
+            <IconCalendar size={22} />
+            Semana
+          </h1>
           <p className={styles.subtitle}>
             {formatWeekRange(anchor)}
             {withoutDeadline > 0 ? ` · ${withoutDeadline} tarea(s) sin fecha límite no se ven acá` : ''}
@@ -108,7 +106,7 @@ export function WeekView() {
       </header>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className={styles.grid}>
+        <div className={`${styles.grid} stagger`}>
           {days.map((day, index) => (
             <DayColumn
               key={day}

@@ -11,8 +11,17 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { useModals } from '../app/modals'
+import { ErrorState, LoadingState } from '../components/Feedback'
 import { StatusToggle } from '../components/StatusToggle'
-import { IconChevronDown, IconEye, IconEyeOff, IconPlus, IconSun } from '../components/Icons'
+import {
+  IconChevronDown,
+  IconEye,
+  IconEyeOff,
+  IconFolder,
+  IconInbox,
+  IconPlus,
+  IconSun,
+} from '../components/Icons'
 import { useColorOf } from '../lib/palette'
 import { formatTodayHeading } from '../lib/dates'
 import { useAppState, useUpdateSubtask, useUpdateTask } from '../lib/store'
@@ -67,18 +76,12 @@ export function TodayView() {
     }
   }
 
-  if (isPending) return <p className={styles.state} role="status" aria-live="polite">Cargando...</p>
-  if (error) {
-    return (
-      <p className={styles.stateError}>
-        No se pudo cargar: {error instanceof Error ? error.message : 'error desconocido'}
-      </p>
-    )
-  }
+  if (isPending) return <LoadingState />
+  if (error) return <ErrorState error={error} />
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className={styles.layout}>
+      <div className={`${styles.layout} pageEnter`}>
         <TodayPanel
           tasks={todayTasks}
           categories={categories}
@@ -158,6 +161,7 @@ function TodayPanel({
 
       {tasks.length === 0 ? (
         <div className={styles.dropHint}>
+          <IconInbox size={28} className={styles.dropHintIcon} />
           <p className={styles.dropHintTitle}>Todavía no hay nada para hoy</p>
           <p className={styles.dropHintText}>
             <span className={styles.hintDesktop}>
@@ -169,7 +173,7 @@ function TodayPanel({
           </p>
         </div>
       ) : (
-        <ul className={styles.todayList}>
+        <ul className={`${styles.todayList} stagger`}>
           {tasks.map((task) => (
             <TodayRow key={task.id} task={task} categories={categories} />
           ))}
@@ -252,6 +256,7 @@ function Rail({
 
       {categories.length === 0 && uncategorized.length === 0 ? (
         <p className={styles.railEmpty}>
+          <IconFolder size={18} />
           Creá tu primera categoría para empezar a juntar tareas.
         </p>
       ) : null}
@@ -319,14 +324,16 @@ function CategoryGroup({
         </button>
       </header>
 
-      {open ? (
-        <ul className={styles.groupList}>
-          {tasks.length === 0 ? <li className={styles.groupEmpty}>Sin tareas</li> : null}
-          {tasks.map((task) => (
-            <RailTask key={task.id} task={task} tint={color.soft} dot={color.dot} />
-          ))}
-        </ul>
-      ) : null}
+      <div className={`${styles.groupBody} ${open ? styles.groupBodyOpen : ''}`}>
+        <div>
+          <ul className={styles.groupList}>
+            {tasks.length === 0 ? <li className={styles.groupEmpty}>Sin tareas</li> : null}
+            {tasks.map((task) => (
+              <RailTask key={task.id} task={task} tint={color.soft} dot={color.dot} />
+            ))}
+          </ul>
+        </div>
+      </div>
     </section>
   )
 }

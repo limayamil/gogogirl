@@ -7,17 +7,6 @@
   align-items: start;
 }
 
-.state,
-.stateError {
-  padding: var(--space-6);
-  text-align: center;
-  color: var(--ink-faint);
-}
-
-.stateError {
-  color: var(--accent-ink);
-}
-
 /* --- Panel de Hoy --- */
 
 .today {
@@ -71,6 +60,7 @@
   color: var(--ink-soft);
   font-size: 13px;
   font-weight: 700;
+  transition: color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
 }
 
 .hiddenToggle:hover {
@@ -164,6 +154,13 @@
   border-radius: var(--r-md);
   background: var(--surface-2);
   text-align: center;
+  animation: fade-rise var(--dur-slow) var(--ease-out) both;
+}
+
+.dropHintIcon {
+  color: var(--accent);
+  margin-bottom: var(--space-2);
+  animation: icon-float 2.4s ease-in-out infinite;
 }
 
 .dropHintTitle {
@@ -220,6 +217,7 @@
   color: var(--ink-soft);
   font-size: 13px;
   font-weight: 700;
+  transition: color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
 }
 
 .railAdd:hover {
@@ -227,6 +225,10 @@
 }
 
 .railEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
   padding: var(--space-4);
   font-size: 13.5px;
   color: var(--ink-faint);
@@ -254,8 +256,27 @@
   font-size: 14.5px;
 }
 
+.groupToggle svg {
+  flex-shrink: 0;
+  transition: transform var(--dur) var(--ease-out);
+}
+
 .chevronClosed {
   transform: rotate(-90deg);
+}
+
+.groupBody {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur) var(--ease-out);
+}
+
+.groupBodyOpen {
+  grid-template-rows: 1fr;
+}
+
+.groupBody > * {
+  overflow: hidden;
 }
 
 .groupCount {
@@ -331,6 +352,7 @@
   border-radius: var(--r-pill);
   color: #fff;
   flex-shrink: 0;
+  animation: check-pop var(--dur) var(--ease-out) both;
 }
 
 .subtasks {
