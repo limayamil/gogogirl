@@ -67,6 +67,41 @@
   color: var(--ink);
 }
 
+.weekEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+  max-width: 900px;
+  margin: 0 auto var(--space-5);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  box-shadow: var(--shadow-sm);
+  animation: fade-rise var(--dur-slow) var(--ease-out) both;
+}
+
+.weekEmptyIllustration {
+  display: block;
+  width: min(340px, 42vw);
+  height: auto;
+  margin: -22px 0;
+  filter: saturate(0.9);
+  animation: icon-float 2.8s ease-in-out infinite;
+}
+
+.weekEmptyTitle {
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.weekEmptyText {
+  max-width: 370px;
+  margin-top: 5px;
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -205,6 +240,18 @@
     scroll-snap-type: x mandatory;
     padding-bottom: var(--space-3);
     -webkit-overflow-scrolling: touch;
+  }
+
+  .weekEmpty {
+    flex-direction: column;
+    gap: 0;
+    padding: 0 var(--space-4) var(--space-4);
+    text-align: center;
+  }
+
+  .weekEmptyIllustration {
+    width: min(320px, 88vw);
+    margin: -8px 0 -18px;
   }
 
   .day {

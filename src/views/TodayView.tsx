@@ -18,7 +18,6 @@ import {
   IconEye,
   IconEyeOff,
   IconFolder,
-  IconInbox,
   IconPlus,
   IconSun,
 } from '../components/Icons'
@@ -161,7 +160,13 @@ function TodayPanel({
 
       {tasks.length === 0 ? (
         <div className={styles.dropHint}>
-          <IconInbox size={28} className={styles.dropHintIcon} />
+          <img
+            className={styles.emptyIllustration}
+            src="/images/empty-today.webp"
+            alt=""
+            width="560"
+            height="373"
+          />
           <p className={styles.dropHintTitle}>Todavía no hay nada para hoy</p>
           <p className={styles.dropHintText}>
             <span className={styles.hintDesktop}>

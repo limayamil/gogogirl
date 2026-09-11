@@ -3,7 +3,6 @@ import { ErrorState, LoadingState } from '../components/Feedback'
 import { StatusToggle } from '../components/StatusToggle'
 import {
   IconCalendar,
-  IconFolder,
   IconFlag,
   IconGrid,
   IconList,
@@ -53,7 +52,13 @@ export function CategoriesView() {
 
       {categories.length === 0 && uncategorized.length === 0 ? (
         <div className={styles.empty}>
-          <IconFolder size={28} className={styles.emptyIcon} />
+          <img
+            className={styles.emptyIllustration}
+            src="/images/empty-categories.webp"
+            alt=""
+            width="480"
+            height="480"
+          />
           <p className={styles.emptyTitle}>Todavía no hay categorías</p>
           <p className={styles.emptyText}>
             Creá una (Casa, Trabajo, Estudio...) y elegile un color pastel.

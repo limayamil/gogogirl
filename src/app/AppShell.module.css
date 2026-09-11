@@ -28,14 +28,17 @@
 .logo {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--r-pill);
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #fff;
-  font-size: 17px;
-  box-shadow: var(--shadow-sm);
+  width: 38px;
+  height: 38px;
   animation: logo-sway 4.5s ease-in-out infinite;
+}
+
+.logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgb(58 51 64 / 12%));
 }
 
 .brandName {
