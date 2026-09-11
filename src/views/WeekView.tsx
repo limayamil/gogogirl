@@ -78,7 +78,7 @@ export function WeekView() {
           </h1>
           <p className={styles.subtitle}>
             {formatWeekRange(anchor)}
-            {withoutDeadline > 0 ? ` · ${withoutDeadline} tarea(s) sin deadline no se ven aca` : ''}
+            {withoutDeadline > 0 ? ` · ${withoutDeadline} tarea(s) sin fecha límite no se ven acá` : ''}
           </p>
         </div>
 

@@ -104,24 +104,33 @@
 
 .main {
   flex: 1;
-  padding: var(--space-5) var(--space-5) 110px;
+  padding: var(--space-5) var(--space-5) max(140px, calc(120px + env(safe-area-inset-bottom)));
 }
 
 @media (max-width: 720px) {
   .header {
     grid-template-columns: auto 1fr auto;
-    padding: 0 var(--space-3);
+    padding: 0 max(var(--space-3), env(safe-area-inset-right)) 0 max(var(--space-3), env(safe-area-inset-left));
   }
 
   .brandName {
     display: none;
   }
 
-  .tab span {
-    display: none;
+  .tab {
+    position: relative;
+    padding: 8px 12px;
   }
 
-  .tab {
-    padding: 8px 12px;
+  .tab span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 }

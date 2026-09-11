@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Modal } from './Modal'
 import { IconTrash } from './Icons'
 import { PALETTE, useColorOf } from '../lib/palette'
+import { errorMessage, toastError } from '../lib/toast'
 import { useAppState, useCreateCategory, useDeleteCategory, useUpdateCategory } from '../lib/store'
 import styles from './CategoryModal.module.css'
 
@@ -29,7 +30,7 @@ export function CategoryModal({
   async function save() {
     const trimmed = name.trim()
     if (!trimmed) {
-      setError('La categoria necesita un nombre')
+      setError('La categoría necesita un nombre')
       return
     }
     try {
@@ -41,21 +42,31 @@ export function CategoryModal({
     }
   }
 
+  async function handleDelete() {
+    if (!category) return
+    const extra =
+      taskCount > 0
+        ? ` Sus ${taskCount} tarea(s) no se borran: quedan sin categoría.`
+        : ''
+    if (!window.confirm(`¿Eliminar la categoría “${category.name}”?${extra}`)) return
+    try {
+      await deleteCategory.mutateAsync(category.id)
+      onClose()
+    } catch (caught) {
+      const message = errorMessage(caught)
+      setError(message)
+      toastError(message)
+    }
+  }
+
   return (
     <Modal
-      title={category ? 'Editar categoria' : 'Nueva categoria'}
+      title={category ? 'Editar categoría' : 'Nueva categoría'}
       onClose={onClose}
       footer={
         <>
           {category ? (
-            <button
-              type="button"
-              className={styles.danger}
-              onClick={() => {
-                deleteCategory.mutate(category.id)
-                onClose()
-              }}
-            >
+            <button type="button" className={styles.danger} onClick={() => void handleDelete()}>
               <IconTrash size={16} />
               Eliminar
             </button>
@@ -107,13 +118,13 @@ export function CategoryModal({
           })}
         </div>
         <p className={styles.hint}>
-          Este color pinta la tarjeta de la categoria y acompania a sus tareas en Hoy y en Semana.
+          Este color pinta la tarjeta de la categoría y acompaña a sus tareas en Hoy y en Semana.
         </p>
       </div>
 
       {category && taskCount > 0 ? (
         <p className={styles.hint}>
-          Si eliminas la categoria, sus {taskCount} tarea(s) no se borran: quedan sin categoria.
+          Si eliminás la categoría, sus {taskCount} tarea(s) no se borran: quedan sin categoría.
         </p>
       ) : null}
     </Modal>

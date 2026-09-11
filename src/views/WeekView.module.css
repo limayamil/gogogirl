@@ -195,4 +195,20 @@
   .header {
     flex-direction: column;
   }
+
+  .grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 80vw);
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: var(--space-3);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .day {
+    scroll-snap-align: start;
+    min-height: 280px;
+  }
 }

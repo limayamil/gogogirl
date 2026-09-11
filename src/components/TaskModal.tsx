@@ -3,6 +3,7 @@ import { Modal } from './Modal'
 import { IconPaperclip, IconPlus, IconSpinner, IconTrash } from './Icons'
 import { api } from '../lib/api'
 import { useColorOf } from '../lib/palette'
+import { errorMessage, toastError } from '../lib/toast'
 import {
   useAppState,
   useCreateSubtask,
@@ -47,6 +48,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
     description: task?.description ?? '',
     notes: task?.notes ?? '',
     status: task?.status ?? ('pendiente' as Status),
+    inToday: task?.inToday ?? request.defaults?.inToday ?? false,
   }))
 
   /** Subtareas locales: solo se usan al crear, porque la tarea todavia no tiene id. */
@@ -72,7 +74,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
   async function handleSave() {
     const title = form.title.trim()
     if (!title) {
-      setError('La tarea necesita un titulo')
+      setError('La tarea necesita un título')
       return
     }
 
@@ -84,6 +86,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
       description: form.description.trim() || null,
       notes: form.notes.trim() || null,
       status: form.status,
+      inToday: form.inToday,
     }
 
     try {
@@ -92,7 +95,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
       } else {
         await createTask.mutateAsync({
           ...payload,
-          inToday: request.defaults?.inToday ?? false,
+          inToday: form.inToday,
           subtasks: draftSubtasks,
         })
       }
@@ -143,6 +146,31 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
     }
   }
 
+  async function handleDelete() {
+    if (!task) return
+    if (!window.confirm(`¿Eliminar “${task.title}”? Esta acción no se puede deshacer.`)) return
+    try {
+      await deleteTask.mutateAsync(task.id)
+      onClose()
+    } catch (caught) {
+      const message = errorMessage(caught)
+      setError(message)
+      toastError(message)
+    }
+  }
+
+  async function handleDeleteAttachment(id: string, fileName: string) {
+    if (!window.confirm(`¿Eliminar el adjunto “${fileName}”?`)) return
+    try {
+      await api.deleteAttachment(id)
+      await refreshState()
+    } catch (caught) {
+      const message = errorMessage(caught)
+      setError(message)
+      toastError(message)
+    }
+  }
+
   return (
     <Modal
       title={isEdit ? 'Detalle de tarea' : 'Nueva tarea'}
@@ -150,14 +178,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
       footer={
         <>
           {task ? (
-            <button
-              type="button"
-              className={styles.danger}
-              onClick={() => {
-                deleteTask.mutate(task.id)
-                onClose()
-              }}
-            >
+            <button type="button" className={styles.danger} onClick={() => void handleDelete()}>
               <IconTrash size={16} />
               Eliminar
             </button>
@@ -194,7 +215,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
           className={styles.input}
           value={form.title}
           autoFocus
-          placeholder="Que hay que hacer?"
+          placeholder="¿Qué hay que hacer?"
           onChange={(e) => set('title', e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') void handleSave()
@@ -202,15 +223,27 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
         />
       </label>
 
+      <label className={styles.checkRow}>
+        <input
+          type="checkbox"
+          className={styles.checkbox}
+          checked={form.inToday}
+          onChange={(e) => set('inToday', e.target.checked)}
+        />
+        <span>Agregar a Hoy</span>
+      </label>
+
       <div className={styles.field}>
-        <span className={styles.label}>Categoria</span>
-        <div className={styles.chips}>
+        <span className={styles.label}>Categoría</span>
+        <div className={styles.chips} role="radiogroup" aria-label="Categoría">
           <button
             type="button"
             className={`${styles.chip} ${form.categoryId === null ? styles.chipOn : ''}`}
             onClick={() => set('categoryId', null)}
+            aria-checked={form.categoryId === null}
+            role="radio"
           >
-            Sin categoria
+            Sin categoría
           </button>
           {categories.map((category) => {
             const color = colorOf(category.colorKey)
@@ -220,6 +253,8 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
                 key={category.id}
                 type="button"
                 className={`${styles.chip} ${active ? styles.chipOn : ''}`}
+                role="radio"
+                aria-checked={active}
                 style={
                   active
                     ? { background: color.bg, color: color.ink, borderColor: color.dot }
@@ -258,7 +293,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
         </div>
 
         <label className={styles.field}>
-          <span className={styles.label}>Deadline (opcional)</span>
+          <span className={styles.label}>Fecha límite (opcional)</span>
           <input
             type="date"
             className={styles.input}
@@ -269,7 +304,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
       </div>
 
       <label className={styles.field}>
-        <span className={styles.label}>Descripcion (opcional)</span>
+        <span className={styles.label}>Descripción (opcional)</span>
         <textarea
           className={styles.textarea}
           rows={3}
@@ -293,15 +328,17 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
         <ul className={styles.subtasks}>
           {subtasks.map((subtask) => (
             <li key={subtask.id} className={styles.subtask}>
-              <input
-                type="checkbox"
-                className={styles.checkbox}
-                checked={subtask.done}
-                onChange={(e) =>
-                  updateSubtask.mutate({ id: subtask.id, patch: { done: e.target.checked } })
-                }
-              />
-              <span className={subtask.done ? styles.subtaskDone : undefined}>{subtask.title}</span>
+              <label className={styles.subtaskLabel}>
+                <input
+                  type="checkbox"
+                  className={styles.checkbox}
+                  checked={subtask.done}
+                  onChange={(e) =>
+                    updateSubtask.mutate({ id: subtask.id, patch: { done: e.target.checked } })
+                  }
+                />
+                <span className={subtask.done ? styles.subtaskDone : undefined}>{subtask.title}</span>
+              </label>
               <button
                 type="button"
                 className={styles.iconButton}
@@ -342,7 +379,12 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
               }
             }}
           />
-          <button type="button" className={styles.addButton} onClick={addSubtask}>
+          <button
+            type="button"
+            className={styles.addButton}
+            onClick={addSubtask}
+            aria-label="Agregar subtarea"
+          >
             <IconPlus size={16} />
           </button>
         </div>
@@ -366,10 +408,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
                   <button
                     type="button"
                     className={styles.iconButton}
-                    onClick={async () => {
-                      await api.deleteAttachment(attachment.id)
-                      await refreshState()
-                    }}
+                    onClick={() => void handleDeleteAttachment(attachment.id, attachment.fileName)}
                     aria-label={`Eliminar ${attachment.fileName}`}
                   >
                     <IconTrash size={15} />
@@ -407,7 +446,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
             </button>
           </>
         ) : (
-          <p className={styles.hint}>Crea la tarea primero y despues vas a poder adjuntar archivos.</p>
+          <p className={styles.hint}>Creá la tarea primero y después vas a poder adjuntar archivos.</p>
         )}
       </div>
     </Modal>
