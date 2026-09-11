@@ -47,6 +47,9 @@ sin pasar por la funcion). Se configura con `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGI
 `S3_ACCESS_KEY_ID` y `S3_SECRET_ACCESS_KEY`. Sin esas variables la app funciona igual:
 solo el boton de subir archivo responde que el almacenamiento no esta configurado.
 
+Las variables se llaman `S3_*` y no `AWS_*` porque Vercel reserva ese prefijo. Hoy apuntan
+a Neon Object Storage; cambiar a R2 o S3 es solo cambiar esos valores.
+
 ## Estructura
 
 ```
