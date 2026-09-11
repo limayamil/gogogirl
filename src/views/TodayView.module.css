@@ -157,9 +157,12 @@
   animation: fade-rise var(--dur-slow) var(--ease-out) both;
 }
 
-.dropHintIcon {
-  color: var(--accent);
-  margin-bottom: var(--space-2);
+.emptyIllustration {
+  display: block;
+  width: min(280px, 78%);
+  height: auto;
+  margin: -12px auto -2px;
+  filter: saturate(0.94);
   animation: icon-float 2.4s ease-in-out infinite;
 }
 

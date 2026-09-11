@@ -36,7 +36,7 @@ export function AppShell() {
       <header className={styles.header}>
         <div className={styles.brand}>
           <span className={styles.logo} aria-hidden="true">
-            ✿
+            <img src="/brand/logo-mark.webp" alt="" width="34" height="34" />
           </span>
           <span className={styles.brandName}>GoGoGirl</span>
         </div>

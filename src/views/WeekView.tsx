@@ -50,6 +50,7 @@ export function WeekView() {
   }, [tasks, days])
 
   const withoutDeadline = tasks.filter((task) => !task.deadline && task.status !== 'hecha').length
+  const weekTaskCount = days.reduce((total, day) => total + (byDay.get(day)?.length ?? 0), 0)
 
   function handleDragEnd(event: DragEndEvent) {
     setDragging(null)
@@ -106,6 +107,24 @@ export function WeekView() {
       </header>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        {weekTaskCount === 0 ? (
+          <div className={styles.weekEmpty}>
+            <img
+              className={styles.weekEmptyIllustration}
+              src="/images/empty-week.webp"
+              alt=""
+              width="760"
+              height="507"
+            />
+            <div>
+              <p className={styles.weekEmptyTitle}>Una semana con espacio</p>
+              <p className={styles.weekEmptyText}>
+                Las tareas con fecha límite van a aparecer en el día que les corresponda.
+              </p>
+            </div>
+          </div>
+        ) : null}
+
         <div className={`${styles.grid} stagger`}>
           {days.map((day, index) => (
             <DayColumn

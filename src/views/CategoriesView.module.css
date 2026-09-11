@@ -216,9 +216,12 @@
   animation: fade-rise var(--dur-slow) var(--ease-out) both;
 }
 
-.emptyIcon {
-  color: var(--accent-2);
-  margin-bottom: var(--space-2);
+.emptyIllustration {
+  display: block;
+  width: min(230px, 72%);
+  height: auto;
+  margin: -18px auto -10px;
+  filter: saturate(0.92);
   animation: icon-float 2.4s ease-in-out infinite;
 }
 
