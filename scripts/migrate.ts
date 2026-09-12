@@ -41,7 +41,11 @@ for (const file of files) {
   // El driver HTTP de Neon manda una sentencia por request, asi que separamos el archivo.
   for (const statement of statements.split(/;\s*\n/)) {
     const trimmed = statement.trim()
-    if (trimmed && !trimmed.startsWith('--')) await sql.query(trimmed)
+    // Para saber si el bloque tiene SQL hay que mirar debajo de los comentarios: un
+    // `-- por que` arriba de un create hacia que la sentencia entera se salteara en
+    // silencio (asi se perdio el `create extension pgcrypto` de 001_init).
+    const withoutLeadingComments = trimmed.replace(/^(?:\s*--[^\n]*\n)+/, '').trim()
+    if (withoutLeadingComments) await sql.query(trimmed)
   }
   await sql`insert into _migrations (name) values (${file})`
   console.log(`  aplicada     ${file}`)
