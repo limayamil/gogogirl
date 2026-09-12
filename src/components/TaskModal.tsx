@@ -14,6 +14,7 @@ import {
 } from './Icons'
 import { api } from '../lib/api'
 import { addDays, formatShortDate, toDateKey, todayKey } from '../lib/dates'
+import { compressImage } from '../lib/image'
 import { useColorOf } from '../lib/palette'
 import { errorMessage, toastError } from '../lib/toast'
 import {
@@ -218,12 +219,17 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
   const uploadOne = useCallback(
     async (taskId: string, draft: DraftFile): Promise<string | null> => {
       try {
+        // Las imagenes viajan como WebP redimensionado: lo que se firma, se sube y se
+        // registra es este archivo, no el que eligio el usuario. La miniatura del
+        // borrador sigue saliendo del original, que ya esta en pantalla.
+        const file = await compressImage(draft.file)
+        const contentType = file.type || 'application/octet-stream'
         const { objectKey, uploadUrl } = await api.signUpload({
           taskId,
-          fileName: draft.file.name,
-          contentType: draft.file.type || 'application/octet-stream',
+          fileName: file.name,
+          contentType,
         })
-        await putFile(uploadUrl, draft.file, (fraction) => {
+        await putFile(uploadUrl, file, (fraction) => {
           setDraftFiles((prev) =>
             prev.map((d) => (d.key === draft.key ? { ...d, progress: fraction } : d)),
           )
@@ -231,9 +237,9 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
         await api.createAttachment({
           taskId,
           objectKey,
-          fileName: draft.file.name,
-          contentType: draft.file.type || 'application/octet-stream',
-          sizeBytes: draft.file.size,
+          fileName: file.name,
+          contentType,
+          sizeBytes: file.size,
         })
         setDraftFiles((prev) =>
           prev.map((d) => (d.key === draft.key ? { ...d, progress: 1, done: true } : d)),
