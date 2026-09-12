@@ -7,13 +7,13 @@
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
-import { api } from './api'
+import { api, type LinkDraft } from './api'
 import { toastError } from './toast'
 import type { AppState, Category, QuickTask, Task, TaskInput } from '../shared/types'
 
 const KEY = ['state'] as const
 
-const EMPTY: AppState = { categories: [], tasks: [], quickTasks: [] }
+const EMPTY: AppState = { categories: [], tasks: [], quickTasks: [], storageConfigured: false }
 
 export function useAppState() {
   return useQuery({ queryKey: KEY, queryFn: api.getState })
@@ -58,7 +58,8 @@ const replaceTask = (state: AppState, id: string, update: (task: Task) => Task):
 export function useCreateTask() {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: (input: TaskInput & { subtasks?: string[] }) => api.createTask(input),
+    mutationFn: (input: TaskInput & { subtasks?: string[]; links?: LinkDraft[] }) =>
+      api.createTask(input),
     onSuccess(task) {
       patchCache(client, (state) => ({ ...state, tasks: [...state.tasks, task] }))
     },
@@ -137,6 +138,40 @@ export function useDeleteSubtask() {
       tasks: state.tasks.map((task) => ({
         ...task,
         subtasks: task.subtasks.filter((s) => s.id !== id),
+      })),
+    }),
+  })
+}
+
+// --- Links ----------------------------------------------------------------
+
+export function useCreateLink() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { taskId: string; url: string; title?: string | null }) =>
+      api.createLink(input),
+    onSuccess(link) {
+      patchCache(client, (state) =>
+        replaceTask(state, link.taskId, (task) => ({ ...task, links: [...task.links, link] })),
+      )
+    },
+    onError(error) {
+      toastError(error)
+    },
+    onSettled() {
+      void client.invalidateQueries({ queryKey: KEY })
+    },
+  })
+}
+
+export function useDeleteLink() {
+  return useOptimistic({
+    mutationFn: (id: string) => api.deleteLink(id),
+    optimistic: (state, id) => ({
+      ...state,
+      tasks: state.tasks.map((task) => ({
+        ...task,
+        links: task.links.filter((l) => l.id !== id),
       })),
     }),
   })

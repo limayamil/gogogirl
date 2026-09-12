@@ -1,6 +1,6 @@
 import { loadTask, sql } from '../_lib/db.ts'
 import { body, route } from '../_lib/http.ts'
-import { parseTaskCreate, requiredText } from '../_lib/validate.ts'
+import { httpUrl, optionalText, parseTaskCreate, requiredText } from '../_lib/validate.ts'
 
 type Row = Record<string, unknown>
 
@@ -18,6 +18,16 @@ export default route({
         200,
       ),
     )
+
+    // Los links tambien: el modal los junta antes de que la tarea exista.
+    const rawLinks = Array.isArray(raw.links) ? raw.links : []
+    const links = rawLinks.map((item, index) => {
+      const entry = typeof item === 'string' ? { url: item } : ((item ?? {}) as Record<string, unknown>)
+      return {
+        url: httpUrl(entry.url, `links[${index}].url`),
+        title: optionalText(entry.title, `links[${index}].title`, 200),
+      }
+    })
 
     const [{ next: position }] = (await sql`
       select coalesce(max(position), -1) + 1 as next
@@ -48,6 +58,13 @@ export default route({
     for (const [index, title] of subtaskTitles.entries()) {
       await sql`
         insert into subtasks (task_id, title, position) values (${taskId}, ${title}, ${index})
+      `
+    }
+
+    for (const [index, link] of links.entries()) {
+      await sql`
+        insert into task_links (task_id, url, title, position)
+        values (${taskId}, ${link.url}, ${link.title}, ${index})
       `
     }
 

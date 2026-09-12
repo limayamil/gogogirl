@@ -4,10 +4,12 @@ import {
   mapQuickTask,
   mapSubtask,
   mapTask,
+  mapTaskLink,
   sql,
 } from './_lib/db.ts'
 import { route } from './_lib/http.ts'
-import type { AppState, Attachment, Subtask } from '../src/shared/types.ts'
+import { storageConfigured } from './_lib/storage.ts'
+import type { AppState, Attachment, Subtask, TaskLink } from '../src/shared/types.ts'
 
 type Row = Record<string, unknown>
 
@@ -20,11 +22,12 @@ type Row = Record<string, unknown>
  */
 export default route({
   async GET(_req, res) {
-    const [categories, tasks, subtasks, attachments, quickTasks] = (await Promise.all([
+    const [categories, tasks, subtasks, attachments, links, quickTasks] = (await Promise.all([
       sql`select * from categories order by position, created_at`,
       sql`select * from tasks order by position, created_at`,
       sql`select * from subtasks order by position, title`,
       sql`select * from attachments order by created_at`,
+      sql`select * from task_links order by position, created_at`,
       sql`select * from quick_tasks order by position, created_at`,
     ])) as Row[][]
 
@@ -44,6 +47,14 @@ export default route({
       else attachmentsByTask.set(attachment.taskId, [attachment])
     }
 
+    const linksByTask = new Map<string, TaskLink[]>()
+    for (const row of links) {
+      const link = mapTaskLink(row)
+      const list = linksByTask.get(link.taskId)
+      if (list) list.push(link)
+      else linksByTask.set(link.taskId, [link])
+    }
+
     const state: AppState = {
       categories: categories.map(mapCategory),
       tasks: tasks.map((row) =>
@@ -51,9 +62,11 @@ export default route({
           row,
           subtasksByTask.get(row.id as string) ?? [],
           attachmentsByTask.get(row.id as string) ?? [],
+          linksByTask.get(row.id as string) ?? [],
         ),
       ),
       quickTasks: quickTasks.map(mapQuickTask),
+      storageConfigured,
     }
 
     res.status(200).json(state)

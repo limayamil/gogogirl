@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
 import { IconBolt, IconPlus, IconTrash } from './Icons'
 import { useModals } from '../app/modals'
 import {
@@ -16,7 +15,6 @@ import styles from './Fabs.module.css'
  */
 export function Fabs() {
   const { openTask } = useModals()
-  const { pathname } = useLocation()
   const { data } = useAppState()
   const quickTasks = data?.quickTasks ?? []
 
@@ -127,7 +125,7 @@ export function Fabs() {
         <button
           type="button"
           className={`${styles.fab} ${styles.fabAdd}`}
-          onClick={() => openTask({ taskId: null, defaults: { inToday: pathname === '/' } })}
+          onClick={() => openTask({ taskId: null })}
           aria-label="Nueva tarea"
         >
           <IconPlus size={24} />

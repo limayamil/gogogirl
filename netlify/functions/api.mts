@@ -20,6 +20,8 @@ import quickTasks from '../../api/quick-tasks/index.ts'
 import quickTaskById from '../../api/quick-tasks/[id].ts'
 import attachments from '../../api/attachments/index.ts'
 import attachmentById from '../../api/attachments/[id].ts'
+import links from '../../api/links/index.ts'
+import linkById from '../../api/links/[id].ts'
 import uploadsSign from '../../api/uploads/sign.ts'
 
 const routes: Route[] = [
@@ -34,6 +36,8 @@ const routes: Route[] = [
   ['/api/quick-tasks/:id', quickTaskById],
   ['/api/attachments', attachments],
   ['/api/attachments/:id', attachmentById],
+  ['/api/links', links],
+  ['/api/links/:id', linkById],
   ['/api/uploads/sign', uploadsSign],
 ]
 

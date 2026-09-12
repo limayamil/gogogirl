@@ -23,6 +23,15 @@ export interface Subtask {
   position: number
 }
 
+export interface TaskLink {
+  id: string
+  taskId: string
+  url: string
+  /** Titulo que escribio el usuario, o null: el front muestra el dominio en ese caso. */
+  title: string | null
+  position: number
+}
+
 export interface Attachment {
   id: string
   taskId: string
@@ -52,6 +61,7 @@ export interface Task {
   completedAt: string | null
   subtasks: Subtask[]
   attachments: Attachment[]
+  links: TaskLink[]
 }
 
 export interface QuickTask {
@@ -67,6 +77,8 @@ export interface AppState {
   categories: Category[]
   tasks: Task[]
   quickTasks: QuickTask[]
+  /** false = faltan las S3_*; el modal esconde los adjuntos en vez de fallar al subir. */
+  storageConfigured: boolean
 }
 
 export interface CategoryInput {

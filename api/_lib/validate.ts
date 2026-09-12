@@ -73,6 +73,33 @@ export function dateOrNull(value: unknown, field: string): string | null {
   return value
 }
 
+/**
+ * Normaliza un link. Acepta que venga sin esquema ("drive.google.com/...") y le pone
+ * https://, porque es lo que sale de copiar una barra de direcciones a medias.
+ * Solo http y https: un `javascript:` guardado seria un XSS esperando a que alguien
+ * lo toque desde la lista de adjuntos.
+ */
+export function httpUrl(value: unknown, field: string, max = 2000): string {
+  if (typeof value !== 'string') fail(`"${field}" debe ser texto`)
+  const trimmed = value.trim()
+  if (!trimmed) fail(`"${field}" no puede estar vacio`)
+  if (trimmed.length > max) fail(`"${field}" supera los ${max} caracteres`)
+
+  const candidate = /^[a-z][a-z0-9+.-]*:/i.test(trimmed) ? trimmed : `https://${trimmed}`
+
+  let parsed: URL
+  try {
+    parsed = new URL(candidate)
+  } catch {
+    fail(`"${field}" no es una URL valida`)
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    fail(`"${field}" solo puede ser http o https`)
+  }
+  if (!parsed.hostname) fail(`"${field}" no es una URL valida`)
+  return parsed.toString()
+}
+
 export function urgency(value: unknown): Urgency {
   if (typeof value !== 'string' || !URGENCIES.includes(value as Urgency)) {
     fail(`"urgency" debe ser una de: ${URGENCIES.join(', ')}`)

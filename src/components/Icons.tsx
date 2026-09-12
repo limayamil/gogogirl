@@ -141,3 +141,32 @@ export const IconList = ({ size = 20, className }: Props) => (
     <path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" />
   </svg>
 )
+
+export const IconLink = ({ size = 16, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" />
+    <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" />
+  </svg>
+)
+
+export const IconImage = ({ size = 20, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <rect x="3" y="4" width="18" height="16" rx="3" />
+    <circle cx="8.5" cy="9.5" r="1.5" />
+    <path d="m3 16 4.5-4.5 4 4L15 12l6 5" />
+  </svg>
+)
+
+export const IconFile = ({ size = 20, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" />
+    <path d="M14 3v5h5M9 13h6M9 17h4" />
+  </svg>
+)
+
+export const IconUpload = ({ size = 22, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <path d="M12 16V4M8 8l4-4 4 4" />
+    <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+  </svg>
+)

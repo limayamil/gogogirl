@@ -6,6 +6,7 @@ import type {
   Subtask,
   Task,
   TaskInput,
+  TaskLink,
 } from '../shared/types'
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -24,6 +25,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 const json = (payload: unknown) => JSON.stringify(payload)
 
+/** Link que todavia no existe en la base: lo que junta el modal antes de crear la tarea. */
+export interface LinkDraft {
+  url: string
+  title?: string | null
+}
+
 export const api = {
   getState: () => request<AppState>('/state'),
 
@@ -33,7 +40,7 @@ export const api = {
     request<Category>(`/categories/${id}`, { method: 'PATCH', body: json(patch) }),
   deleteCategory: (id: string) => request<unknown>(`/categories/${id}`, { method: 'DELETE' }),
 
-  createTask: (input: TaskInput & { subtasks?: string[] }) =>
+  createTask: (input: TaskInput & { subtasks?: string[]; links?: LinkDraft[] }) =>
     request<Task>('/tasks', { method: 'POST', body: json(input) }),
   updateTask: (id: string, patch: Partial<TaskInput>) =>
     request<Task>(`/tasks/${id}`, { method: 'PATCH', body: json(patch) }),
@@ -50,6 +57,12 @@ export const api = {
   updateQuickTask: (id: string, patch: { title?: string; done?: boolean }) =>
     request<QuickTask>(`/quick-tasks/${id}`, { method: 'PATCH', body: json(patch) }),
   deleteQuickTask: (id: string) => request<unknown>(`/quick-tasks/${id}`, { method: 'DELETE' }),
+
+  createLink: (input: { taskId: string; url: string; title?: string | null }) =>
+    request<TaskLink>('/links', { method: 'POST', body: json(input) }),
+  updateLink: (id: string, patch: { url?: string; title?: string | null }) =>
+    request<TaskLink>(`/links/${id}`, { method: 'PATCH', body: json(patch) }),
+  deleteLink: (id: string) => request<unknown>(`/links/${id}`, { method: 'DELETE' }),
 
   signUpload: (input: { taskId: string; fileName: string; contentType: string }) =>
     request<{ objectKey: string; uploadUrl: string }>('/uploads/sign', {

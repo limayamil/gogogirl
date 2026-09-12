@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { HttpError } from './http.ts'
-import { dateOrNull, parseCategoryInput, parseTaskCreate, parseTaskPatch } from './validate.ts'
+import {
+  dateOrNull,
+  httpUrl,
+  parseCategoryInput,
+  parseTaskCreate,
+  parseTaskPatch,
+} from './validate.ts'
 
 describe('dateOrNull', () => {
   it('acepta fechas reales', () => {
@@ -79,5 +85,31 @@ describe('parseCategoryInput', () => {
       position: undefined,
     })
     expect(() => parseCategoryInput({ name: 'Casa' })).toThrow(HttpError)
+  })
+})
+
+describe('httpUrl', () => {
+  it('le pone https:// a una URL sin esquema', () => {
+    expect(httpUrl('drive.google.com/file/d/1a2B', 'url')).toBe(
+      'https://drive.google.com/file/d/1a2B',
+    )
+  })
+
+  it('respeta http:// y https:// explicitos', () => {
+    expect(httpUrl('http://localhost:3001/x', 'url')).toBe('http://localhost:3001/x')
+    expect(httpUrl('https://ejemplo.com', 'url')).toBe('https://ejemplo.com/')
+  })
+
+  it('rechaza esquemas que no son http ni https', () => {
+    // Un javascript: guardado seria un XSS esperando a que alguien lo toque.
+    expect(() => httpUrl('javascript:alert(1)', 'url')).toThrow()
+    expect(() => httpUrl('data:text/html,<script>', 'url')).toThrow()
+    expect(() => httpUrl('file:///etc/passwd', 'url')).toThrow()
+  })
+
+  it('rechaza vacio y texto que no es URL', () => {
+    expect(() => httpUrl('   ', 'url')).toThrow()
+    expect(() => httpUrl('https://', 'url')).toThrow()
+    expect(() => httpUrl(42, 'url')).toThrow()
   })
 })
