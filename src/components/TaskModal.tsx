@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Modal } from './Modal'
+import { RichTextEditor } from './RichTextEditor'
 import {
   IconChevronDown,
   IconClose,
@@ -14,9 +15,11 @@ import {
   IconUpload,
 } from './Icons'
 import { api } from '../lib/api'
+import { celebrateFromPointer, shouldCelebrateChecked, shouldCelebrateStatus } from '../lib/confetti'
 import { addDays, formatShortDate, toDateKey, todayKey } from '../lib/dates'
 import { compressImage } from '../lib/image'
 import { useColorOf } from '../lib/palette'
+import { isEmptyRichText, serializeRichText } from '../lib/rich-text'
 import { errorMessage, toastError, toastUndo } from '../lib/toast'
 import {
   useAppState,
@@ -377,7 +380,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
       }
 
       const target = event.target as HTMLElement | null
-      if (target?.tagName === 'TEXTAREA' || target?.hasAttribute('data-paste-text')) return
+      if (target?.closest('textarea, [contenteditable="true"], [data-paste-text]')) return
 
       const text = clip.getData('text/plain').trim()
       if (!text || !looksLikeUrl(text)) return
@@ -476,7 +479,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
       categoryId: form.categoryId,
       urgency: form.urgency,
       deadline: form.deadline || null,
-      description: form.description.trim() || null,
+      description: serializeRichText(form.description),
       notes: form.notes.trim() || null,
       status: form.status,
       inToday: form.inToday,
@@ -556,7 +559,7 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
     draftSubtasks.length +
     draftFiles.length +
     draftLinks.length +
-    (form.description.trim() ? 1 : 0) +
+    (isEmptyRichText(form.description) ? 0 : 1) +
     (form.notes.trim() ? 1 : 0)
 
   return (
@@ -654,7 +657,10 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
                   aria-checked={form.status === level}
                   className={`${styles.segmentItem} ${form.status === level ? styles.segmentOn : ''}`}
                   style={form.status === level ? { background: 'var(--accent-2)' } : undefined}
-                  onClick={() => set('status', level)}
+                  onClick={(event) => {
+                    if (shouldCelebrateStatus(form.status, level)) celebrateFromPointer(event)
+                    set('status', level)
+                  }}
                 >
                   {STATUS_LABEL[level]}
                 </button>
@@ -816,17 +822,16 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
 
         {details ? (
           <>
-            <label className={styles.group}>
+            <div className={styles.group}>
               <span className={styles.label}>Descripción</span>
-              <textarea
-                className={styles.textarea}
-                rows={3}
-                maxLength={5000}
-                placeholder="Para acordarte del contexto…"
+              <RichTextEditor
                 value={form.description}
-                onChange={(e) => set('description', e.target.value)}
+                placeholder="Para acordarte del contexto…"
+                minHeight={100}
+                aria-label="Descripción"
+                onChange={(html) => set('description', html)}
               />
-            </label>
+            </div>
 
             <label className={styles.group}>
               <span className={styles.label}>Notas</span>
@@ -850,9 +855,10 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
                         type="checkbox"
                         className={styles.checkbox}
                         checked={subtask.done}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          if (shouldCelebrateChecked(e.target.checked)) celebrateFromPointer()
                           updateSubtask.mutate({ id: subtask.id, patch: { done: e.target.checked } })
-                        }
+                        }}
                       />
                       <span className={subtask.done ? styles.subtaskDone : undefined}>
                         {subtask.title}
