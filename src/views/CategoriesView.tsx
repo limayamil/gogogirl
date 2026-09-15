@@ -12,6 +12,7 @@ import {
 } from '../components/Icons'
 import { useColorOf } from '../lib/palette'
 import { formatShortDate } from '../lib/dates'
+import { richTextExcerpt } from '../lib/rich-text'
 import { useAppState, useUpdateTask } from '../lib/store'
 import type { Task, Urgency } from '../shared/types'
 import styles from './CategoriesView.module.css'
@@ -152,7 +153,10 @@ function TaskCard({ task, tint, dot }: { task: Task; tint: string; dot: string }
         ) : null}
       </div>
 
-      {task.description ? <p className={styles.taskDescription}>{task.description}</p> : null}
+      {(() => {
+        const preview = richTextExcerpt(task.description, 160)
+        return preview ? <p className={styles.taskDescription}>{preview}</p> : null
+      })()}
 
       <div className={styles.meta}>
         <span className={`${styles.badge} ${styles[`urgency_${task.urgency}`]}`}>

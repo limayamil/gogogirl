@@ -1,7 +1,7 @@
 // Validacion de payloads. Funciones puras y sin dependencias de red: son las que
 // cubren los tests de Vitest.
 
-import { STATUSES, URGENCIES } from '../../src/shared/types.ts'
+import { RICH_TEXT_MAX, STATUSES, URGENCIES } from '../../src/shared/types.ts'
 import type { CategoryInput, Status, TaskInput, Urgency } from '../../src/shared/types.ts'
 import { HttpError } from './http.ts'
 
@@ -135,7 +135,7 @@ export function parseTaskCreate(input: Record<string, unknown>): TaskInput {
   return {
     title: requiredText(input.title, 'title', 200),
     categoryId: uuidOrNull(input.categoryId, 'categoryId'),
-    description: optionalText(input.description, 'description'),
+    description: optionalText(input.description, 'description', RICH_TEXT_MAX),
     notes: optionalText(input.notes, 'notes'),
     urgency: input.urgency == null ? 'media' : urgency(input.urgency),
     deadline: dateOrNull(input.deadline, 'deadline'),
@@ -149,7 +149,9 @@ export function parseTaskPatch(input: Record<string, unknown>): Partial<TaskInpu
   const patch: Partial<TaskInput> = {}
   if ('title' in input) patch.title = requiredText(input.title, 'title', 200)
   if ('categoryId' in input) patch.categoryId = uuidOrNull(input.categoryId, 'categoryId')
-  if ('description' in input) patch.description = optionalText(input.description, 'description')
+  if ('description' in input) {
+    patch.description = optionalText(input.description, 'description', RICH_TEXT_MAX)
+  }
   if ('notes' in input) patch.notes = optionalText(input.notes, 'notes')
   if ('urgency' in input) patch.urgency = urgency(input.urgency)
   if ('deadline' in input) patch.deadline = dateOrNull(input.deadline, 'deadline')
