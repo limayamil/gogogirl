@@ -409,7 +409,13 @@ function RailTask({ task, tint, dot }: { task: Task; tint: string; dot: string }
   const { openTask } = useModals()
   const updateTask = useUpdateTask()
   const updateSubtask = useUpdateSubtask()
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
+  // Si ya esta en Hoy, el sortable de alla es el unico dueno del id: registrar
+  // otro draggable con el mismo id hace que el DragOverlay mida este nodo
+  // (abajo a la derecha) y aparezca una pildora fantasma.
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: task.id,
+    disabled: task.inToday,
+  })
 
   return (
     <li
