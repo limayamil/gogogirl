@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tipografías para GoGoGirl</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Dancing+Script:wght@700&family=Kalam:wght@700&family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: 'Nunito', ui-rounded, sans-serif;
+        color: #3a3340;
+        background: #fbf6f3;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background:
+          radial-gradient(circle at 10% 5%, #fde8e4 0, transparent 32%),
+          radial-gradient(circle at 90% 22%, #e9e6fa 0, transparent 34%),
+          #fbf6f3;
+      }
+
+      main {
+        width: min(1100px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 56px 0 72px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: #8c3a2a;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(30px, 5vw, 48px);
+        letter-spacing: -0.04em;
+      }
+
+      .intro {
+        max-width: 640px;
+        margin: 12px 0 36px;
+        color: #6d6577;
+        line-height: 1.6;
+      }
+
+      .options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .option {
+        appearance: none;
+        width: 100%;
+        padding: 0;
+        overflow: hidden;
+        border: 2px solid transparent;
+        border-radius: 24px;
+        background: #fff;
+        color: inherit;
+        box-shadow: 0 10px 28px rgb(58 51 64 / 8%);
+        cursor: pointer;
+        text-align: left;
+        transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+      }
+
+      .option:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 34px rgb(58 51 64 / 12%);
+      }
+
+      .option[aria-pressed='true'] {
+        border-color: #f4836c;
+        box-shadow: 0 12px 32px rgb(244 131 108 / 18%);
+      }
+
+      .mock-header {
+        display: flex;
+        align-items: center;
+        min-height: 82px;
+        padding: 18px 22px;
+        background: linear-gradient(105deg, #cde8fb, #eaf4ff 48%, #fde8d4);
+        border-bottom: 1px solid #eae4ee;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .brand img {
+        display: block;
+        width: 38px;
+        height: 38px;
+        object-fit: contain;
+        filter: drop-shadow(0 3px 6px rgb(58 51 64 / 12%));
+      }
+
+      .brand-name {
+        display: inline-flex;
+        align-items: center;
+        height: 38px;
+        padding-top: 2px;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.035em;
+      }
+
+      .kalam { font-family: 'Kalam', cursive; }
+      .caveat { font-family: 'Caveat', cursive; }
+      .dancing { font-family: 'Dancing Script', cursive; }
+      .pacifico { font-family: 'Pacifico', cursive; font-size: 21px; font-weight: 400; }
+
+      .details {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px 20px;
+      }
+
+      .details strong {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 16px;
+      }
+
+      .details span {
+        color: #6d6577;
+        font-size: 13px;
+      }
+
+      .badge {
+        flex: 0 0 auto;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #ffe3dc;
+        color: #8c3a2a !important;
+        font-size: 11px !important;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .comparison {
+        margin-top: 32px;
+        overflow: hidden;
+        border: 1px solid #eae4ee;
+        border-radius: 24px;
+        background: #fff;
+        box-shadow: 0 10px 28px rgb(58 51 64 / 8%);
+      }
+
+      .comparison-title {
+        margin: 0;
+        padding: 18px 22px;
+        font-size: 15px;
+      }
+
+      .comparison-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .preview {
+        display: grid;
+        min-height: 116px;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .preview.light {
+        background: linear-gradient(105deg, #cde8fb, #eaf4ff 48%, #fde8d4);
+      }
+
+      .preview.dark {
+        color: #f0ebf4;
+        background: linear-gradient(105deg, #28233d, #211d2c 48%, #3c2730);
+      }
+
+      @media (max-width: 700px) {
+        main { padding-top: 36px; }
+        .options { grid-template-columns: 1fr; }
+        .comparison-row { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Prueba de marca</p>
+      <h1>¿Qué personalidad tiene GoGoGirl?</h1>
+      <p class="intro">
+        Todas las opciones usan el ícono y las medidas reales de la cabecera. Hacé clic en una
+        tarjeta para compararla en los modos claro y oscuro.
+      </p>
+
+      <section class="options" aria-label="Opciones de tipografía">
+        <button class="option" data-font="kalam" data-name="Kalam" aria-pressed="true">
+          <div class="mock-header">
+            <span class="brand">
+              <img src="/brand/logo-mark.webp" alt="" />
+              <span class="brand-name kalam">GoGoGirl</span>
+            </span>
+          </div>
+          <span class="details">
+            <span><strong>Kalam</strong>Amable, artesanal y clara</span>
+            <span class="badge">Recomendada</span>
+          </span>
+        </button>
+
+        <button class="option" data-font="caveat" data-name="Caveat" aria-pressed="false">
+          <div class="mock-header">
+            <span class="brand">
+              <img src="/brand/logo-mark.webp" alt="" />
+              <span class="brand-name caveat">GoGoGirl</span>
+            </span>
+          </div>
+          <span class="details">
+            <span><strong>Caveat</strong>Casual, espontánea y liviana</span>
+          </span>
+        </button>
+
+        <button class="option" data-font="dancing" data-name="Dancing Script" aria-pressed="false">
+          <div class="mock-header">
+            <span class="brand">
+              <img src="/brand/logo-mark.webp" alt="" />
+              <span class="brand-name dancing">GoGoGirl</span>
+            </span>
+          </div>
+          <span class="details">
+            <span><strong>Dancing Script</strong>Elegante, femenina y fluida</span>
+          </span>
+        </button>
+
+        <button class="option" data-font="pacifico" data-name="Pacifico" aria-pressed="false">
+          <div class="mock-header">
+            <span class="brand">
+              <img src="/brand/logo-mark.webp" alt="" />
+              <span class="brand-name pacifico">GoGoGirl</span>
+            </span>
+          </div>
+          <span class="details">
+            <span><strong>Pacifico</strong>Retro, expresiva y protagonista</span>
+          </span>
+        </button>
+      </section>
+
+      <section class="comparison" aria-live="polite">
+        <h2 class="comparison-title">Vista seleccionada: <span id="selected-name">Kalam</span></h2>
+        <div class="comparison-row">
+          <div class="preview light">
+            <span class="brand">
+              <img src="/brand/logo-mark.webp" alt="" />
+              <span class="brand-name kalam selected-sample">GoGoGirl</span>
+            </span>
+          </div>
+          <div class="preview dark">
+            <span class="brand">
+              <img src="/brand/logo-mark.webp" alt="" />
+              <span class="brand-name kalam selected-sample">GoGoGirl</span>
+            </span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const options = document.querySelectorAll('.option')
+      const samples = document.querySelectorAll('.selected-sample')
+      const selectedName = document.querySelector('#selected-name')
+
+      options.forEach((option) => {
+        option.addEventListener('click', () => {
+          const font = option.dataset.font
+          options.forEach((item) => item.setAttribute('aria-pressed', String(item === option)))
+          samples.forEach((sample) => {
+            sample.className = `brand-name selected-sample ${font}`
+          })
+          selectedName.textContent = option.dataset.name
+        })
+      })
+    </script>
+  </body>
+</html>

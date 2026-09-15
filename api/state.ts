@@ -8,7 +8,8 @@ import {
   sql,
 } from './_lib/db.ts'
 import { route } from './_lib/http.ts'
-import { storageConfigured } from './_lib/storage.ts'
+import { stateVersion } from './_lib/version.ts'
+import { storageConfigured } from './_lib/storage-config.ts'
 import type { AppState, Attachment, Subtask, TaskLink } from '../src/shared/types.ts'
 
 type Row = Record<string, unknown>
@@ -22,14 +23,18 @@ type Row = Record<string, unknown>
  */
 export default route({
   async GET(_req, res) {
-    const [categories, tasks, subtasks, attachments, links, quickTasks] = (await Promise.all([
-      sql`select * from categories order by position, created_at`,
-      sql`select * from tasks order by position, created_at`,
-      sql`select * from subtasks order by position, title`,
-      sql`select * from attachments order by created_at`,
-      sql`select * from task_links order by position, created_at`,
-      sql`select * from quick_tasks order by position, created_at`,
-    ])) as Row[][]
+    // `stateVersion` entra al mismo Promise.all, asi que no agrega latencia: el front
+    // se lleva la firma que corresponde a estos datos y puede compararla mas tarde.
+    const [categories, tasks, subtasks, attachments, links, quickTasks, version] =
+      (await Promise.all([
+        sql`select * from categories order by position, created_at`,
+        sql`select * from tasks order by position, created_at`,
+        sql`select * from subtasks order by position, title`,
+        sql`select * from attachments order by created_at`,
+        sql`select * from task_links order by position, created_at`,
+        sql`select * from quick_tasks order by position, created_at`,
+        stateVersion(),
+      ])) as [Row[], Row[], Row[], Row[], Row[], Row[], string]
 
     const subtasksByTask = new Map<string, Subtask[]>()
     for (const row of subtasks) {
@@ -67,6 +72,7 @@ export default route({
       ),
       quickTasks: quickTasks.map(mapQuickTask),
       storageConfigured,
+      version,
     }
 
     res.status(200).json(state)

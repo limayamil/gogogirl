@@ -75,9 +75,6 @@ export function TodayView() {
     }
   }
 
-  if (isPending) return <LoadingState />
-  if (error) return <ErrorState error={error} />
-
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className={`${styles.layout} pageEnter`}>
@@ -87,9 +84,12 @@ export function TodayView() {
           hiddenCount={hiddenCount}
           showHidden={showHidden}
           onToggleHidden={() => setShowHidden((value) => !value)}
+          isPending={isPending}
+          error={error}
         />
 
         <Rail
+          ready={!isPending && !error}
           categories={categories}
           tasks={tasks}
           uncategorized={uncategorized}
@@ -125,12 +125,16 @@ function TodayPanel({
   hiddenCount,
   showHidden,
   onToggleHidden,
+  isPending,
+  error,
 }: {
   tasks: Task[]
   categories: Category[]
   hiddenCount: number
   showHidden: boolean
   onToggleHidden: () => void
+  isPending: boolean
+  error: unknown
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: TODAY_ZONE })
   const today = formatTodayHeading(new Date())
@@ -158,7 +162,12 @@ function TodayPanel({
         ) : null}
       </header>
 
-      {tasks.length === 0 ? (
+      {/* El titulo y la fecha no dependen de los datos: se quedan montados para que la
+          pantalla no salte de un spinner centrado al panel completo. */}
+      {isPending ? <LoadingState /> : null}
+      {error ? <ErrorState error={error} /> : null}
+
+      {isPending || error ? null : tasks.length === 0 ? (
         <div className={styles.dropHint}>
           <img
             className={styles.emptyIllustration}
@@ -193,7 +202,7 @@ function TodayRow({ task, categories }: { task: Task; categories: Category[] }) 
   const { openTask } = useModals()
   const updateTask = useUpdateTask()
   const color = useColorOf()(categoryColorKey(categories, task))
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
+  const { listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
 
   return (
     <li
@@ -202,7 +211,6 @@ function TodayRow({ task, categories }: { task: Task; categories: Category[] }) 
         task.hiddenInToday ? styles.rowHidden : ''
       }`}
       style={{ background: color.soft, borderColor: color.bg }}
-      {...attributes}
       {...listeners}
     >
       <span className={styles.rowBar} style={{ background: color.dot }} />
@@ -235,12 +243,15 @@ function TodayRow({ task, categories }: { task: Task; categories: Category[] }) 
 // --- Columna de listas ----------------------------------------------------
 
 function Rail({
+  ready,
   categories,
   tasks,
   uncategorized,
   onAddCategory,
   onAddTask,
 }: {
+  /** false mientras carga: sin esto el rail invita a crear una categoria que ya existe. */
+  ready: boolean
   categories: Category[]
   tasks: Task[]
   uncategorized: Task[]
@@ -259,7 +270,7 @@ function Rail({
         </button>
       </header>
 
-      {categories.length === 0 && uncategorized.length === 0 ? (
+      {ready && categories.length === 0 && uncategorized.length === 0 ? (
         <p className={styles.railEmpty}>
           <IconFolder size={18} />
           Creá tu primera categoría para empezar a juntar tareas.
@@ -347,14 +358,13 @@ function RailTask({ task, tint, dot }: { task: Task; tint: string; dot: string }
   const { openTask } = useModals()
   const updateTask = useUpdateTask()
   const updateSubtask = useUpdateSubtask()
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
+  const { listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
 
   return (
     <li
       ref={setNodeRef}
       className={`${styles.railTask} ${isDragging ? styles.dragging : ''}`}
       style={{ background: tint }}
-      {...attributes}
       {...listeners}
     >
       <div className={styles.railTaskMain}>

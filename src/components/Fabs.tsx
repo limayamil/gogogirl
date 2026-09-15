@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { IconBolt, IconPlus, IconTrash } from './Icons'
 import { useModals } from '../app/modals'
+import { toastUndo } from '../lib/toast'
 import {
   useAppState,
   useCreateQuickTask,
   useDeleteQuickTask,
   useUpdateQuickTask,
 } from '../lib/store'
+import type { QuickTask } from '../shared/types'
 import styles from './Fabs.module.css'
 
 /**
@@ -51,6 +53,22 @@ export function Fabs() {
     setDraft('')
   }
 
+  /**
+   * Borrar es de un click y sin confirmar, asi que el aviso trae el Deshacer. La
+   * tarea vuelve con id nuevo — para un checklist suelto alcanza con recuperar el
+   * texto y si estaba tildada.
+   */
+  function remove(quick: QuickTask) {
+    deleteQuickTask.mutate(quick.id)
+    toastUndo(`Se eliminó “${quick.title}”`, () => {
+      createQuickTask.mutate(quick.title, {
+        onSuccess: (restored) => {
+          if (quick.done) updateQuickTask.mutate({ id: restored.id, patch: { done: true } })
+        },
+      })
+    })
+  }
+
   return (
     <div className={styles.dock} ref={container}>
       {open ? (
@@ -83,7 +101,7 @@ export function Fabs() {
                   <button
                     type="button"
                     className={styles.itemDelete}
-                    onClick={() => deleteQuickTask.mutate(quick.id)}
+                    onClick={() => remove(quick)}
                     aria-label={`Eliminar ${quick.title}`}
                   >
                     <IconTrash size={14} />
@@ -95,6 +113,9 @@ export function Fabs() {
 
           <div className={styles.addRow}>
             <input
+              // El flujo esta pensado para encadenar varias: al abrir, el cursor ya
+              // esta donde se escribe.
+              autoFocus
               className={styles.addInput}
               placeholder="Agregar tarea rápida"
               value={draft}

@@ -15,3 +15,11 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Vite le pone hash de contenido a todo lo de /assets, asi que un archivo con ese
+# nombre no cambia nunca: se puede cachear para siempre. El resto (index.html, iconos,
+# manifest) se queda con el default, que revalida.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

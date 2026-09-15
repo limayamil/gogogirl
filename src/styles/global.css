@@ -19,13 +19,23 @@ body,
 body {
   font-family: var(--font-sans);
   color: var(--ink);
-  background:
-    radial-gradient(1100px 600px at 8% -8%, var(--bg-tint-a), transparent 62%),
-    radial-gradient(1000px 620px at 96% 4%, var(--bg-tint-b), transparent 58%),
-    var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   line-height: 1.45;
+}
+
+/* Los dos tintes del fondo van en una capa fija propia y no en `background-attachment:
+   fixed` del body: asi el navegador no repinta los dos gradientes grandes en cada
+   frame de scroll. Se ve igual. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(1100px 600px at 8% -8%, var(--bg-tint-a), transparent 62%),
+    radial-gradient(1000px 620px at 96% 4%, var(--bg-tint-b), transparent 58%);
 }
 
 button,

@@ -13,17 +13,25 @@ import {
 import { useModals } from '../app/modals'
 import { ErrorState, LoadingState } from '../components/Feedback'
 import { StatusToggle } from '../components/StatusToggle'
-import { IconCalendar, IconChevronLeft, IconChevronRight } from '../components/Icons'
+import {
+  IconCalendar,
+  IconChevronLeft,
+  IconChevronRight,
+  IconEye,
+  IconEyeOff,
+} from '../components/Icons'
 import { useColorOf } from '../lib/palette'
 import {
   DAY_NAMES,
   addDays,
   formatDayNumber,
+  formatShortDate,
   formatWeekRange,
   todayKey,
   weekKeys,
 } from '../lib/dates'
 import { useAppState, useUpdateTask } from '../lib/store'
+import { toastUndo } from '../lib/toast'
 import type { Category, Task } from '../shared/types'
 import styles from './WeekView.module.css'
 
@@ -34,12 +42,14 @@ export function WeekView() {
 
   const [anchor, setAnchor] = useState(() => new Date())
   const [dragging, setDragging] = useState<Task | null>(null)
+  const [showWeekend, setShowWeekend] = useState(false)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
   const tasks = data?.tasks ?? []
   const categories = data?.categories ?? []
   const days = useMemo(() => weekKeys(anchor), [anchor])
+  const visibleDays = showWeekend ? days : days.slice(0, 5)
 
   const byDay = useMemo(() => {
     const map = new Map<string, Task[]>(days.map((day) => [day, []]))
@@ -50,7 +60,10 @@ export function WeekView() {
   }, [tasks, days])
 
   const withoutDeadline = tasks.filter((task) => !task.deadline && task.status !== 'hecha').length
-  const weekTaskCount = days.reduce((total, day) => total + (byDay.get(day)?.length ?? 0), 0)
+  const visibleTaskCount = visibleDays.reduce(
+    (total, day) => total + (byDay.get(day)?.length ?? 0),
+    0,
+  )
 
   function handleDragEnd(event: DragEndEvent) {
     setDragging(null)
@@ -58,16 +71,19 @@ export function WeekView() {
     const task = tasks.find((t) => t.id === event.active.id)
     // Soltar en otra columna es, literalmente, mover el deadline a ese dia.
     if (task && typeof day === 'string' && task.deadline !== day) {
+      const previous = task.deadline
       updateTask.mutate({ id: task.id, patch: { deadline: day } })
+      // La columna destino puede quedar fuera de pantalla: el aviso confirma adonde
+      // fue, y deja volver atras sin tener que buscar la tarjeta.
+      toastUndo(`“${task.title}” pasó al ${formatShortDate(day)}`, () => {
+        updateTask.mutate({ id: task.id, patch: { deadline: previous } })
+      })
     }
   }
 
   function handleDragStart(event: DragStartEvent) {
     setDragging(tasks.find((task) => task.id === event.active.id) ?? null)
   }
-
-  if (isPending) return <LoadingState />
-  if (error) return <ErrorState error={error} />
 
   return (
     <div className={`${styles.page} pageEnter`}>
@@ -83,31 +99,49 @@ export function WeekView() {
           </p>
         </div>
 
-        <div className={styles.nav}>
+        <div className={styles.headerActions}>
           <button
             type="button"
-            className={styles.navButton}
-            onClick={() => setAnchor((date) => addDays(date, -7))}
-            aria-label="Semana anterior"
+            className={`${styles.weekendToggle} ${showWeekend ? styles.weekendToggleActive : ''}`}
+            onClick={() => setShowWeekend((visible) => !visible)}
+            aria-expanded={showWeekend}
+            aria-controls="week-grid"
           >
-            <IconChevronLeft size={18} />
+            {showWeekend ? <IconEyeOff size={17} /> : <IconEye size={17} />}
+            {showWeekend ? 'Ocultar fin de semana' : 'Ver fin de semana'}
           </button>
-          <button type="button" className={styles.navToday} onClick={() => setAnchor(new Date())}>
-            Esta semana
-          </button>
-          <button
-            type="button"
-            className={styles.navButton}
-            onClick={() => setAnchor((date) => addDays(date, 7))}
-            aria-label="Semana siguiente"
-          >
-            <IconChevronRight size={18} />
-          </button>
+
+          <div className={styles.nav}>
+            <button
+              type="button"
+              className={styles.navButton}
+              onClick={() => setAnchor((date) => addDays(date, -7))}
+              aria-label="Semana anterior"
+            >
+              <IconChevronLeft size={18} />
+            </button>
+            <button type="button" className={styles.navToday} onClick={() => setAnchor(new Date())}>
+              Esta semana
+            </button>
+            <button
+              type="button"
+              className={styles.navButton}
+              onClick={() => setAnchor((date) => addDays(date, 7))}
+              aria-label="Semana siguiente"
+            >
+              <IconChevronRight size={18} />
+            </button>
+          </div>
         </div>
       </header>
 
+      {/* Igual que en Categorias: el encabezado y la navegacion de semana no dependen
+          de los datos, asi que solo se reemplaza el area de contenido. */}
+      {isPending ? <LoadingState /> : null}
+      {error ? <ErrorState error={error} /> : null}
+
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        {weekTaskCount === 0 ? (
+        {visibleTaskCount === 0 && !isPending && !error ? (
           <div className={styles.weekEmpty}>
             <img
               className={styles.weekEmptyIllustration}
@@ -125,8 +159,11 @@ export function WeekView() {
           </div>
         ) : null}
 
-        <div className={`${styles.grid} stagger`}>
-          {days.map((day, index) => (
+        <div
+          id="week-grid"
+          className={`${styles.grid} ${showWeekend ? styles.gridWithWeekend : ''} stagger`}
+        >
+          {visibleDays.map((day, index) => (
             <DayColumn
               key={day}
               dayKey={day}
@@ -184,14 +221,13 @@ function WeekCard({ task, categories }: { task: Task; categories: Category[] }) 
   const updateTask = useUpdateTask()
   const category = categories.find((c) => c.id === task.categoryId)
   const color = useColorOf()(category?.colorKey)
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
+  const { listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
 
   return (
     <li
       ref={setNodeRef}
       className={`${styles.card} ${isDragging ? styles.dragging : ''}`}
       style={{ background: color.soft, borderLeftColor: color.dot }}
-      {...attributes}
       {...listeners}
     >
       <div className={styles.cardTop}>

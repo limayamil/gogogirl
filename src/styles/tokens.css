@@ -3,6 +3,7 @@
 
 :root {
   --font-sans: 'Nunito', ui-rounded, -apple-system, 'Segoe UI', sans-serif;
+  --font-brand: 'Kalam', 'Comic Sans MS', cursive;
 
   /* Superficies */
   --bg: #fbf6f3;

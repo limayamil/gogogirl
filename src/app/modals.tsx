@@ -1,6 +1,14 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import { TaskModal, type TaskModalRequest } from '../components/TaskModal'
+import { Suspense, createContext, lazy, useContext, useMemo, useState, type ReactNode } from 'react'
+import type { TaskModalRequest } from '../components/TaskModal'
 import { CategoryModal } from '../components/CategoryModal'
+
+/**
+ * El detalle de tarea es el componente mas grande de la app y no se ve hasta que se
+ * abre una tarea: va en su propio chunk para que no pese en la carga inicial.
+ */
+const TaskModal = lazy(() =>
+  import('../components/TaskModal').then((m) => ({ default: m.TaskModal })),
+)
 
 /**
  * Host unico de modales. Cualquier vista puede abrir el detalle de una tarea o el
@@ -35,13 +43,17 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     <Context.Provider value={api}>
       {children}
       {taskRequest ? (
-        // La key remonta el formulario al cambiar de tarea, para que no arrastre el
-        // estado local del modal anterior.
-        <TaskModal
-          key={taskRequest.taskId ?? 'nueva'}
-          request={taskRequest}
-          onClose={() => setTaskRequest(null)}
-        />
+        // Sin fallback: el chunk llega en milisegundos y un spinner de paso a paso
+        // parpadearia mas de lo que informa.
+        <Suspense fallback={null}>
+          {/* La key remonta el formulario al cambiar de tarea, para que no arrastre el
+              estado local del modal anterior. */}
+          <TaskModal
+            key={taskRequest.taskId ?? 'nueva'}
+            request={taskRequest}
+            onClose={() => setTaskRequest(null)}
+          />
+        </Suspense>
       ) : null}
       {categoryRequest ? (
         <CategoryModal

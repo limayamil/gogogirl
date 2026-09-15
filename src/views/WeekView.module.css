@@ -28,6 +28,39 @@
   color: var(--ink-faint);
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.weekendToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 7px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  color: var(--ink-soft);
+  box-shadow: var(--shadow-sm);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition:
+    background var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+
+.weekendToggle:hover,
+.weekendToggleActive {
+  border-color: color-mix(in srgb, var(--accent-2) 45%, var(--line));
+  background: var(--accent-2-soft);
+  color: var(--ink);
+}
+
 .nav {
   display: flex;
   align-items: center;
@@ -104,9 +137,13 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--space-3);
   align-items: start;
+}
+
+.gridWithWeekend {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .day {
@@ -229,6 +266,15 @@
 @media (max-width: 720px) {
   .header {
     flex-direction: column;
+  }
+
+  .headerActions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .nav {
+    margin-left: auto;
   }
 
   .grid {

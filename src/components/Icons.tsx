@@ -170,3 +170,10 @@ export const IconUpload = ({ size = 22, className }: Props) => (
     <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
   </svg>
 )
+
+export const IconRefresh = ({ size = 18, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+    <path d="M21 3v6h-6" />
+  </svg>
+)

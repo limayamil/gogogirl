@@ -4,6 +4,7 @@ import { Fabs } from '../components/Fabs'
 import { IconCalendar, IconGrid, IconMoon, IconSun } from '../components/Icons'
 import { ModalProvider } from './modals'
 import { ToastHost } from './ToastHost'
+import { UpdateBanner } from './UpdateBanner'
 import { useThemeMode } from './theme'
 import { useSky } from './useSky'
 import styles from './AppShell.module.css'
@@ -74,6 +75,7 @@ export function AppShell() {
       >
         <div className={styles.sky} aria-hidden="true">
           <span className={styles.skyGlow} />
+          <span className={styles.skyPattern} />
           {raining ? (
             <span className={styles.skyRain}>
               {RAIN_DROPS.map((drop, index) => (
@@ -93,12 +95,12 @@ export function AppShell() {
           ) : null}
         </div>
 
-        <div className={styles.brand}>
+        <NavLink to="/" end className={styles.brand} aria-label="Ir a Hoy">
           <span className={styles.logo} aria-hidden="true">
             <img src="/brand/logo-mark.webp" alt="" width="34" height="34" />
           </span>
           <span className={styles.brandName}>GoGoGirl</span>
-        </div>
+        </NavLink>
 
         <nav className={styles.tabs} aria-label="Vistas">
           {TABS.map(({ to, label, Icon }) => (
@@ -131,6 +133,7 @@ export function AppShell() {
 
         <Fabs />
         <ToastHost />
+        <UpdateBanner />
       </ModalProvider>
     </div>
   )

@@ -79,6 +79,9 @@ export interface AppState {
   quickTasks: QuickTask[]
   /** false = faltan las S3_*; el modal esconde los adjuntos en vez de fallar al subir. */
   storageConfigured: boolean
+  /** Firma de estos datos. El front la compara contra GET /api/version para avisar
+   *  que hay novedades cargadas desde otro dispositivo. */
+  version: string
 }
 
 export interface CategoryInput {

@@ -27,9 +27,6 @@ export function CategoriesView() {
   const { openTask, openCategory } = useModals()
   const colorOf = useColorOf()
 
-  if (isPending) return <LoadingState />
-  if (error) return <ErrorState error={error} />
-
   const categories = data?.categories ?? []
   const tasks = data?.tasks ?? []
   const uncategorized = tasks.filter((task) => task.categoryId === null)
@@ -50,7 +47,12 @@ export function CategoriesView() {
         </button>
       </header>
 
-      {categories.length === 0 && uncategorized.length === 0 ? (
+      {/* El encabezado no depende de los datos: dejarlo montado evita que la pantalla
+          salte de un spinner centrado a la grilla entera. */}
+      {isPending ? <LoadingState /> : null}
+      {error ? <ErrorState error={error} /> : null}
+
+      {!isPending && !error && categories.length === 0 && uncategorized.length === 0 ? (
         <div className={styles.empty}>
           <img
             className={styles.emptyIllustration}

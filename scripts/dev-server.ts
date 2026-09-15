@@ -19,6 +19,7 @@ app.use(express.json({ limit: '1mb' }))
  */
 const routes: Array<[path: string, module: string]> = [
   ['/api/state', '../api/state.ts'],
+  ['/api/version', '../api/version.ts'],
   ['/api/categories', '../api/categories/index.ts'],
   ['/api/categories/:id', '../api/categories/[id].ts'],
   ['/api/tasks', '../api/tasks/index.ts'],

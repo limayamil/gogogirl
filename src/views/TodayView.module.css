@@ -125,26 +125,32 @@
   width: 30px;
   height: 30px;
   border-radius: var(--r-pill);
-  color: transparent;
+  /* Atenuado en reposo, no invisible: en transparente la accion era indescubrible
+     salvo que pasaras el mouse por las filas a ver que aparecia. */
+  color: var(--ink-faint);
+  opacity: 0.45;
   flex-shrink: 0;
+  transition: opacity var(--dur-fast) ease;
 }
 
 .todayRow:hover .rowEye {
-  color: var(--ink-faint);
+  opacity: 1;
 }
 
 .rowEye:hover {
   color: var(--ink);
+  opacity: 1;
   background: color-mix(in srgb, var(--surface) 60%, transparent);
 }
 
 .rowEye:focus-visible {
   color: var(--ink);
+  opacity: 1;
 }
 
 @media (hover: none) {
   .rowEye {
-    color: var(--ink-faint);
+    opacity: 1;
   }
 }
 
