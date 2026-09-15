@@ -7,6 +7,9 @@ export type Urgency = (typeof URGENCIES)[number]
 export const STATUSES = ['pendiente', 'en_progreso', 'hecha'] as const
 export type Status = (typeof STATUSES)[number]
 
+/** Tope de description (HTML). El markup es mas verboso que el texto plano de 5000. */
+export const RICH_TEXT_MAX = 20_000
+
 export interface Category {
   id: string
   name: string
