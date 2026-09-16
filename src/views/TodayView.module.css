@@ -65,6 +65,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
   min-height: 40px;
   padding: 8px 12px 8px 10px;
   border-radius: var(--r-pill);
@@ -459,15 +460,17 @@
 
 @media (max-width: 980px) {
   .layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .today {
-    min-height: 60vh;
+    min-height: 0;
+    padding: var(--space-4);
+    padding-bottom: var(--space-5);
   }
 
   .todayTitle {
-    font-size: 28px;
+    font-size: 26px;
   }
 
   .hintDesktop {
@@ -476,5 +479,24 @@
 
   .hintMobile {
     display: inline;
+  }
+
+  .railHeader {
+    padding: 0;
+  }
+
+  .todayRow {
+    gap: var(--space-2);
+    padding: 12px 12px 12px 20px;
+  }
+
+  .groupToggle {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .railTaskTitle,
+  .rowTitle {
+    min-width: 0;
   }
 }

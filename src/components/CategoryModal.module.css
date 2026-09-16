@@ -111,3 +111,18 @@
   background: var(--accent);
   color: #fff;
 }
+
+@media (max-width: 560px) {
+  .primary,
+  .ghost,
+  .danger {
+    flex-shrink: 0;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .spacer {
+    flex: 1 1 8px;
+    min-width: 8px;
+  }
+}

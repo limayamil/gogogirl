@@ -1,6 +1,7 @@
 .page {
   max-width: 1440px;
   margin: 0 auto;
+  min-width: 0;
 }
 
 .header {
@@ -12,6 +13,8 @@
 }
 
 .title {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: clamp(24px, 2.6vw, 32px);
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -230,11 +233,13 @@
 
 .cardCategory {
   display: inline-block;
+  max-width: calc(100% - 26px);
   margin: 8px 0 0 26px;
   padding: 3px 9px;
   border-radius: var(--r-pill);
   font-size: 11px;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .dragging {
@@ -266,11 +271,18 @@
   .header {
     flex-direction: column;
     align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .title {
+    font-size: 24px;
   }
 
   .headerActions {
     width: 100%;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: var(--space-2);
   }
 
   .weekendLabel {
@@ -286,17 +298,28 @@
   }
 
   .nav {
-    margin-left: auto;
+    margin-left: 0;
+    flex-shrink: 0;
+  }
+
+  .navToday {
+    padding: 6px 10px;
   }
 
   .grid {
     display: grid;
+    width: 100%;
+    min-width: 0;
     grid-auto-flow: column;
-    grid-auto-columns: minmax(220px, 80vw);
+    /* Peek del dia siguiente, sin cortar una palabra a la mitad. */
+    grid-auto-columns: calc(100% - 28px);
     grid-template-columns: none;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
+    scroll-padding-inline: 0;
     padding-bottom: var(--space-3);
+    padding-right: 2px;
     -webkit-overflow-scrolling: touch;
   }
 
