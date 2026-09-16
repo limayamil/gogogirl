@@ -35,19 +35,31 @@
 }
 
 .todayTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.28em 0.35em;
   flex: 1;
   min-width: 0;
-  font-size: clamp(24px, 3vw, 34px);
+  font-size: clamp(26px, 3.2vw, 36px);
   font-weight: 700;
   color: var(--ink);
   letter-spacing: -0.03em;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .todayFriendly {
   font-style: italic;
   font-weight: 700;
   color: var(--accent);
+}
+
+.todayRest {
+  font-size: 0.48em;
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: -0.01em;
+  color: var(--ink-faint);
 }
 
 .hiddenToggle {
@@ -456,7 +468,7 @@
   }
 
   .todayTitle {
-    font-size: 22px;
+    font-size: 28px;
   }
 
   .hintDesktop {

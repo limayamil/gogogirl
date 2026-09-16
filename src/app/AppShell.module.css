@@ -69,14 +69,19 @@
   pointer-events: none;
   background-repeat: repeat;
   background-position: 0 50%;
-  opacity: 0.42;
-  filter: drop-shadow(0 1px 0 rgb(74 66 100 / 10%));
+  opacity: 0.52;
+  filter: drop-shadow(0 1px 0 rgb(74 66 100 / 16%));
 }
 
 .header[data-period='manana'] .skyPattern,
 .header[data-period='mediodia'] .skyPattern {
   background-image: url('/patterns/sky-stitch-day.svg');
   background-size: 240px 96px;
+  /* El trazo es blanco: de dia hay que subirle contraste o se funde con el cielo. */
+  opacity: 0.92;
+  filter:
+    drop-shadow(0 0.5px 0 rgb(74 66 100 / 34%))
+    drop-shadow(0 1px 1.5px rgb(74 66 100 / 22%));
 }
 
 .header[data-period='amanecer'] .skyPattern,
@@ -111,7 +116,9 @@
   background-position: -104px -8px;
 }
 
-:global(:root[data-theme='dark']) .skyPattern {
+:global(:root[data-theme='dark']) .skyPattern,
+:global(:root[data-theme='dark']) .header[data-period='manana'] .skyPattern,
+:global(:root[data-theme='dark']) .header[data-period='mediodia'] .skyPattern {
   opacity: 0.18;
   filter: none;
 }

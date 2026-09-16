@@ -193,7 +193,7 @@ function TodayPanel({
   const today = formatTodayHeading(new Date())
   const comma = today.indexOf(',')
   const weekday = comma === -1 ? today : today.slice(0, comma)
-  const rest = comma === -1 ? '' : today.slice(comma)
+  const rest = comma === -1 ? '' : today.slice(comma + 1).trim()
 
   return (
     <section
@@ -206,7 +206,7 @@ function TodayPanel({
            como el saludo amable de las referencias, sin copiar su copy. */}
         <h1 className={styles.todayTitle}>
           <span className={styles.todayFriendly}>{weekday}</span>
-          {rest}
+          {rest ? <span className={styles.todayRest}>{rest}</span> : null}
         </h1>
 
         {hiddenCount > 0 ? (

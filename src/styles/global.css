@@ -26,17 +26,23 @@ body {
 
 /* Los tintes del fondo van en una capa fija propia y no en `background-attachment:
    fixed` del body: asi el navegador no repinta los gradientes grandes en cada
-   frame de scroll. Se ve igual. */
+   frame de scroll. Se ve igual. En claro van a media tinta para no pelear con
+   las tarjetas; en oscuro se dejan enteros, que ya son suaves. */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  opacity: 0.38;
   background:
     radial-gradient(1100px 600px at 8% -8%, var(--bg-tint-a), transparent 62%),
     radial-gradient(1000px 620px at 96% 4%, var(--bg-tint-b), transparent 58%),
     radial-gradient(820px 480px at 70% 110%, var(--bg-tint-c), transparent 64%);
+}
+
+:root[data-theme='dark'] body::before {
+  opacity: 1;
 }
 
 button,
