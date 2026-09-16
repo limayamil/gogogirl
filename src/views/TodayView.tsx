@@ -191,6 +191,9 @@ function TodayPanel({
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: TODAY_ZONE })
   const today = formatTodayHeading(new Date())
+  const comma = today.indexOf(',')
+  const weekday = comma === -1 ? today : today.slice(0, comma)
+  const rest = comma === -1 ? '' : today.slice(comma)
 
   return (
     <section
@@ -199,23 +202,28 @@ function TodayPanel({
       aria-label="Tareas de hoy"
     >
       <header className={styles.todayHeader}>
-        <div>
-          <h1 className={styles.todayTitle}>
-            <IconSun size={22} />
-            Hoy
-          </h1>
-          <p className={styles.todayDate}>{today}</p>
-        </div>
+        {/* El nav ya dice Hoy: el heading es la fecha, con el dia en italica coral
+           como el saludo amable de las referencias, sin copiar su copy. */}
+        <h1 className={styles.todayTitle}>
+          <span className={styles.todayFriendly}>{weekday}</span>
+          {rest}
+        </h1>
 
         {hiddenCount > 0 ? (
-          <button type="button" className={styles.hiddenToggle} onClick={onToggleHidden}>
-            {showHidden ? <IconEyeOff size={16} /> : <IconEye size={16} />}
-            {showHidden ? 'Ocultar' : `Ver ${hiddenCount} oculta(s)`}
+          <button
+            type="button"
+            className={styles.hiddenToggle}
+            onClick={onToggleHidden}
+            title={showHidden ? 'Ocultar tareas escondidas' : `Ver ${hiddenCount} oculta(s)`}
+            aria-label={showHidden ? 'Ocultar tareas escondidas' : `Ver ${hiddenCount} oculta(s)`}
+          >
+            {showHidden ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+            <span>{showHidden ? 'Ocultar' : hiddenCount}</span>
           </button>
         ) : null}
       </header>
 
-      {/* El titulo y la fecha no dependen de los datos: se quedan montados para que la
+      {/* El heading no depende de los datos: se queda montado para que la
           pantalla no salte de un spinner centrado al panel completo. */}
       {isPending ? <LoadingState /> : null}
       {error ? <ErrorState error={error} /> : null}
@@ -268,7 +276,7 @@ function TodayRow({ task, categories }: { task: Task; categories: Category[] }) 
         task.hiddenInToday ? styles.rowHidden : ''
       }`}
       style={{
-        background: color.soft,
+        backgroundColor: color.soft,
         borderColor: color.bg,
         transform: CSS.Transform.toString(transform),
         transition,
@@ -378,7 +386,7 @@ function CategoryGroup({
   const pending = tasks.filter((task) => task.status !== 'hecha').length
 
   return (
-    <section className={styles.group} style={{ background: color.bg }}>
+    <section className={styles.group} style={{ backgroundColor: color.bg }}>
       <header className={styles.groupHeader}>
         <button
           type="button"
@@ -433,7 +441,7 @@ function RailTask({ task, tint, dot }: { task: Task; tint: string; dot: string }
     <li
       ref={setNodeRef}
       className={`${styles.railTask} ${isDragging ? styles.dragging : ''}`}
-      style={{ background: tint }}
+      style={{ backgroundColor: tint }}
       {...attributes}
       {...listeners}
     >

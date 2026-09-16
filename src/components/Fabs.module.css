@@ -48,7 +48,7 @@
 .fabAdd {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: var(--accent);
   color: #fff;
 }
 
@@ -78,7 +78,7 @@
   flex-direction: column;
   padding: var(--space-4);
   gap: var(--space-3);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-xl);
   background: var(--surface);
   box-shadow: var(--shadow-lg);
   animation: pop var(--dur) var(--ease-out);

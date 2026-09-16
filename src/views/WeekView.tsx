@@ -14,7 +14,6 @@ import { useModals } from '../app/modals'
 import { ErrorState, LoadingState } from '../components/Feedback'
 import { StatusToggle } from '../components/StatusToggle'
 import {
-  IconCalendar,
   IconChevronLeft,
   IconChevronRight,
   IconEye,
@@ -89,14 +88,12 @@ export function WeekView() {
     <div className={`${styles.page} pageEnter`}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>
-            <IconCalendar size={22} />
-            Semana
-          </h1>
-          <p className={styles.subtitle}>
-            {formatWeekRange(anchor)}
-            {withoutDeadline > 0 ? ` · ${withoutDeadline} tarea(s) sin fecha límite no se ven acá` : ''}
-          </p>
+          <h1 className={styles.title}>{formatWeekRange(anchor)}</h1>
+          {withoutDeadline > 0 ? (
+            <p className={styles.subtitle}>
+              {withoutDeadline} sin fecha límite no se ven acá
+            </p>
+          ) : null}
         </div>
 
         <div className={styles.headerActions}>
@@ -106,9 +103,11 @@ export function WeekView() {
             onClick={() => setShowWeekend((visible) => !visible)}
             aria-expanded={showWeekend}
             aria-controls="week-grid"
+            title={showWeekend ? 'Ocultar fin de semana' : 'Ver fin de semana'}
+            aria-label={showWeekend ? 'Ocultar fin de semana' : 'Ver fin de semana'}
           >
-            {showWeekend ? <IconEyeOff size={17} /> : <IconEye size={17} />}
-            {showWeekend ? 'Ocultar fin de semana' : 'Ver fin de semana'}
+            {showWeekend ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+            <span className={styles.weekendLabel}>Fin de semana</span>
           </button>
 
           <div className={styles.nav}>
@@ -227,7 +226,7 @@ function WeekCard({ task, categories }: { task: Task; categories: Category[] }) 
     <li
       ref={setNodeRef}
       className={`${styles.card} ${isDragging ? styles.dragging : ''}`}
-      style={{ background: color.soft, borderLeftColor: color.dot }}
+      style={{ backgroundColor: color.soft }}
       {...listeners}
     >
       <div className={styles.cardTop}>
@@ -242,7 +241,7 @@ function WeekCard({ task, categories }: { task: Task; categories: Category[] }) 
       </div>
 
       {category ? (
-        <span className={styles.cardCategory} style={{ background: color.bg, color: color.ink }}>
+        <span className={styles.cardCategory} style={{ backgroundColor: color.bg, color: color.ink }}>
           {category.name}
         </span>
       ) : null}

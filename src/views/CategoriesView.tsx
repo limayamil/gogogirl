@@ -4,7 +4,6 @@ import { StatusToggle } from '../components/StatusToggle'
 import {
   IconCalendar,
   IconFlag,
-  IconGrid,
   IconList,
   IconPaperclip,
   IconPlus,
@@ -35,16 +34,15 @@ export function CategoriesView() {
   return (
     <div className={`${styles.page} pageEnter`}>
       <header className={styles.header}>
-        <div>
-          <h1 className={styles.title}>
-            <IconGrid size={22} />
-            Categorías
-          </h1>
-          <p className={styles.subtitle}>Todo lo que tenés anotado, ordenado por color.</p>
-        </div>
-        <button type="button" className={styles.newCategory} onClick={() => openCategory(null)}>
+        <h1 className="visuallyHidden">Categorías</h1>
+        <button
+          type="button"
+          className={styles.newCategory}
+          onClick={() => openCategory(null)}
+          aria-label="Nueva categoría"
+        >
           <IconPlus size={16} />
-          Nueva categoría
+          Nueva
         </button>
       </header>
 
@@ -74,7 +72,7 @@ export function CategoriesView() {
           const color = colorOf(category.colorKey)
           const own = tasks.filter((task) => task.categoryId === category.id)
           return (
-            <section key={category.id} className={styles.card} style={{ background: color.bg }}>
+            <section key={category.id} className={styles.card} style={{ backgroundColor: color.bg }}>
               <header className={styles.cardHeader}>
                 <button
                   type="button"
@@ -112,7 +110,7 @@ export function CategoriesView() {
         })}
 
         {uncategorized.length > 0 ? (
-          <section className={styles.card} style={{ background: 'var(--surface-2)' }}>
+          <section className={styles.card} style={{ backgroundColor: 'var(--surface-2)' }}>
             <header className={styles.cardHeader}>
               <span className={styles.cardTitle}>
                 Sin categoría
@@ -138,7 +136,7 @@ function TaskCard({ task, tint, dot }: { task: Task; tint: string; dot: string }
   const doneSubtasks = task.subtasks.filter((subtask) => subtask.done).length
 
   return (
-    <li className={styles.task} style={{ background: tint }}>
+    <li className={styles.task} style={{ backgroundColor: tint }}>
       <div className={styles.taskMain}>
         <StatusToggle
           size="sm"
@@ -161,9 +159,12 @@ function TaskCard({ task, tint, dot }: { task: Task; tint: string; dot: string }
       })()}
 
       <div className={styles.meta}>
-        <span className={`${styles.badge} ${styles[`urgency_${task.urgency}`]}`}>
+        <span
+          className={`${styles.badge} ${styles[`urgency_${task.urgency}`]}`}
+          title={URGENCY_LABEL[task.urgency]}
+          aria-label={`Urgencia ${URGENCY_LABEL[task.urgency]}`}
+        >
           <IconFlag size={11} />
-          {URGENCY_LABEL[task.urgency]}
         </span>
         {task.deadline ? (
           <span className={styles.badge}>
@@ -172,15 +173,15 @@ function TaskCard({ task, tint, dot }: { task: Task; tint: string; dot: string }
           </span>
         ) : null}
         {task.subtasks.length > 0 ? (
-          <span className={styles.badge}>
+          <span className={styles.badge} title="Subtareas">
             <IconList size={11} />
             {doneSubtasks}/{task.subtasks.length}
           </span>
         ) : null}
         {task.attachments.length > 0 ? (
-          <span className={styles.badge}>
+          <span className={styles.badge} title="Adjuntos">
             <IconPaperclip size={11} />
-            {task.attachments.length} adjuntos
+            {task.attachments.length}
           </span>
         ) : null}
       </div>

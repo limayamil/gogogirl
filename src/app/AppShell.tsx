@@ -110,7 +110,7 @@ export function AppShell() {
               end={to === '/'}
               className={({ isActive }) => `${styles.tab} ${isActive ? styles.tabActive : ''}`}
             >
-              <Icon size={18} />
+              <Icon size={20} />
               <span>{label}</span>
             </NavLink>
           ))}
@@ -122,7 +122,7 @@ export function AppShell() {
           onClick={toggle}
           aria-label={mode === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}
         >
-          {mode === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />}
+          {mode === 'light' ? <IconMoon size={20} /> : <IconSun size={20} />}
         </button>
       </header>
 

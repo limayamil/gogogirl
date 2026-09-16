@@ -11,11 +11,13 @@
 
 .today {
   padding: var(--space-5);
-  border-radius: var(--r-lg);
-  background: var(--surface);
-  box-shadow: var(--shadow-md);
+  padding-bottom: var(--space-6);
+  border-radius: var(--r-xl);
+  background-color: var(--surface);
+  background-image: var(--grad-wash);
+  box-shadow: var(--shadow-card);
   border: 2px dashed transparent;
-  transition: border-color 160ms ease, background 160ms ease;
+  transition: border-color 160ms ease, background-color 160ms ease;
 }
 
 .todayOver {
@@ -27,33 +29,33 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-4);
+  flex-wrap: wrap;
+  gap: var(--space-3);
   margin-bottom: var(--space-5);
 }
 
 .todayTitle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: 30px;
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 700;
   color: var(--ink);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
 }
 
-.todayTitle svg {
+.todayFriendly {
+  font-style: italic;
+  font-weight: 700;
   color: var(--accent);
-}
-
-.todayDate {
-  margin-top: 2px;
-  font-size: 14px;
-  color: var(--ink-faint);
 }
 
 .hiddenToggle {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  min-height: 40px;
+  padding: 8px 12px 8px 10px;
   border-radius: var(--r-pill);
   background: var(--surface-2);
   color: var(--ink-soft);
@@ -77,9 +79,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 13px 14px 13px 20px;
+  padding: 14px 16px 14px 22px;
   border-radius: var(--r-md);
   border: 1.5px solid transparent;
+  background-image: var(--grad-wash);
   cursor: grab;
   /* El transform lo maneja dnd-kit al reordenar; el hover no puede pelearle. */
   transition: box-shadow 140ms ease;
@@ -99,11 +102,12 @@
 
 .rowBar {
   position: absolute;
-  left: 8px;
-  top: 12px;
-  bottom: 12px;
-  width: 4px;
+  left: 10px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
   border-radius: var(--r-pill);
+  translate: 0 -50%;
 }
 
 .rowTitle {
@@ -156,8 +160,9 @@
 
 .dropHint {
   padding: var(--space-6) var(--space-5);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   background: var(--surface-2);
+  background-image: var(--grad-wash);
   text-align: center;
   animation: fade-rise var(--dur-slow) var(--ease-out) both;
 }
@@ -210,8 +215,9 @@
 }
 
 .railTitle {
-  font-size: 17px;
-  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-faint);
 }
 
 .railAdd {
@@ -245,7 +251,9 @@
 
 .group {
   padding: var(--space-3);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
+  background-image: var(--grad-wash);
+  box-shadow: var(--shadow-sm);
 }
 
 .groupHeader {
@@ -323,8 +331,9 @@
 }
 
 .railTask {
-  padding: 10px 12px;
-  border-radius: var(--r-sm);
+  padding: 11px 13px;
+  border-radius: var(--r-md);
+  background-image: var(--grad-wash);
   cursor: grab;
   transition: transform 140ms ease, box-shadow 140ms ease;
 }
@@ -402,7 +411,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: 12px 18px;
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   background: var(--surface);
   box-shadow: var(--shadow-lg);
   font-weight: 700;
@@ -444,6 +453,10 @@
 
   .today {
     min-height: 60vh;
+  }
+
+  .todayTitle {
+    font-size: 22px;
   }
 
   .hintDesktop {

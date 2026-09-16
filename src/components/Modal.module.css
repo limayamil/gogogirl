@@ -15,7 +15,7 @@
   max-height: min(88vh, 760px);
   display: flex;
   flex-direction: column;
-  border-radius: var(--r-lg);
+  border-radius: var(--r-xl);
   background: var(--surface);
   box-shadow: var(--shadow-lg);
   animation: rise var(--dur-slow) var(--ease-out);

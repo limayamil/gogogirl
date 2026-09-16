@@ -678,9 +678,9 @@
   gap: 8px;
   padding: 10px 20px;
   border-radius: var(--r-pill);
-  background: var(--ink);
-  color: var(--surface);
-  font-weight: 800;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
   font-size: 14px;
   transition: opacity var(--dur-fast) ease;
 }
