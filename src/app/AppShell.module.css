@@ -80,8 +80,8 @@
   /* El trazo es blanco: de dia hay que subirle contraste o se funde con el cielo. */
   opacity: 0.92;
   filter:
-    drop-shadow(0 0.5px 0 rgb(74 66 100 / 34%))
-    drop-shadow(0 1px 1.5px rgb(74 66 100 / 22%));
+    drop-shadow(0 0.5px 0 rgb(74 66 100 / 23%))
+    drop-shadow(0 1px 1.5px rgb(74 66 100 / 15%));
 }
 
 .header[data-period='amanecer'] .skyPattern,

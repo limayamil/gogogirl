@@ -49,7 +49,6 @@
 }
 
 .todayFriendly {
-  font-style: italic;
   font-weight: 700;
   color: var(--accent);
 }

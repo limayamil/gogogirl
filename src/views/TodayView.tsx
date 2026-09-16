@@ -202,7 +202,7 @@ function TodayPanel({
       aria-label="Tareas de hoy"
     >
       <header className={styles.todayHeader}>
-        {/* El nav ya dice Hoy: el heading es la fecha, con el dia en italica coral
+        {/* El nav ya dice Hoy: el heading es la fecha, con el dia en coral
            como el saludo amable de las referencias, sin copiar su copy. */}
         <h1 className={styles.todayTitle}>
           <span className={styles.todayFriendly}>{weekday}</span>
