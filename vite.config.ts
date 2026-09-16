@@ -9,7 +9,8 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        // Si 3001 ya esta ocupado: `API_PORT=3011 npm run dev` alinea proxy y API.
+        target: `http://localhost:${process.env.API_PORT ?? 3001}`,
         changeOrigin: true,
       },
     },

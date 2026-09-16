@@ -6,9 +6,7 @@
 
 .label {
   font-size: 12.5px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 700;
   color: var(--ink-faint);
 }
 
@@ -81,9 +79,9 @@
 .primary {
   padding: 10px 20px;
   border-radius: var(--r-pill);
-  background: var(--ink);
-  color: var(--surface);
-  font-weight: 800;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
   font-size: 14px;
 }
 
@@ -112,4 +110,19 @@
 .danger:hover {
   background: var(--accent);
   color: #fff;
+}
+
+@media (max-width: 560px) {
+  .primary,
+  .ghost,
+  .danger {
+    flex-shrink: 0;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .spacer {
+    flex: 1 1 8px;
+    min-width: 8px;
+  }
 }

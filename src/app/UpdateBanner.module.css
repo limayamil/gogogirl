@@ -39,7 +39,7 @@
   gap: 6px;
   padding: 7px 14px;
   border-radius: var(--r-pill);
-  background: var(--ink);
+  background: var(--accent);
   color: var(--surface);
   font-weight: 800;
   font-size: 13px;
