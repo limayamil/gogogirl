@@ -37,10 +37,10 @@ async function client() {
   })
 }
 
-/** Clave unica y sin caracteres raros, agrupada por tarea para poder inspeccionar el bucket. */
-export function buildObjectKey(taskId: string, fileName: string): string {
+/** Clave unica y sin caracteres raros, agrupada por dueño para poder inspeccionar el bucket. */
+export function buildObjectKey(ownerId: string, fileName: string, folder = 'tasks'): string {
   const safe = fileName.replace(/[^\w.\-]+/g, '_').slice(-80)
-  return `tasks/${taskId}/${crypto.randomUUID()}-${safe}`
+  return `${folder}/${ownerId}/${crypto.randomUUID()}-${safe}`
 }
 
 export async function signUpload(objectKey: string, contentType: string): Promise<string> {
