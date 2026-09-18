@@ -100,6 +100,16 @@ export function useUpdateTask() {
           next.hiddenInToday = false
           next.todayPosition = null
         }
+        // Completar ahora no vence hasta que cierre la semana; reabrir limpia expired.
+        if (next.status === 'hecha') {
+          if (task.status !== 'hecha') {
+            next.completedAt = task.completedAt ?? new Date().toISOString()
+            next.expired = false
+          }
+        } else {
+          next.completedAt = null
+          next.expired = false
+        }
         return next
       }),
     // El PATCH devuelve la tarea completa y ya resuelta (todayPosition, completedAt):

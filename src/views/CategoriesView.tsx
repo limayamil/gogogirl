@@ -12,6 +12,7 @@ import {
 import { useColorOf } from '../lib/palette'
 import { formatShortDate } from '../lib/dates'
 import { richTextExcerpt } from '../lib/rich-text'
+import { isExpiredCompleted } from '../shared/expiry'
 import { useAppState, useUpdateTask } from '../lib/store'
 import type { Task, Urgency } from '../shared/types'
 import styles from './CategoriesView.module.css'
@@ -28,7 +29,7 @@ export function CategoriesView() {
   const colorOf = useColorOf()
 
   const categories = data?.categories ?? []
-  const tasks = data?.tasks ?? []
+  const tasks = (data?.tasks ?? []).filter((task) => !isExpiredCompleted(task))
   const uncategorized = tasks.filter((task) => task.categoryId === null)
 
   return (

@@ -7,6 +7,7 @@ import {
   mapTaskLink,
   sql,
 } from './_lib/db.ts'
+import { expireCompletedTasks } from './_lib/expiry.ts'
 import { route } from './_lib/http.ts'
 import { stateVersion } from './_lib/version.ts'
 import { storageConfigured } from './_lib/storage-config.ts'
@@ -23,6 +24,9 @@ type Row = Record<string, unknown>
  */
 export default route({
   async GET(_req, res) {
+    // Lazy: al abrir la app vencen las hechas de semanas ya cerradas. Sin cron.
+    await expireCompletedTasks()
+
     // `stateVersion` entra al mismo Promise.all, asi que no agrega latencia: el front
     // se lleva la firma que corresponde a estos datos y puede compararla mas tarde.
     const [categories, tasks, subtasks, attachments, links, quickTasks, version] =

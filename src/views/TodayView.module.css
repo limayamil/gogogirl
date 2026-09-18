@@ -89,23 +89,32 @@
 .todayRow {
   position: relative;
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
   padding: 14px 16px 14px 22px;
   border-radius: var(--r-md);
   border: 1.5px solid transparent;
   background-image: var(--grad-wash);
-  cursor: grab;
   /* El transform lo maneja dnd-kit al reordenar; el hover no puede pelearle. */
   transition: box-shadow 140ms ease;
 }
 
-.todayRow:hover {
-  box-shadow: var(--shadow-sm);
+.todayRowMain {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  cursor: grab;
 }
 
-.todayRow:active {
+.todayRowMain:active {
   cursor: grabbing;
+}
+
+.todayRow:hover {
+  box-shadow: var(--shadow-sm);
 }
 
 .rowHidden {
@@ -114,12 +123,33 @@
 
 .rowBar {
   position: absolute;
-  left: 10px;
+  left: -12px;
   top: 50%;
   width: 8px;
   height: 8px;
   border-radius: var(--r-pill);
   translate: 0 -50%;
+}
+
+.rowChevron {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin: 0 -4px 0 -6px;
+  border-radius: var(--r-pill);
+  color: var(--ink-faint);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.rowChevron svg {
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.rowChevron:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
 }
 
 .rowTitle {
@@ -151,6 +181,10 @@
 
 .todayRow:hover .rowEye {
   opacity: 1;
+}
+
+.todayRow > .subtasks {
+  margin: 4px 0 2px 34px;
 }
 
 .rowEye:hover {

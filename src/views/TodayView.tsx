@@ -29,6 +29,7 @@ import {
 import { celebrateFromPointer, shouldCelebrateChecked } from '../lib/confetti'
 import { formatTodayHeading } from '../lib/dates'
 import { useColorOf } from '../lib/palette'
+import { isExpiredCompleted } from '../shared/expiry'
 import { useAppState, useReorderToday, useUpdateSubtask, useUpdateTask } from '../lib/store'
 import { nextTodayPositions } from '../lib/today-order'
 import type { Category, Task } from '../shared/types'
@@ -53,16 +54,18 @@ export function TodayView() {
   const tasks = data?.tasks ?? []
   const categories = data?.categories ?? []
 
+  const listed = useMemo(() => tasks.filter((task) => !isExpiredCompleted(task)), [tasks])
+
   const todayTasks = useMemo(
     () =>
-      tasks
+      listed
         .filter((task) => task.inToday && (showHidden || !task.hiddenInToday))
         .sort((a, b) => (a.todayPosition ?? 0) - (b.todayPosition ?? 0)),
-    [tasks, showHidden],
+    [listed, showHidden],
   )
 
-  const hiddenCount = tasks.filter((t) => t.inToday && t.hiddenInToday).length
-  const uncategorized = tasks.filter((t) => t.categoryId === null)
+  const hiddenCount = listed.filter((t) => t.inToday && t.hiddenInToday).length
+  const uncategorized = listed.filter((t) => t.categoryId === null)
 
   function handleDragStart(event: DragStartEvent) {
     setDragging(tasks.find((task) => task.id === event.active.id) ?? null)
@@ -121,7 +124,7 @@ export function TodayView() {
         <Rail
           ready={!isPending && !error}
           categories={categories}
-          tasks={tasks}
+          tasks={listed}
           uncategorized={uncategorized}
           onAddCategory={() => openCategory(null)}
           onAddTask={(categoryId) => openTask({ taskId: null, defaults: { categoryId } })}
@@ -260,10 +263,12 @@ function TodayPanel({
   )
 }
 
-/** Fila de Hoy: solo titulo, color de categoria y status, como pide el boceto. */
+/** Fila de Hoy: titulo, status y, si hay subtareas, un chevron para verlas. */
 function TodayRow({ task, categories }: { task: Task; categories: Category[] }) {
   const { openTask } = useModals()
   const updateTask = useUpdateTask()
+  const [open, setOpen] = useState(false)
+  const hasSubtasks = task.subtasks.length > 0
   const color = useColorOf()(categoryColorKey(categories, task))
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
@@ -281,32 +286,51 @@ function TodayRow({ task, categories }: { task: Task; categories: Category[] }) 
         transform: CSS.Transform.toString(transform),
         transition,
       }}
-      {...attributes}
-      {...listeners}
     >
-      <span className={styles.rowBar} style={{ background: color.dot }} />
+      <div className={styles.todayRowMain} {...attributes} {...listeners}>
+        <span className={styles.rowBar} style={{ background: color.dot }} />
 
-      <StatusToggle
-        status={task.status}
-        onChange={(status) => updateTask.mutate({ id: task.id, patch: { status } })}
-      />
+        {hasSubtasks ? (
+          <button
+            type="button"
+            className={styles.rowChevron}
+            aria-expanded={open}
+            title={open ? 'Ocultar subtareas' : 'Ver subtareas'}
+            aria-label={open ? 'Ocultar subtareas' : 'Ver subtareas'}
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation()
+              setOpen((value) => !value)
+            }}
+          >
+            <IconChevronDown size={16} className={open ? undefined : styles.chevronClosed} />
+          </button>
+        ) : null}
 
-      <button type="button" className={styles.rowTitle} onClick={() => openTask({ taskId: task.id })}>
-        <span className={task.status === 'hecha' ? styles.rowDone : undefined}>{task.title}</span>
-      </button>
+        <StatusToggle
+          status={task.status}
+          onChange={(status) => updateTask.mutate({ id: task.id, patch: { status } })}
+        />
 
-      <button
-        type="button"
-        className={styles.rowEye}
-        title={task.hiddenInToday ? 'Volver a mostrar en Hoy' : 'Ocultar de Hoy'}
-        aria-label={task.hiddenInToday ? 'Volver a mostrar en Hoy' : 'Ocultar de Hoy'}
-        onClick={(event) => {
-          event.stopPropagation()
-          updateTask.mutate({ id: task.id, patch: { hiddenInToday: !task.hiddenInToday } })
-        }}
-      >
-        {task.hiddenInToday ? <IconEyeOff size={16} /> : <IconEye size={16} />}
-      </button>
+        <button type="button" className={styles.rowTitle} onClick={() => openTask({ taskId: task.id })}>
+          <span className={task.status === 'hecha' ? styles.rowDone : undefined}>{task.title}</span>
+        </button>
+
+        <button
+          type="button"
+          className={styles.rowEye}
+          title={task.hiddenInToday ? 'Volver a mostrar en Hoy' : 'Ocultar de Hoy'}
+          aria-label={task.hiddenInToday ? 'Volver a mostrar en Hoy' : 'Ocultar de Hoy'}
+          onClick={(event) => {
+            event.stopPropagation()
+            updateTask.mutate({ id: task.id, patch: { hiddenInToday: !task.hiddenInToday } })
+          }}
+        >
+          {task.hiddenInToday ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+        </button>
+      </div>
+
+      {hasSubtasks && open ? <SubtaskList task={task} /> : null}
     </li>
   )
 }
@@ -428,7 +452,6 @@ function CategoryGroup({
 function RailTask({ task, tint, dot }: { task: Task; tint: string; dot: string }) {
   const { openTask } = useModals()
   const updateTask = useUpdateTask()
-  const updateSubtask = useUpdateSubtask()
   // Si ya esta en Hoy, el sortable de alla es el unico dueno del id: registrar
   // otro draggable con el mismo id hace que el DragOverlay mida este nodo
   // (abajo a la derecha) y aparezca una pildora fantasma.
@@ -465,27 +488,33 @@ function RailTask({ task, tint, dot }: { task: Task; tint: string; dot: string }
         ) : null}
       </div>
 
-      {task.subtasks.length > 0 ? (
-        <ul className={styles.subtasks}>
-          {task.subtasks.map((subtask) => (
-            <li key={subtask.id} className={styles.subtask}>
-              <label className={styles.subtaskLabel}>
-                <input
-                  type="checkbox"
-                  className={styles.subtaskCheck}
-                  checked={subtask.done}
-                  onPointerDown={(event) => event.stopPropagation()}
-                  onChange={(event) => {
-                    if (shouldCelebrateChecked(event.target.checked)) celebrateFromPointer()
-                    updateSubtask.mutate({ id: subtask.id, patch: { done: event.target.checked } })
-                  }}
-                />
-                <span className={subtask.done ? styles.rowDone : undefined}>{subtask.title}</span>
-              </label>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      {task.subtasks.length > 0 ? <SubtaskList task={task} /> : null}
     </li>
+  )
+}
+
+function SubtaskList({ task }: { task: Task }) {
+  const updateSubtask = useUpdateSubtask()
+
+  return (
+    <ul className={styles.subtasks}>
+      {task.subtasks.map((subtask) => (
+        <li key={subtask.id} className={styles.subtask}>
+          <label className={styles.subtaskLabel}>
+            <input
+              type="checkbox"
+              className={styles.subtaskCheck}
+              checked={subtask.done}
+              onPointerDown={(event) => event.stopPropagation()}
+              onChange={(event) => {
+                if (shouldCelebrateChecked(event.target.checked)) celebrateFromPointer()
+                updateSubtask.mutate({ id: subtask.id, patch: { done: event.target.checked } })
+              }}
+            />
+            <span className={subtask.done ? styles.rowDone : undefined}>{subtask.title}</span>
+          </label>
+        </li>
+      ))}
+    </ul>
   )
 }
