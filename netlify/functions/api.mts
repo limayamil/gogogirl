@@ -19,6 +19,8 @@ import subtasks from '../../api/subtasks/index.ts'
 import subtaskById from '../../api/subtasks/[id].ts'
 import quickTasks from '../../api/quick-tasks/index.ts'
 import quickTaskById from '../../api/quick-tasks/[id].ts'
+import notes from '../../api/notes/index.ts'
+import noteById from '../../api/notes/[id].ts'
 import attachments from '../../api/attachments/index.ts'
 import attachmentById from '../../api/attachments/[id].ts'
 import links from '../../api/links/index.ts'
@@ -36,6 +38,8 @@ const routes: Route[] = [
   ['/api/subtasks/:id', subtaskById],
   ['/api/quick-tasks', quickTasks],
   ['/api/quick-tasks/:id', quickTaskById],
+  ['/api/notes', notes],
+  ['/api/notes/:id', noteById],
   ['/api/attachments', attachments],
   ['/api/attachments/:id', attachmentById],
   ['/api/links', links],

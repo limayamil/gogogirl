@@ -1,6 +1,7 @@
 import { Suspense, createContext, lazy, useContext, useMemo, useState, type ReactNode } from 'react'
 import type { TaskModalRequest } from '../components/TaskModal'
 import { CategoryModal } from '../components/CategoryModal'
+import type { NoteKind } from '../shared/types'
 
 /**
  * El detalle de tarea es el componente mas grande de la app y no se ve hasta que se
@@ -10,13 +11,18 @@ const TaskModal = lazy(() =>
   import('../components/TaskModal').then((m) => ({ default: m.TaskModal })),
 )
 
+const NoteModal = lazy(() =>
+  import('../components/NoteModal').then((m) => ({ default: m.NoteModal })),
+)
+
 /**
- * Host unico de modales. Cualquier vista puede abrir el detalle de una tarea o el
- * formulario de categoria sin tener que pasar estado por props entre vistas y FABs.
+ * Host unico de modales. Cualquier vista puede abrir el detalle de una tarea, una
+ * nota o el formulario de categoria sin tener que pasar estado por props.
  */
 interface ModalsApi {
   openTask: (request: TaskModalRequest) => void
   openCategory: (categoryId: string | null) => void
+  openNote: (noteId: string | null, kind?: NoteKind) => void
 }
 
 const Context = createContext<ModalsApi | null>(null)
@@ -30,11 +36,15 @@ export function useModals(): ModalsApi {
 export function ModalProvider({ children }: { children: ReactNode }) {
   const [taskRequest, setTaskRequest] = useState<TaskModalRequest | null>(null)
   const [categoryRequest, setCategoryRequest] = useState<{ id: string | null } | null>(null)
+  const [noteRequest, setNoteRequest] = useState<{ id: string | null; kind: NoteKind } | undefined>(
+    undefined,
+  )
 
   const api = useMemo<ModalsApi>(
     () => ({
       openTask: setTaskRequest,
       openCategory: (id) => setCategoryRequest({ id }),
+      openNote: (id, kind = 'note') => setNoteRequest({ id, kind }),
     }),
     [],
   )
@@ -61,6 +71,16 @@ export function ModalProvider({ children }: { children: ReactNode }) {
           categoryId={categoryRequest.id}
           onClose={() => setCategoryRequest(null)}
         />
+      ) : null}
+      {noteRequest ? (
+        <Suspense fallback={null}>
+          <NoteModal
+            key={noteRequest.id ?? `nueva-${noteRequest.kind}`}
+            noteId={noteRequest.id}
+            composeKind={noteRequest.kind}
+            onClose={() => setNoteRequest(undefined)}
+          />
+        </Suspense>
       ) : null}
     </Context.Provider>
   )

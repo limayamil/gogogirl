@@ -28,6 +28,8 @@ const routes: Array<[path: string, module: string]> = [
   ['/api/subtasks/:id', '../api/subtasks/[id].ts'],
   ['/api/quick-tasks', '../api/quick-tasks/index.ts'],
   ['/api/quick-tasks/:id', '../api/quick-tasks/[id].ts'],
+  ['/api/notes', '../api/notes/index.ts'],
+  ['/api/notes/:id', '../api/notes/[id].ts'],
   ['/api/attachments', '../api/attachments/index.ts'],
   ['/api/attachments/:id', '../api/attachments/[id].ts'],
   ['/api/links', '../api/links/index.ts'],

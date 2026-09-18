@@ -10,13 +10,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import { api, type LinkDraft } from './api'
 import { toastError } from './toast'
-import type { AppState, Category, QuickTask, Task, TaskInput } from '../shared/types'
+import type { AppState, Category, Note, NoteInput, QuickTask, Task, TaskInput } from '../shared/types'
 
 const KEY = ['state'] as const
 
 const EMPTY: AppState = {
   categories: [],
   tasks: [],
+  notes: [],
   quickTasks: [],
   storageConfigured: false,
   version: '',
@@ -68,6 +69,11 @@ function useOptimistic<TVars, TData>(options: {
 const replaceTask = (state: AppState, id: string, update: (task: Task) => Task): AppState => ({
   ...state,
   tasks: state.tasks.map((task) => (task.id === id ? update(task) : task)),
+})
+
+const replaceNote = (state: AppState, id: string, update: (note: Note) => Note): AppState => ({
+  ...state,
+  notes: state.notes.map((note) => (note.id === id ? update(note) : note)),
 })
 
 // --- Tareas ---------------------------------------------------------------
@@ -308,6 +314,49 @@ export function useDeleteQuickTask() {
       ...state,
       quickTasks: state.quickTasks.filter((q) => q.id !== id),
     }),
+  })
+}
+
+export function useCreateNote() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: NoteInput) => api.createNote(input),
+    onSuccess(note) {
+      patchCache(client, (state) => ({
+        ...state,
+        notes: [note, ...state.notes.filter((item) => item.id !== note.id)],
+      }))
+    },
+    onError() {
+      void client.invalidateQueries({ queryKey: KEY })
+    },
+  })
+}
+
+export function useUpdateNote() {
+  return useOptimistic({
+    mutationFn: ({ id, patch }: { id: string; patch: Partial<NoteInput> }) =>
+      api.updateNote(id, patch),
+    optimistic: (state, { id, patch }) =>
+      replaceNote(state, id, (note) => {
+        const { tags, ...rest } = patch
+        const next = { ...note, ...rest }
+        if (tags) {
+          next.tags = tags.map((name, index) => {
+            const existing = note.tags.find((tag) => tag.name.toLowerCase() === name.toLowerCase())
+            return existing ?? { id: `tmp-${index}`, name }
+          })
+        }
+        return next
+      }),
+    commit: (state, note) => replaceNote(state, note.id, () => note),
+  })
+}
+
+export function useDeleteNote() {
+  return useOptimistic({
+    mutationFn: (id: string) => api.deleteNote(id),
+    optimistic: (state, id) => ({ ...state, notes: state.notes.filter((n) => n.id !== id) }),
   })
 }
 

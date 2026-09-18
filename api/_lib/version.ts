@@ -26,7 +26,11 @@ export async function stateVersion(): Promise<string> {
       (select count(*) from quick_tasks)        as quick_n,
       (select max(created_at) from quick_tasks) as quick_at,
       (select count(*) from task_links)         as link_n,
-      (select count(*) from attachments)        as att_n
+      (select count(*) from attachments)        as att_n,
+      (select count(*) from notes)              as notes_n,
+      (select max(updated_at) from notes)       as notes_at,
+      (select count(*) from note_tags)          as tag_n,
+      (select count(*) from note_tag_assignments) as tag_assign_n
   `) as Row[]
 
   return [
@@ -39,6 +43,10 @@ export async function stateVersion(): Promise<string> {
     row.quick_at,
     row.link_n,
     row.att_n,
+    row.notes_n,
+    row.notes_at,
+    row.tag_n,
+    row.tag_assign_n,
   ]
     .map((value) => (value instanceof Date ? value.getTime() : String(value ?? '')))
     .join('.')
