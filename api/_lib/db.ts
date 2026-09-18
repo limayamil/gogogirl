@@ -101,6 +101,7 @@ export function mapTask(
     status: row.status as Task['status'],
     inToday: Boolean(row.in_today),
     hiddenInToday: Boolean(row.hidden_in_today),
+    expired: Boolean(row.expired),
     todayPosition: row.today_position == null ? null : Number(row.today_position),
     position: Number(row.position),
     createdAt: toIso(row.created_at),

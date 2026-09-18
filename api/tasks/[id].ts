@@ -49,6 +49,14 @@ export default route({
       merged.status === 'hecha'
         ? (current.completedAt ?? new Date().toISOString())
         : null
+    // Completar esta semana la deja visible; reabrirla limpia el vencimiento.
+    // Si ya estaba hecha, no tocamos `expired`: el lazy del GET se encarga.
+    const expired =
+      merged.status === 'hecha'
+        ? current.status === 'hecha'
+          ? current.expired
+          : false
+        : false
 
     // Los hijos no cambian con este UPDATE, asi que la lectura arranca ya mismo y
     // corre solapada con la escritura en vez de esperarla.
@@ -68,6 +76,7 @@ export default route({
         today_position  = ${merged.todayPosition},
         position        = ${merged.position},
         completed_at    = ${completedAt},
+        expired         = ${expired},
         updated_at      = now()
       where id = ${id}
       returning *

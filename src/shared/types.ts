@@ -57,6 +57,11 @@ export interface Task {
   status: Status
   inToday: boolean
   hiddenInToday: boolean
+  /**
+   * Hecha cuya semana (lunes–domingo) ya termino. Distinto de `hiddenInToday`:
+   * no es el ojito, es para que las completadas no se acumulen en Hoy/Categorias.
+   */
+  expired: boolean
   todayPosition: number | null
   position: number
   createdAt: string
