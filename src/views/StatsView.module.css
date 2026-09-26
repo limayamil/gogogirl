@@ -94,6 +94,35 @@
   gap: 6px;
 }
 
+.weekButton {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 4px;
+  border-radius: var(--r-md);
+  text-align: left;
+  color: inherit;
+  transition:
+    background var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.weekButton:hover,
+.weekButton:focus-visible {
+  background: var(--surface-2);
+}
+
+.weekButton:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+.weekButton .weekMeta {
+  align-items: center;
+}
+
 .barMeta,
 .weekMeta {
   display: flex;
@@ -121,10 +150,17 @@
 
 .barCount,
 .weekCounts {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   flex-shrink: 0;
   font-size: 13px;
   font-weight: 700;
   color: var(--ink-faint);
+}
+
+.weekCounts svg {
+  color: var(--accent-2);
 }
 
 .barTrack {
@@ -160,6 +196,26 @@
   box-shadow: var(--shadow-card);
 }
 
+.chipButton {
+  text-align: left;
+  color: inherit;
+  min-height: 44px;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur) ease;
+}
+
+.chipButton:hover,
+.chipButton:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.chipButton:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
 .chipLabel {
   font-size: 12px;
   font-weight: 800;
@@ -190,6 +246,64 @@
   gap: 8px;
   font-size: 15px;
   font-weight: 800;
+}
+
+.nowBadge {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--accent-2-soft);
+  color: var(--accent-2);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 2px 6px;
+  border-radius: var(--r-sm);
+  background: var(--surface-sunken);
+}
+
+.dayCount {
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.dayTrack {
+  display: flex;
+  align-items: flex-end;
+  width: 8px;
+  height: 36px;
+  overflow: hidden;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--accent-2) 18%, var(--surface));
+}
+
+.dayFill {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  border-radius: inherit;
+  background: var(--accent-2);
+}
+
+.dayName {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-faint);
 }
 
 .weeksEmpty {

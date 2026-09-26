@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { computeTaskStats, formatWeekSpan, UNCATEGORIZED_NAME } from './stats'
+import { computeTaskStats, computeWeekDetail, formatWeekSpan, UNCATEGORIZED_NAME } from './stats'
 import type { Category, Task } from '../shared/types'
 
 function task(partial: Partial<Task> & Pick<Task, 'id'>): Task {
@@ -183,6 +183,60 @@ describe('computeTaskStats', () => {
     )
     expect(stats.byCategory[0]?.name).toBe(UNCATEGORIZED_NAME)
     expect(stats.byCategory[0]?.colorKey).toBeNull()
+  })
+})
+
+describe('computeWeekDetail', () => {
+  it('incluye expiradas y corta en el lunes–domingo de Argentina', () => {
+    const detail = computeWeekDetail(
+      [
+        task({
+          id: 'esta',
+          expired: true,
+          categoryId: 'casa',
+          completedAt: '2026-09-14T12:00:00-03:00',
+        }),
+        task({
+          id: 'otra-lista',
+          categoryId: 'laburo',
+          completedAt: '2026-09-20T23:00:00-03:00',
+        }),
+        task({
+          id: 'lunes-siguiente',
+          categoryId: 'casa',
+          completedAt: '2026-09-21T00:30:00-03:00',
+        }),
+        task({ id: 'pendiente', status: 'pendiente', completedAt: '2026-09-15T12:00:00-03:00' }),
+      ],
+      [casa, laburo],
+      '2026-09-14',
+    )
+    expect(detail.total).toBe(2)
+    expect(detail.sunday).toBe('2026-09-20')
+    expect(detail.byCategory.map((row) => [row.name, row.count])).toEqual([
+      ['Casa', 1],
+      ['Laburo', 1],
+    ])
+    expect(detail.weekdays.map((day) => day.count)).toEqual([1, 0, 0, 0, 0, 0, 1])
+  })
+
+  it('agrupa Sin categoría y queda vacio si esa semana no tuvo hechas', () => {
+    const empty = computeWeekDetail(
+      [task({ id: 'otra', completedAt: '2026-09-08T12:00:00-03:00' })],
+      [casa],
+      '2026-09-14',
+    )
+    expect(empty.total).toBe(0)
+    expect(empty.byCategory).toEqual([])
+
+    const loose = computeWeekDetail(
+      [task({ id: 'suelta', completedAt: '2026-09-16T12:00:00-03:00' })],
+      [casa],
+      '2026-09-14',
+    )
+    expect(loose.byCategory).toEqual([
+      { categoryId: null, name: UNCATEGORIZED_NAME, colorKey: null, count: 1 },
+    ])
   })
 })
 

@@ -5,7 +5,7 @@ import type { Category, Task } from '../shared/types'
 /** Las listas borradas dejan `categoryId` en null; stats las agrupa aca. */
 export const UNCATEGORIZED_NAME = 'Sin categoría'
 
-const WEEKDAY_LONG = [
+export const WEEKDAY_LONG = [
   'lunes',
   'martes',
   'miércoles',
@@ -37,10 +37,20 @@ export interface WeekdayStat {
   count: number
 }
 
+export interface WeekDetail {
+  monday: string
+  sunday: string
+  total: number
+  byCategory: CategoryStat[]
+  weekdays: WeekdayStat[]
+}
+
 export interface TaskStats {
   total: number
   byCategory: CategoryStat[]
   weeks: WeekStat[]
+  thisMonday: string
+  lastMonday: string
   thisWeekCount: number
   lastWeekCount: number
   mostProductiveWeekdays: WeekdayStat[]
@@ -63,12 +73,44 @@ function weekdayIndex(dateKey: string): number {
   return (date.getUTCDay() + 6) % 7
 }
 
+function categoryName(
+  categoryId: string | null,
+  byId: Map<string, Category>,
+): { name: string; colorKey: string | null } {
+  if (categoryId === null) {
+    return { name: UNCATEGORIZED_NAME, colorKey: null }
+  }
+  const category = byId.get(categoryId)
+  return {
+    name: category?.name ?? UNCATEGORIZED_NAME,
+    colorKey: category?.colorKey ?? null,
+  }
+}
+
+function toCategoryStats(
+  counts: Map<string | null, number>,
+  byId: Map<string, Category>,
+): CategoryStat[] {
+  return [...counts.entries()]
+    .map(([categoryId, count]) => ({
+      categoryId,
+      count,
+      ...categoryName(categoryId, byId),
+    }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'es'))
+}
+
 export function formatWeekSpan(monday: string, sunday: string): string {
   return `${formatShortDate(monday)} – ${formatShortDate(sunday)}`
 }
 
 export function plural(count: number, one: string, many: string): string {
   return `${count} ${count === 1 ? one : many}`
+}
+
+function completedDayKey(task: Task): string | null {
+  if (task.status !== 'hecha' || !task.completedAt) return null
+  return dateKeyInAppZone(new Date(task.completedAt))
 }
 
 /**
@@ -90,11 +132,10 @@ export function computeTaskStats(
   const weekdayCounts = [0, 0, 0, 0, 0, 0, 0]
 
   for (const task of completed) {
-    const key = task.categoryId
-    categoryCounts.set(key, (categoryCounts.get(key) ?? 0) + 1)
+    categoryCounts.set(task.categoryId, (categoryCounts.get(task.categoryId) ?? 0) + 1)
 
-    if (!task.completedAt) continue
-    const day = dateKeyInAppZone(new Date(task.completedAt))
+    const day = completedDayKey(task)
+    if (!day) continue
     const monday = mondayOf(day)
     const bucket = weekBuckets.get(monday)
     if (bucket) {
@@ -105,21 +146,6 @@ export function computeTaskStats(
     }
     weekdayCounts[weekdayIndex(day)] += 1
   }
-
-  const byCategory: CategoryStat[] = [...categoryCounts.entries()]
-    .map(([categoryId, count]) => {
-      if (categoryId === null) {
-        return { categoryId, name: UNCATEGORIZED_NAME, colorKey: null, count }
-      }
-      const category = byId.get(categoryId)
-      return {
-        categoryId,
-        name: category?.name ?? UNCATEGORIZED_NAME,
-        colorKey: category?.colorKey ?? null,
-        count,
-      }
-    })
-    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'es'))
 
   const weeks: WeekStat[] = [...weekBuckets.entries()]
     .map(([monday, bucket]) => ({
@@ -136,17 +162,48 @@ export function computeTaskStats(
     peak === 0
       ? []
       : weekdayCounts.flatMap((count, index) =>
-          count === peak
-            ? [{ index, label: WEEKDAY_LONG[index], count }]
-            : [],
+          count === peak ? [{ index, label: WEEKDAY_LONG[index], count }] : [],
         )
 
   return {
     total: completed.length,
-    byCategory,
+    byCategory: toCategoryStats(categoryCounts, byId),
     weeks,
+    thisMonday,
+    lastMonday,
     thisWeekCount: weekBuckets.get(thisMonday)?.count ?? 0,
     lastWeekCount: weekBuckets.get(lastMonday)?.count ?? 0,
     mostProductiveWeekdays,
+  }
+}
+
+/** Detalle de una semana puntual, con las mismas reglas que el total. */
+export function computeWeekDetail(
+  tasks: Task[],
+  categories: Category[],
+  monday: string,
+): WeekDetail {
+  const sunday = addDaysToKey(monday, 6)
+  const byId = new Map(categories.map((category) => [category.id, category]))
+  const categoryCounts = new Map<string | null, number>()
+  const weekdayCounts = [0, 0, 0, 0, 0, 0, 0]
+
+  for (const task of tasks) {
+    const day = completedDayKey(task)
+    if (!day || mondayOf(day) !== monday) continue
+    categoryCounts.set(task.categoryId, (categoryCounts.get(task.categoryId) ?? 0) + 1)
+    weekdayCounts[weekdayIndex(day)] += 1
+  }
+
+  return {
+    monday,
+    sunday,
+    total: [...categoryCounts.values()].reduce((sum, count) => sum + count, 0),
+    byCategory: toCategoryStats(categoryCounts, byId),
+    weekdays: weekdayCounts.map((count, index) => ({
+      index,
+      label: WEEKDAY_LONG[index],
+      count,
+    })),
   }
 }
