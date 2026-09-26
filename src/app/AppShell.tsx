@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Fabs } from '../components/Fabs'
-import { IconCalendar, IconGrid, IconMoon, IconNote, IconSun } from '../components/Icons'
+import { IconCalendar, IconChart, IconGrid, IconMoon, IconNote, IconSun } from '../components/Icons'
 import { ModalProvider } from './modals'
 import { ToastHost } from './ToastHost'
 import { UpdateBanner } from './UpdateBanner'
@@ -14,6 +14,7 @@ const TABS = [
   { to: '/categorias', label: 'Categorías', Icon: IconGrid },
   { to: '/semana', label: 'Semana', Icon: IconCalendar },
   { to: '/notas', label: 'Notas', Icon: IconNote },
+  { to: '/estadisticas', label: 'Estadísticas', Icon: IconChart },
 ]
 
 const TITLES: Record<string, string> = {
@@ -21,6 +22,7 @@ const TITLES: Record<string, string> = {
   '/categorias': 'Categorías · GoGoGirl',
   '/semana': 'Semana · GoGoGirl',
   '/notas': 'Notas · GoGoGirl',
+  '/estadisticas': 'Estadísticas · GoGoGirl',
 }
 
 function DocumentTitle() {
