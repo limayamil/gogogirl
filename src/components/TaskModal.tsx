@@ -872,37 +872,34 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
           </div>
         </div>
 
-        <button
-          type="button"
-          className={`${styles.todayRow} ${form.inToday ? styles.todayRowOn : ''}`}
-          role="switch"
-          aria-checked={form.inToday}
-          onClick={() => set('inToday', !form.inToday)}
-        >
-          <span className={styles.todayIcon}>
-            <IconSun size={19} />
-          </span>
-          <span className={styles.todayText}>
-            <span className={styles.todayTitle}>Agregar a Hoy</span>
-            <span className={styles.todaySub}>Aparece en el panel de Hoy hasta que la ocultes</span>
-          </span>
-          <span className={`${styles.switch} ${form.inToday ? styles.switchOn : ''}`}>
-            <span className={styles.knob} />
-          </span>
-        </button>
-
-        {!isEdit ? (
+        <div className={styles.actionRow}>
           <button
             type="button"
-            className={`${styles.disclosure} ${details ? styles.disclosureOpen : ''}`}
-            aria-expanded={details}
-            onClick={() => setDetails((value) => !value)}
+            className={`${styles.todayToggle} ${form.inToday ? styles.todayToggleOn : ''}`}
+            role="switch"
+            aria-checked={form.inToday}
+            onClick={() => set('inToday', !form.inToday)}
           >
-            <IconChevronDown size={18} className={details ? styles.chevUp : undefined} />
-            Más detalles
-            {!details && extras > 0 ? <span className={styles.count}>{extras}</span> : null}
+            <IconSun size={16} />
+            Agregar a hoy
+            <span className={`${styles.switch} ${form.inToday ? styles.switchOn : ''}`}>
+              <span className={styles.knob} />
+            </span>
           </button>
-        ) : null}
+
+          {!isEdit ? (
+            <button
+              type="button"
+              className={`${styles.disclosure} ${details ? styles.disclosureOpen : ''}`}
+              aria-expanded={details}
+              onClick={() => setDetails((value) => !value)}
+            >
+              <IconChevronDown size={16} className={details ? styles.chevUp : undefined} />
+              Más detalles
+              {!details && extras > 0 ? <span className={styles.count}>{extras}</span> : null}
+            </button>
+          ) : null}
+        </div>
 
         {details ? (
           <>
