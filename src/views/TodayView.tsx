@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -28,6 +28,12 @@ import {
 } from '../components/Icons'
 import { celebrateFromPointer, shouldCelebrateChecked } from '../lib/confetti'
 import { formatTodayHeading } from '../lib/dates'
+import {
+  HIDE_COMPLETED_ON_HOME_KEY,
+  homeListStaysVisible,
+  readHideCompletedOnHome,
+  visibleHomeListTasks,
+} from '../lib/hide-completed'
 import { useColorOf } from '../lib/palette'
 import { isExpiredCompleted } from '../shared/expiry'
 import { useAppState, useReorderToday, useUpdateSubtask, useUpdateTask } from '../lib/store'
@@ -354,15 +360,36 @@ function Rail({
   onAddTask: (categoryId: string | null) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: RAIL_ZONE })
+  // Solo pinta el rail: no toca tareas guardadas ni las otras pantallas.
+  const [hideCompleted, setHideCompleted] = useState(() =>
+    readHideCompletedOnHome(localStorage.getItem(HIDE_COMPLETED_ON_HOME_KEY)),
+  )
+
+  useEffect(() => {
+    localStorage.setItem(HIDE_COMPLETED_ON_HOME_KEY, hideCompleted ? 'true' : 'false')
+  }, [hideCompleted])
+
+  const shownUncategorized = visibleHomeListTasks(uncategorized, hideCompleted)
 
   return (
     <aside ref={setNodeRef} className={`${styles.rail} ${isOver ? styles.railOver : ''}`}>
       <header className={styles.railHeader}>
         <h2 className={styles.railTitle}>Listas</h2>
-        <button type="button" className={styles.railAdd} onClick={onAddCategory}>
-          <IconPlus size={15} />
-          Categoría
-        </button>
+        <div className={styles.railActions}>
+          <button
+            type="button"
+            className={`${styles.railAdd} ${hideCompleted ? styles.railAddOn : ''}`}
+            aria-pressed={hideCompleted}
+            onClick={() => setHideCompleted((value) => !value)}
+          >
+            {hideCompleted ? <IconEye size={15} /> : <IconEyeOff size={15} />}
+            {hideCompleted ? 'Ver hechas' : 'Ocultar hechas'}
+          </button>
+          <button type="button" className={styles.railAdd} onClick={onAddCategory}>
+            <IconPlus size={15} />
+            Categoría
+          </button>
+        </div>
       </header>
 
       {ready && categories.length === 0 && uncategorized.length === 0 ? (
@@ -372,21 +399,26 @@ function Rail({
         </p>
       ) : null}
 
-      {categories.map((category) => (
-        <CategoryGroup
-          key={category.id}
-          name={category.name}
-          colorKey={category.colorKey}
-          tasks={tasks.filter((task) => task.categoryId === category.id)}
-          onAddTask={() => onAddTask(category.id)}
-        />
-      ))}
+      {categories.map((category) => {
+        const own = tasks.filter((task) => task.categoryId === category.id)
+        // Toda hecha: la lista desaparece. Mixta: sigue, sin las hechas.
+        if (!homeListStaysVisible(own, hideCompleted)) return null
+        return (
+          <CategoryGroup
+            key={category.id}
+            name={category.name}
+            colorKey={category.colorKey}
+            tasks={visibleHomeListTasks(own, hideCompleted)}
+            onAddTask={() => onAddTask(category.id)}
+          />
+        )
+      })}
 
-      {uncategorized.length > 0 ? (
+      {shownUncategorized.length > 0 ? (
         <CategoryGroup
           name="Sin categoría"
           colorKey={null}
-          tasks={uncategorized}
+          tasks={shownUncategorized}
           onAddTask={() => onAddTask(null)}
         />
       ) : null}
