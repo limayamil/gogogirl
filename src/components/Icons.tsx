@@ -35,6 +35,23 @@ export const IconCalendar = ({ size = 20, className }: Props) => (
   </svg>
 )
 
+/** 1, 2 o 3 barras de señal. El botón pinta el color; el ícono no elige la urgencia. */
+const SIGNAL_BARS: Record<1 | 2 | 3, string> = {
+  1: 'M12 19V9',
+  2: 'M8 19V11M16 19V5',
+  3: 'M5 19V13M12 19V7M19 19V3',
+}
+
+export const IconSignal = ({
+  bars,
+  size = 18,
+  className,
+}: Props & { bars: 1 | 2 | 3 }) => (
+  <svg {...base(size)} className={className} aria-hidden="true" strokeWidth={2.4}>
+    <path d={SIGNAL_BARS[bars]} />
+  </svg>
+)
+
 export const IconPlus = ({ size = 20, className }: Props) => (
   <svg {...base(size)} className={className} aria-hidden="true">
     <path d="M12 5v14M5 12h14" />

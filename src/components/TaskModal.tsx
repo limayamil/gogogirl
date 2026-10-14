@@ -3,12 +3,14 @@ import { useQuery } from '@tanstack/react-query'
 import { Modal } from './Modal'
 import { RichTextEditor } from './RichTextEditor'
 import {
+  IconCalendar,
   IconChevronDown,
   IconClose,
   IconFile,
   IconImage,
   IconLink,
   IconPlus,
+  IconSignal,
   IconSpinner,
   IconSun,
   IconTrash,
@@ -58,6 +60,7 @@ export interface TaskModalRequest {
 }
 
 const URGENCY_LABEL: Record<Urgency, string> = { baja: 'Baja', media: 'Media', alta: 'Alta' }
+const URGENCY_BARS: Record<Urgency, 1 | 2 | 3> = { baja: 1, media: 2, alta: 3 }
 const STATUS_LABEL: Record<Status, string> = {
   pendiente: 'Pendiente',
   en_progreso: 'En progreso',
@@ -784,86 +787,89 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
           />
         </div>
 
-        <div className={styles.group}>
-          <span className={styles.label}>Urgencia</span>
-          <div className={styles.segment} role="radiogroup" aria-label="Urgencia">
-            {URGENCIES.map((level) => (
-              <button
-                key={level}
-                type="button"
-                role="radio"
-                aria-checked={form.urgency === level}
-                className={`${styles.segmentItem} ${form.urgency === level ? styles.segmentOn : ''}`}
-                style={
-                  form.urgency === level
-                    ? {
-                        background: `var(--urgency-${level})`,
-                        // Blanco sobre el amarillo de "media" da un contraste ilegible.
-                        color: level === 'media' ? '#4a3a10' : '#fff',
-                      }
-                    : undefined
-                }
-                onClick={() => set('urgency', level)}
-              >
-                {URGENCY_LABEL[level]}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className={styles.group}>
-          <span className={styles.label}>Fecha límite</span>
-          <div className={styles.chips} role="radiogroup" aria-label="Fecha límite">
-            {presets.map((preset) => {
-              const active = form.deadline === preset.value
-              return (
+        <div className={styles.scheduleRow}>
+          <div className={styles.group}>
+            <span className={styles.label}>Urgencia</span>
+            <div className={styles.segment} role="radiogroup" aria-label="Urgencia">
+              {URGENCIES.map((level) => (
                 <button
-                  key={preset.key}
+                  key={level}
                   type="button"
                   role="radio"
-                  aria-checked={active}
-                  className={`${styles.chip} ${active ? styles.chipOn : ''}`}
+                  aria-label={URGENCY_LABEL[level]}
+                  aria-checked={form.urgency === level}
+                  className={`${styles.segmentItem} ${styles.segmentIcon} ${form.urgency === level ? styles.segmentOn : ''}`}
+                  style={
+                    form.urgency === level
+                      ? {
+                          background: `var(--urgency-${level})`,
+                          // Blanco sobre el amarillo de "media" da un contraste ilegible.
+                          color: level === 'media' ? '#4a3a10' : '#fff',
+                        }
+                      : undefined
+                  }
+                  onClick={() => set('urgency', level)}
+                >
+                  <IconSignal bars={URGENCY_BARS[level]} size={18} />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.group}>
+            <span className={styles.label}>Fecha límite</span>
+            <div className={styles.chips} role="radiogroup" aria-label="Fecha límite">
+              {presets.map((preset) => {
+                const active = form.deadline === preset.value
+                return (
+                  <button
+                    key={preset.key}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    className={`${styles.chip} ${active ? styles.chipOn : ''}`}
+                    onClick={() => {
+                      set('deadline', active ? '' : preset.value)
+                      setShowCalendar(false)
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                )
+              })}
+              <button
+                type="button"
+                className={`${styles.chip} ${styles.calendarChip} ${customDate ? styles.chipOn : ''}`}
+                aria-expanded={showCalendar}
+                aria-label={customDate ? `Elegir fecha, ${formatShortDate(form.deadline)}` : 'Elegir fecha'}
+                onClick={() => setShowCalendar((value) => !value)}
+              >
+                <IconCalendar size={16} />
+              </button>
+              {form.deadline ? (
+                <button
+                  type="button"
+                  className={styles.chipClear}
+                  aria-label="Sacar la fecha límite"
                   onClick={() => {
-                    set('deadline', active ? '' : preset.value)
+                    set('deadline', '')
                     setShowCalendar(false)
                   }}
                 >
-                  {preset.label}
+                  <IconClose size={13} />
                 </button>
-              )
-            })}
-            <button
-              type="button"
-              className={`${styles.chip} ${customDate ? styles.chipOn : ''}`}
-              aria-expanded={showCalendar}
-              onClick={() => setShowCalendar((value) => !value)}
-            >
-              <IconChevronDown size={14} />
-              {customDate ? formatShortDate(form.deadline) : 'Fecha…'}
-            </button>
-            {form.deadline ? (
-              <button
-                type="button"
-                className={styles.chipClear}
-                aria-label="Sacar la fecha límite"
-                onClick={() => {
-                  set('deadline', '')
-                  setShowCalendar(false)
-                }}
-              >
-                <IconClose size={13} />
-              </button>
+              ) : null}
+            </div>
+            {showCalendar ? (
+              <input
+                type="date"
+                className={styles.input}
+                value={form.deadline ?? ''}
+                aria-label="Elegir fecha"
+                onChange={(e) => set('deadline', e.target.value)}
+              />
             ) : null}
           </div>
-          {showCalendar ? (
-            <input
-              type="date"
-              className={styles.input}
-              value={form.deadline ?? ''}
-              aria-label="Elegir fecha"
-              onChange={(e) => set('deadline', e.target.value)}
-            />
-          ) : null}
         </div>
 
         <button

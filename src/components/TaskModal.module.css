@@ -213,6 +213,36 @@
   color: #fff;
 }
 
+.segmentIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  padding-inline: 10px;
+}
+
+/* Urgencia y fecha comparten fila: en el ancho del modal no tienen que bajar de línea. */
+.scheduleRow {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.scheduleRow .group {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.scheduleRow .chips {
+  flex-wrap: nowrap;
+}
+
+.calendarChip {
+  padding-inline: 10px;
+}
+
 /* --- Agregar a Hoy --------------------------------------------------------- */
 
 .todayRow {
@@ -806,6 +836,20 @@
 
   .segmentItem {
     padding: 13px 17px;
+  }
+
+  /* En el teléfono la hoja es más angosta que el modal de escritorio. */
+  .scheduleRow,
+  .scheduleRow .chips {
+    flex-wrap: wrap;
+  }
+
+  .segmentIcon {
+    padding: 11px 12px;
+  }
+
+  .calendarChip {
+    padding: 11px 12px;
   }
 
   .chipClear {
