@@ -15,6 +15,13 @@ import {
   IconUpload,
 } from './Icons'
 import { api } from '../lib/api'
+import {
+  COLLAPSED_CATEGORY_LIMIT,
+  formatCategoryUsageCookie,
+  rankCategoryChips,
+  readCategoryUsage,
+  recordCategorySelection,
+} from '../lib/category-usage'
 import { celebrateFromPointer, shouldCelebrateChecked, shouldCelebrateStatus } from '../lib/confetti'
 import { addDays, formatShortDate, toDateKey, todayKey } from '../lib/dates'
 import { compressImage } from '../lib/image'
@@ -33,7 +40,15 @@ import {
   useUpdateSubtask,
   useUpdateTask,
 } from '../lib/store'
-import { STATUSES, URGENCIES, type Status, type Subtask, type TaskLink, type Urgency } from '../shared/types'
+import {
+  STATUSES,
+  URGENCIES,
+  type Category,
+  type Status,
+  type Subtask,
+  type TaskLink,
+  type Urgency,
+} from '../shared/types'
 import styles from './TaskModal.module.css'
 
 export interface TaskModalRequest {
@@ -136,6 +151,99 @@ function putFile(url: string, file: File, onProgress: (fraction: number) => void
   })
 }
 
+function CategoryChips({
+  categories,
+  selectedId,
+  onSelect,
+}: {
+  categories: Category[]
+  selectedId: string | null
+  onSelect: (categoryId: string | null) => void
+}) {
+  const colorOf = useColorOf()
+  const [expanded, setExpanded] = useState(false)
+  // El orden vive en la cookie, no en la tarea: abrir el modal no cuenta como elección.
+  const [usage, setUsage] = useState(() => readCategoryUsage(document.cookie))
+
+  const ids = useMemo(() => [null, ...categories.map((category) => category.id)], [categories])
+  const visibleIds = useMemo(
+    () => rankCategoryChips(ids, usage, selectedId, expanded),
+    [ids, usage, selectedId, expanded],
+  )
+  const byId = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories])
+
+  const choose = (categoryId: string | null) => {
+    onSelect(categoryId)
+    setUsage((current) => {
+      const next = recordCategorySelection(current, categoryId)
+      document.cookie = formatCategoryUsageCookie(next)
+      return next
+    })
+  }
+
+  return (
+    <div className={styles.categoryPicker}>
+      <div
+        className={`${styles.categoryRow} ${expanded ? styles.categoryRowExpanded : ''}`}
+        role="radiogroup"
+        aria-label="Categoría"
+      >
+        {visibleIds.map((id) => {
+          if (id === null) {
+            const active = selectedId === null
+            return (
+              <button
+                key="sin-categoria"
+                type="button"
+                role="radio"
+                className={`${styles.chip} ${active ? styles.chipOn : ''}`}
+                aria-checked={active}
+                onClick={() => choose(null)}
+              >
+                <span className={styles.chipLabel}>Sin categoría</span>
+              </button>
+            )
+          }
+
+          const category = byId.get(id)
+          if (!category) return null
+          const color = colorOf(category.colorKey)
+          const active = selectedId === category.id
+          return (
+            <button
+              key={category.id}
+              type="button"
+              role="radio"
+              className={`${styles.chip} ${active ? styles.chipOn : ''}`}
+              aria-checked={active}
+              style={
+                active
+                  ? { background: color.bg, color: color.ink, borderColor: color.dot }
+                  : undefined
+              }
+              onClick={() => choose(category.id)}
+            >
+              <span className={styles.dot} style={{ background: color.dot }} />
+              <span className={styles.chipLabel}>{category.name}</span>
+            </button>
+          )
+        })}
+      </div>
+      {ids.length > COLLAPSED_CATEGORY_LIMIT ? (
+        <button
+          type="button"
+          className={styles.categoryToggle}
+          aria-expanded={expanded}
+          aria-label={expanded ? 'Ver menos' : 'Ver todas las categorías'}
+          onClick={() => setExpanded((value) => !value)}
+        >
+          <IconChevronDown size={16} className={expanded ? styles.chevUp : undefined} />
+        </button>
+      ) : null}
+    </div>
+  )
+}
+
 export function TaskModal({ request, onClose }: { request: TaskModalRequest; onClose: () => void }) {
   const { data } = useAppState()
   const categories = data?.categories ?? []
@@ -151,8 +259,6 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
   const createLink = useCreateLink()
   const deleteLink = useDeleteLink()
   const refreshState = useRefreshState()
-  const colorOf = useColorOf()
-
   const [form, setForm] = useState(() => ({
     title: task?.title ?? '',
     categoryId: task?.categoryId ?? request.defaults?.categoryId ?? null,
@@ -671,39 +777,11 @@ export function TaskModal({ request, onClose }: { request: TaskModalRequest; onC
 
         <div className={styles.group}>
           <span className={styles.label}>Categoría</span>
-          <div className={styles.chips} role="radiogroup" aria-label="Categoría">
-            <button
-              type="button"
-              className={`${styles.chip} ${form.categoryId === null ? styles.chipOn : ''}`}
-              onClick={() => set('categoryId', null)}
-              aria-checked={form.categoryId === null}
-              role="radio"
-            >
-              Sin categoría
-            </button>
-            {categories.map((category) => {
-              const color = colorOf(category.colorKey)
-              const active = form.categoryId === category.id
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  className={`${styles.chip} ${active ? styles.chipOn : ''}`}
-                  role="radio"
-                  aria-checked={active}
-                  style={
-                    active
-                      ? { background: color.bg, color: color.ink, borderColor: color.dot }
-                      : undefined
-                  }
-                  onClick={() => set('categoryId', category.id)}
-                >
-                  <span className={styles.dot} style={{ background: color.dot }} />
-                  {category.name}
-                </button>
-              )
-            })}
-          </div>
+          <CategoryChips
+            categories={categories}
+            selectedId={form.categoryId}
+            onSelect={(categoryId) => set('categoryId', categoryId)}
+          />
         </div>
 
         <div className={styles.group}>

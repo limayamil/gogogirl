@@ -128,6 +128,63 @@
   flex: none;
 }
 
+/* La fila colapsada no puede bajar de línea: si un nombre no entra, se corta. */
+.categoryPicker {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+}
+
+.categoryRow {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.categoryRowExpanded {
+  flex-wrap: wrap;
+}
+
+.categoryRow .chip {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.categoryRowExpanded .chip {
+  flex-shrink: 0;
+  min-width: auto;
+}
+
+.chipLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.categoryRowExpanded .chipLabel {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.categoryToggle {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  width: 36px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  color: var(--ink-faint);
+}
+
+.categoryToggle:hover {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
 /* --- Segmentado (urgencia, estado) ----------------------------------------- */
 
 .segment {
