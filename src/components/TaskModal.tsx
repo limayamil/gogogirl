@@ -163,7 +163,7 @@ function chipFace(
   byId: Map<string, Category>,
   colorOf: (key: string) => { dot: string },
 ) {
-  if (id === null) return <span>Sin categoría</span>
+  if (id === null) return <IconClose size={16} />
   const category = byId.get(id)
   if (!category) return null
   return (
@@ -236,7 +236,11 @@ function CategoryChips({
     <div className={styles.categoryPicker}>
       <div ref={measureRef} className={styles.categoryMeasure} aria-hidden="true">
         {ranked.map((id) => (
-          <span key={id ?? 'sin-categoria'} className={styles.chip} data-chip="">
+          <span
+            key={id ?? 'sin-categoria'}
+            className={`${styles.chip} ${id === null ? styles.chipIcon : ''}`}
+            data-chip=""
+          >
             {chipFace(id, byId, colorOf)}
           </span>
         ))}
@@ -255,7 +259,8 @@ function CategoryChips({
                 key="sin-categoria"
                 type="button"
                 role="radio"
-                className={`${styles.chip} ${active ? styles.chipOn : ''}`}
+                className={`${styles.chip} ${styles.chipIcon} ${active ? styles.chipOn : ''}`}
+                aria-label="Sin categoría"
                 aria-checked={active}
                 onClick={() => choose(null)}
               >

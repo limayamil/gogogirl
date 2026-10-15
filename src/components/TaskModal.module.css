@@ -232,7 +232,8 @@
   flex-wrap: nowrap;
 }
 
-.calendarChip {
+.calendarChip,
+.chipIcon {
   padding-inline: 10px;
 }
 
@@ -825,7 +826,8 @@
     padding: 11px 12px;
   }
 
-  .calendarChip {
+  .calendarChip,
+  .chipIcon {
     padding: 11px 12px;
   }
 
