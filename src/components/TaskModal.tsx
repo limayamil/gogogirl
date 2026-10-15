@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Modal } from './Modal'
 import { RichTextEditor } from './RichTextEditor'
@@ -18,9 +18,9 @@ import {
 } from './Icons'
 import { api } from '../lib/api'
 import {
-  COLLAPSED_CATEGORY_LIMIT,
+  fitCategoryChips,
   formatCategoryUsageCookie,
-  rankCategoryChips,
+  rankCategoryIds,
   readCategoryUsage,
   recordCategorySelection,
 } from '../lib/category-usage'
@@ -154,6 +154,26 @@ function putFile(url: string, file: File, onProgress: (fraction: number) => void
   })
 }
 
+function sameWidths(left: number[], right: number[]) {
+  return left.length === right.length && left.every((width, index) => width === right[index])
+}
+
+function chipFace(
+  id: string | null,
+  byId: Map<string, Category>,
+  colorOf: (key: string) => { dot: string },
+) {
+  if (id === null) return <span>Sin categoría</span>
+  const category = byId.get(id)
+  if (!category) return null
+  return (
+    <>
+      <span className={styles.dot} style={{ background: colorOf(category.colorKey).dot }} />
+      <span>{category.name}</span>
+    </>
+  )
+}
+
 function CategoryChips({
   categories,
   selectedId,
@@ -169,11 +189,39 @@ function CategoryChips({
   const [usage, setUsage] = useState(() => readCategoryUsage(document.cookie))
 
   const ids = useMemo(() => [null, ...categories.map((category) => category.id)], [categories])
-  const visibleIds = useMemo(
-    () => rankCategoryChips(ids, usage, selectedId, expanded),
-    [ids, usage, selectedId, expanded],
-  )
+  const ranked = useMemo(() => rankCategoryIds(ids, usage), [ids, usage])
   const byId = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories])
+  const rowRef = useRef<HTMLDivElement>(null)
+  const measureRef = useRef<HTMLDivElement>(null)
+  const [slot, setSlot] = useState({ width: 0, gap: 0, widths: [] as number[] })
+
+  // El corte no es un número fijo: depende del ancho del modal y del nombre entero.
+  useLayoutEffect(() => {
+    const row = rowRef.current
+    const measure = measureRef.current
+    if (!row || !measure) return
+
+    const read = () => {
+      const widths = [...measure.querySelectorAll<HTMLElement>('[data-chip]')].map((el) => el.offsetWidth)
+      const gap = Number.parseFloat(getComputedStyle(row).columnGap || '0') || 0
+      const width = row.clientWidth
+      setSlot((prev) =>
+        prev.width === width && prev.gap === gap && sameWidths(prev.widths, widths)
+          ? prev
+          : { width, gap, widths },
+      )
+    }
+
+    read()
+    const observer = new ResizeObserver(read)
+    observer.observe(row)
+    observer.observe(measure)
+    return () => observer.disconnect()
+  }, [ranked])
+
+  const visibleIds = expanded
+    ? ranked
+    : fitCategoryChips(ranked, slot.widths, slot.width, slot.gap, selectedId)
 
   const choose = (categoryId: string | null) => {
     onSelect(categoryId)
@@ -186,8 +234,16 @@ function CategoryChips({
 
   return (
     <div className={styles.categoryPicker}>
+      <div ref={measureRef} className={styles.categoryMeasure} aria-hidden="true">
+        {ranked.map((id) => (
+          <span key={id ?? 'sin-categoria'} className={styles.chip} data-chip="">
+            {chipFace(id, byId, colorOf)}
+          </span>
+        ))}
+      </div>
       <div
-        className={`${styles.categoryRow} ${expanded ? styles.categoryRowExpanded : ''}`}
+        ref={rowRef}
+        className={styles.categoryRow}
         role="radiogroup"
         aria-label="Categoría"
       >
@@ -203,7 +259,7 @@ function CategoryChips({
                 aria-checked={active}
                 onClick={() => choose(null)}
               >
-                <span className={styles.chipLabel}>Sin categoría</span>
+                {chipFace(null, byId, colorOf)}
               </button>
             )
           }
@@ -226,13 +282,12 @@ function CategoryChips({
               }
               onClick={() => choose(category.id)}
             >
-              <span className={styles.dot} style={{ background: color.dot }} />
-              <span className={styles.chipLabel}>{category.name}</span>
+              {chipFace(category.id, byId, colorOf)}
             </button>
           )
         })}
       </div>
-      {ids.length > COLLAPSED_CATEGORY_LIMIT ? (
+      {expanded || visibleIds.length < ranked.length ? (
         <button
           type="button"
           className={styles.categoryToggle}
