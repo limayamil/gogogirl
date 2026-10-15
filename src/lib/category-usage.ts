@@ -5,8 +5,8 @@
 
 export const CATEGORY_USAGE_COOKIE = 'gogogirl.categoryUsage'
 
-/** Cuántas chips entran en la fila colapsada. */
-export const COLLAPSED_CATEGORY_LIMIT = 4
+/** Líneas del picker cerrado. Lo que no entra queda detrás del chevron. */
+export const COLLAPSED_CATEGORY_LINES = 2
 
 /**
  * "Sin categoría" no tiene uuid. La cookie es un mapa de id → veces, así que
@@ -54,29 +54,80 @@ export function recordCategorySelection(usage: CategoryUsage, categoryId: string
   return { ...usage, [key]: count + 1 }
 }
 
-/**
- * Orden completo, o las primeras `limit` si está colapsado.
- * Si la seleccionada no entra en ese recorte, ocupa el lugar de la menos usada
- * (la última: el orden ya las dejó así) para que el chip activo no desaparezca.
- */
-export function rankCategoryChips(
+/** Más usadas primero. Empate: se queda el orden de `ids` (el de hoy). */
+export function rankCategoryIds(
   ids: readonly (string | null)[],
   usage: CategoryUsage,
-  selectedId: string | null,
-  expanded: boolean,
-  limit = COLLAPSED_CATEGORY_LIMIT,
 ): (string | null)[] {
-  const ranked = ids
+  return ids
     .map((id, index) => ({ id, index, count: countOf(usage, id) }))
     .sort((a, b) => b.count - a.count || a.index - b.index)
     .map((item) => item.id)
+}
 
-  if (expanded || ranked.length <= limit) return ranked
+/**
+ * Prefijo del ranking que entra en `maxLines` sin achicar un chip.
+ * `widths[i]` es el ancho del nombre completo. Si la seleccionada no entra,
+ * se mete al final y se sueltan las menos usadas hasta que vuelva a caber.
+ */
+export function fitCategoryChips(
+  ids: readonly (string | null)[],
+  widths: readonly number[],
+  containerWidth: number,
+  gap: number,
+  selectedId: string | null = null,
+  maxLines = COLLAPSED_CATEGORY_LINES,
+): (string | null)[] {
+  if (containerWidth <= 0 || widths.length < ids.length) return [...ids]
 
-  const top = ranked.slice(0, limit)
-  if (top.includes(selectedId)) return top
-  if (!ranked.includes(selectedId)) return top
-  return [...top.slice(0, -1), selectedId]
+  const fitted = packChips(ids, widths, containerWidth, gap, maxLines)
+  const selectedAt = ids.indexOf(selectedId)
+  if (selectedAt < 0 || fitted.includes(selectedId)) return fitted
+
+  for (let keep = fitted.length; keep >= 0; keep--) {
+    const attempt = [...fitted.slice(0, keep), selectedId]
+    const attemptWidths = attempt.map((id) => widths[ids.indexOf(id)] ?? 0)
+    if (packChips(attempt, attemptWidths, containerWidth, gap, maxLines).length === attempt.length) {
+      return attempt
+    }
+  }
+  return fitted
+}
+
+function packChips(
+  ids: readonly (string | null)[],
+  widths: readonly number[],
+  containerWidth: number,
+  gap: number,
+  maxLines: number,
+): (string | null)[] {
+  const fitted: (string | null)[] = []
+  let lines = 0
+  let used = 0
+  let open = false
+
+  for (let i = 0; i < ids.length; i++) {
+    const width = widths[i] ?? 0
+    if (!open) {
+      if (lines >= maxLines) break
+      lines += 1
+      open = true
+      used = width
+      fitted.push(ids[i])
+      continue
+    }
+    if (used + gap + width <= containerWidth) {
+      used += gap + width
+      fitted.push(ids[i])
+      continue
+    }
+    if (lines >= maxLines) break
+    lines += 1
+    used = width
+    fitted.push(ids[i])
+  }
+
+  return fitted
 }
 
 function countOf(usage: CategoryUsage, categoryId: string | null): number {

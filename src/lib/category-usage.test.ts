@@ -1,77 +1,81 @@
 import { describe, expect, it } from 'vitest'
 import {
   CATEGORY_USAGE_COOKIE,
-  COLLAPSED_CATEGORY_LIMIT,
+  COLLAPSED_CATEGORY_LINES,
   SIN_CATEGORIA_USAGE_KEY,
+  fitCategoryChips,
   formatCategoryUsageCookie,
   parseCategoryUsage,
-  rankCategoryChips,
+  rankCategoryIds,
   readCategoryUsage,
   recordCategorySelection,
 } from './category-usage'
 
 const hoy = [null, 'a', 'b', 'c', 'd', 'e'] as const
 
-describe('rankCategoryChips', () => {
-  it('sin uso conserva el orden de hoy y muestra las primeras 4', () => {
-    expect(rankCategoryChips(hoy, {}, null, false)).toEqual([null, 'a', 'b', 'c'])
-    expect(COLLAPSED_CATEGORY_LIMIT).toBe(4)
+describe('rankCategoryIds', () => {
+  it('sin uso conserva el orden de hoy', () => {
+    expect(rankCategoryIds(hoy, {})).toEqual([null, 'a', 'b', 'c', 'd', 'e'])
+    expect(COLLAPSED_CATEGORY_LINES).toBe(2)
   })
 
   it('pone más a la izquierda la categoría más elegida', () => {
-    expect(rankCategoryChips(hoy, { b: 3, e: 8, [SIN_CATEGORIA_USAGE_KEY]: 1 }, null, false)).toEqual([
+    expect(rankCategoryIds(hoy, { b: 3, e: 8, [SIN_CATEGORIA_USAGE_KEY]: 1 })).toEqual([
       'e',
       'b',
       null,
       'a',
+      'c',
+      'd',
     ])
   })
 
   it('en empate deja el orden de hoy', () => {
-    expect(rankCategoryChips(hoy, { a: 2, c: 2, e: 2 }, null, true)).toEqual([
-      'a',
-      'c',
-      'e',
-      null,
-      'b',
-      'd',
-    ])
-  })
-
-  it('si la seleccionada no está en el top 4, saca a la menos usada', () => {
-    const usage = { a: 5, b: 4, c: 3, d: 2 }
-    expect(rankCategoryChips(hoy, usage, 'e', false)).toEqual(['a', 'b', 'c', 'e'])
-  })
-
-  it('no mueve nada si la seleccionada ya está en el top', () => {
-    expect(rankCategoryChips(hoy, { e: 9 }, 'e', false)).toEqual(['e', null, 'a', 'b'])
-  })
-
-  it('expandido lista todas, más usadas primero', () => {
-    expect(rankCategoryChips(hoy, { d: 4, [SIN_CATEGORIA_USAGE_KEY]: 2 }, 'e', true)).toEqual([
-      'd',
-      null,
-      'a',
-      'b',
-      'c',
-      'e',
-    ])
-  })
-
-  it('con 4 o menos no recorta', () => {
-    expect(rankCategoryChips([null, 'a'], {}, 'a', false)).toEqual([null, 'a'])
-  })
-
-  it('ignora una seleccionada que ya no existe', () => {
-    expect(rankCategoryChips(hoy, {}, 'fantasma', false)).toEqual([null, 'a', 'b', 'c'])
+    expect(rankCategoryIds(hoy, { a: 2, c: 2, e: 2 })).toEqual(['a', 'c', 'e', null, 'b', 'd'])
   })
 
   it('no muta las entradas', () => {
     const ids = [null, 'a', 'b', 'c', 'd']
     const usage = { d: 1 }
-    rankCategoryChips(ids, usage, 'd', false)
+    rankCategoryIds(ids, usage)
     expect(ids).toEqual([null, 'a', 'b', 'c', 'd'])
     expect(usage).toEqual({ d: 1 })
+  })
+})
+
+describe('fitCategoryChips', () => {
+  it('llena dos líneas y deja afuera lo que no entra entero', () => {
+    const ids = ['a', 'b', 'c', 'd', 'e']
+    const widths = [80, 80, 80, 80, 80]
+    expect(fitCategoryChips(ids, widths, 100, 8)).toEqual(['a', 'b'])
+  })
+
+  it('sigue con la segunda línea en vez de cortar el nombre', () => {
+    const ids = ['a', 'b', 'c', 'd']
+    const widths = [50, 50, 50, 50]
+    expect(fitCategoryChips(ids, widths, 120, 10)).toEqual(['a', 'b', 'c', 'd'])
+  })
+
+  it('no saltea una ancha para meter una más chica que viene después', () => {
+    expect(fitCategoryChips(['a', 'ancha', 'chica'], [70, 90, 20], 100, 8)).toEqual(['a', 'ancha'])
+  })
+
+  it('muestra el nombre completo aunque sea más ancho que la fila', () => {
+    expect(fitCategoryChips(['larga', 'otra'], [180, 40], 100, 8)).toEqual(['larga', 'otra'])
+  })
+
+  it('si la seleccionada no entra, suelta las menos usadas hasta que quepa', () => {
+    const ids = ['a', 'b', 'c', 'elegida']
+    const widths = [80, 80, 80, 80]
+    expect(fitCategoryChips(ids, widths, 100, 8, 'elegida')).toEqual(['a', 'elegida'])
+  })
+
+  it('no toca el orden si la seleccionada ya entra', () => {
+    expect(fitCategoryChips(['a', 'b', 'c', 'd'], [80, 80, 80, 80], 100, 8, 'b')).toEqual(['a', 'b'])
+  })
+
+  it('sin medida todavía no esconde chips', () => {
+    expect(fitCategoryChips(['a', 'b'], [10, 10], 0, 8)).toEqual(['a', 'b'])
   })
 })
 

@@ -128,8 +128,9 @@
   flex: none;
 }
 
-/* La fila colapsada no puede bajar de línea: si un nombre no entra, se corta. */
+/* Hasta dos líneas con el nombre entero. Lo que no entra lo abre el chevron. */
 .categoryPicker {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -137,37 +138,29 @@
   min-width: 0;
 }
 
-.categoryRow {
+.categoryMeasure {
+  position: absolute;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
   display: flex;
   flex-wrap: nowrap;
+  width: max-content;
+  gap: var(--space-2);
+}
+
+.categoryRow {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   min-width: 0;
 }
 
-.categoryRowExpanded {
-  flex-wrap: wrap;
-}
-
-.categoryRow .chip {
-  min-width: 0;
-  max-width: 100%;
-}
-
-.categoryRowExpanded .chip {
-  flex-shrink: 0;
-  min-width: auto;
-}
-
-.chipLabel {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.categoryRow .chip,
+.categoryMeasure .chip {
+  flex: 0 0 auto;
   white-space: nowrap;
-}
-
-.categoryRowExpanded .chipLabel {
-  overflow: visible;
-  text-overflow: clip;
 }
 
 .categoryToggle {
@@ -239,7 +232,8 @@
   flex-wrap: nowrap;
 }
 
-.calendarChip {
+.calendarChip,
+.chipIcon {
   padding-inline: 10px;
 }
 
@@ -832,7 +826,8 @@
     padding: 11px 12px;
   }
 
-  .calendarChip {
+  .calendarChip,
+  .chipIcon {
     padding: 11px 12px;
   }
 
