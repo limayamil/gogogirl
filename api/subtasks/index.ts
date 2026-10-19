@@ -1,3 +1,4 @@
+import { requireUser } from '../_lib/auth.ts'
 import { mapSubtask, sql } from '../_lib/db.ts'
 import { body, notFound, route } from '../_lib/http.ts'
 import { int, requiredText, uuid } from '../_lib/validate.ts'
@@ -6,11 +7,14 @@ type Row = Record<string, unknown>
 
 export default route({
   async POST(req, res) {
+    const { id: userId } = await requireUser(req)
     const input = body(req)
     const taskId = uuid(input.taskId, 'taskId')
     const title = requiredText(input.title, 'title', 200)
 
-    const [task] = (await sql`select id from tasks where id = ${taskId}`) as Row[]
+    const [task] = (await sql`
+      select id from tasks where id = ${taskId} and user_id = ${userId}
+    `) as Row[]
     if (!task) notFound('La tarea de esa subtarea no existe')
 
     const position =

@@ -15,22 +15,33 @@ type Row = Record<string, unknown>
  * separado, cualquier diferencia entre las dos haria aparecer el aviso de novedades
  * para siempre.
  */
-export async function stateVersion(): Promise<string> {
+export async function stateVersion(userId: string): Promise<string> {
   const [row] = (await sql`
     select
-      (select count(*) from tasks)              as tasks_n,
-      (select max(updated_at) from tasks)       as tasks_at,
-      (select count(*) from categories)         as cat_n,
-      (select max(created_at) from categories)  as cat_at,
-      (select count(*) from subtasks)           as sub_n,
-      (select count(*) from quick_tasks)        as quick_n,
-      (select max(created_at) from quick_tasks) as quick_at,
-      (select count(*) from task_links)         as link_n,
-      (select count(*) from attachments)        as att_n,
-      (select count(*) from notes)              as notes_n,
-      (select max(updated_at) from notes)       as notes_at,
-      (select count(*) from note_tags)          as tag_n,
-      (select count(*) from note_tag_assignments) as tag_assign_n
+      (select count(*) from tasks where user_id = ${userId}) as tasks_n,
+      (select max(updated_at) from tasks where user_id = ${userId}) as tasks_at,
+      (select count(*) from categories where user_id = ${userId}) as cat_n,
+      (select max(created_at) from categories where user_id = ${userId}) as cat_at,
+      (select count(*) from subtasks s
+        join tasks t on t.id = s.task_id
+        where t.user_id = ${userId}) as sub_n,
+      (select count(*) from quick_tasks where user_id = ${userId}) as quick_n,
+      (select max(created_at) from quick_tasks where user_id = ${userId}) as quick_at,
+      (select count(*) from task_links l
+        join tasks t on t.id = l.task_id
+        where t.user_id = ${userId}) as link_n,
+      (select count(*) from attachments a
+        where exists (
+          select 1 from tasks t where t.id = a.task_id and t.user_id = ${userId}
+        ) or exists (
+          select 1 from notes n where n.id = a.note_id and n.user_id = ${userId}
+        )) as att_n,
+      (select count(*) from notes where user_id = ${userId}) as notes_n,
+      (select max(updated_at) from notes where user_id = ${userId}) as notes_at,
+      (select count(*) from note_tags where user_id = ${userId}) as tag_n,
+      (select count(*) from note_tag_assignments a
+        join notes n on n.id = a.note_id
+        where n.user_id = ${userId}) as tag_assign_n
   `) as Row[]
 
   return [

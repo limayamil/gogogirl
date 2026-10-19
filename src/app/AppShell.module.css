@@ -259,8 +259,29 @@
   transform: none;
 }
 
-.themeButton {
+.headerTools {
   justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logout {
+  height: 42px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--ink-soft);
+  font-weight: 800;
+  font-size: 13px;
+  box-shadow: var(--shadow-sm);
+}
+
+.logout:hover {
+  color: var(--accent);
+}
+
+.themeButton {
   display: grid;
   place-items: center;
   width: 42px;
@@ -332,8 +353,12 @@
     padding: var(--space-4) var(--space-3) max(152px, calc(132px + env(safe-area-inset-bottom)));
   }
 
+  .logout,
+  .themeButton {
+    height: 40px;
+  }
+
   .themeButton {
     width: 40px;
-    height: 40px;
   }
 }

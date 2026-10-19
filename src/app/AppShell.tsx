@@ -1,5 +1,9 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import { sessionKey } from '../lib/queryClient'
+import { toastError } from '../lib/toast'
 import { Fabs } from '../components/Fabs'
 import { IconCalendar, IconChart, IconGrid, IconMoon, IconNote, IconSun } from '../components/Icons'
 import { ModalProvider } from './modals'
@@ -45,6 +49,21 @@ export function AppShell() {
   const { mode, toggle } = useThemeMode()
   const { period, raining, palette } = useSky()
   const [skyReady, setSkyReady] = useState(false)
+  const [leaving, setLeaving] = useState(false)
+  const client = useQueryClient()
+
+  async function onLogout() {
+    if (leaving) return
+    setLeaving(true)
+    try {
+      const next = await api.logout()
+      client.setQueryData(sessionKey, next)
+      client.removeQueries({ queryKey: ['state'] })
+    } catch (error) {
+      toastError(error)
+      setLeaving(false)
+    }
+  }
 
   useEffect(() => {
     // El primer frame pinta la franja actual; recien despues animamos
@@ -120,14 +139,19 @@ export function AppShell() {
           ))}
         </nav>
 
-        <button
-          type="button"
-          className={styles.themeButton}
-          onClick={toggle}
-          aria-label={mode === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}
-        >
-          {mode === 'light' ? <IconMoon size={20} /> : <IconSun size={20} />}
-        </button>
+        <div className={styles.headerTools}>
+          <button type="button" className={styles.logout} onClick={onLogout} disabled={leaving}>
+            Salir
+          </button>
+          <button
+            type="button"
+            className={styles.themeButton}
+            onClick={toggle}
+            aria-label={mode === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}
+          >
+            {mode === 'light' ? <IconMoon size={20} /> : <IconSun size={20} />}
+          </button>
+        </div>
       </header>
 
       <ModalProvider>

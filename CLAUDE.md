@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Proyecto
 
-GoGoGirl: app personal de productividad (un solo usuario, sin auth ni `user_id`). React + Vite + TypeScript, Neon Postgres, handlers HTTP en `api/`, deploy en Netlify.
+GoGoGirl: app de productividad con cuentas. React + Vite + TypeScript, Neon Postgres, handlers HTTP en `api/`, deploy en Netlify. La sesion es una cookie `httpOnly`. Cada lectura y escritura filtra por la cuenta que entro. La migracion `006_accounts.sql` deja las filas que ya existian en una sola cuenta sin usuario: el primer ingreso le asigna usuario y contrasena, no crea otra. Una cuenta nueva empieza vacia.
 
 **El código, los comentarios y la UI están en español.** Los comentarios explican el *por qué* de una decisión, no el *qué* hace la línea. Mantené ese registro al escribir código nuevo.
 
@@ -45,7 +45,7 @@ Cada handler se arma con `route({ GET, POST, PATCH, DELETE })` de `api/_lib/http
 
 ### La base y el front hablan distinto
 
-La base usa `snake_case`, el front `camelCase`. Los mappers de `api/_lib/db.ts` (`mapTask`, `mapCategory`, …) son la **única** frontera donde se traduce: ningún componente ve nombres de columnas. `loadTask(id)` trae una tarea completa con subtareas y adjuntos ya mapeada.
+La base usa `snake_case`, el front `camelCase`. Los mappers de `api/_lib/db.ts` (`mapTask`, `mapCategory`, …) son la **única** frontera donde se traduce: ningún componente ve nombres de columnas. `loadTask(id, userId)` trae una tarea completa con subtareas y adjuntos ya mapeada, solo si es de esa cuenta.
 
 ### Estado del front: un solo cache
 
@@ -76,7 +76,7 @@ Los deadlines son **días calendario** (`'YYYY-MM-DD'`), no instantes. `src/lib/
 
 ### Migraciones
 
-`db/migrations/*.sql` versionado, aplicado en orden alfabético por `scripts/migrate.ts`, que anota cada archivo en `_migrations` (re-ejecutar es seguro). El driver HTTP de Neon manda una sentencia por request, así que el runner separa el archivo por `;\n` — evitá sentencias que dependan de ejecutarse en el mismo batch.
+`db/migrations/*.sql` versionado, aplicado en orden alfabético por `scripts/migrate.ts`, que anota cada archivo en `_migrations` (re-ejecutar es seguro). El driver HTTP de Neon no mantiene una transacción entre requests: `scripts/sql-split.ts` parte el archivo (sin cortar bloques `$$`) y `sql.transaction` manda esas sentencias juntas. `006_accounts.sql` es un solo `DO` a propósito, para que el backfill no quede a medias.
 
 ### Adjuntos
 
@@ -84,4 +84,4 @@ Subida directa del navegador al bucket vía URL prefirmada (`POST /api/uploads/s
 
 ## Tests
 
-Vitest, sin config propia. Cubren funciones puras y sin red: `api/_lib/validate.test.ts`, `netlify/lib/router.test.ts`, `src/lib/dates.test.ts`, `src/lib/toast.test.ts`. No hay tests de componentes ni de base.
+Vitest, sin config propia. Cubren funciones puras y la migración de cuentas contra PGlite (una copia, con un `ROLLBACK` en el medio). No hay tests de componentes.

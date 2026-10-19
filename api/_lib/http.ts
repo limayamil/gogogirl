@@ -39,6 +39,10 @@ export function notFound(message = 'No encontrado'): never {
   throw new HttpError(404, message)
 }
 
+export function unauthorized(message = 'Tenes que entrar para ver esto'): never {
+  throw new HttpError(401, message)
+}
+
 type Methods = Partial<Record<'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE', Handler>>
 
 /**
@@ -60,6 +64,10 @@ export function route(methods: Methods): Handler {
       res.status(405).json({ error: `Metodo ${method} no permitido` })
       return
     }
+
+    // Las respuestas son de una cuenta. Sin esto un cache compartido podria
+    // guardar el estado de una persona y servirselo a otra.
+    res.setHeader('Cache-Control', 'no-store')
 
     try {
       await handler(req, res)

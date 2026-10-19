@@ -18,6 +18,11 @@ app.use(express.json({ limit: '1mb' }))
  * Si agregas una ruta aca, agregala tambien en netlify/functions/api.mts.
  */
 const routes: Array<[path: string, module: string]> = [
+  ['/api/auth/session', '../api/auth/session.ts'],
+  ['/api/auth/claim', '../api/auth/claim.ts'],
+  ['/api/auth/login', '../api/auth/login.ts'],
+  ['/api/auth/register', '../api/auth/register.ts'],
+  ['/api/auth/logout', '../api/auth/logout.ts'],
   ['/api/state', '../api/state.ts'],
   ['/api/version', '../api/version.ts'],
   ['/api/categories', '../api/categories/index.ts'],
