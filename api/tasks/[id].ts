@@ -1,3 +1,4 @@
+import { requireUser } from '../_lib/auth.ts'
 import { loadTask, loadTaskChildren, loadTaskRow, mapTask, sql } from '../_lib/db.ts'
 import { body, notFound, requireId, route } from '../_lib/http.ts'
 import { parseTaskPatch } from '../_lib/validate.ts'
@@ -6,41 +7,44 @@ type Row = Record<string, unknown>
 
 export default route({
   async GET(req, res) {
-    const task = await loadTask(requireId(req))
+    const { id: userId } = await requireUser(req)
+    const task = await loadTask(requireId(req), userId)
     if (!task) notFound('Tarea no encontrada')
     res.status(200).json(task)
   },
 
   /**
-   * Lee la tarea, mezcla el patch en memoria y reescribe todas las columnas.
-   * Es una query extra frente a armar el UPDATE dinamicamente, pero evita
-   * concatenar nombres de columnas en SQL y hace trivial distinguir
-   * "no mandaron el campo" de "lo mandaron en null".
-   *
-   * Esa query extra es UNA sola: alcanza con la fila de `tasks`, porque el UPDATE no
-   * toca subtareas, adjuntos ni links. Los hijos se traen solo para armar la respuesta,
-   * en paralelo con el propio UPDATE.
+   * Lee la tarea de esta cuenta, mezcla el patch en memoria y reescribe las
+   * columnas. El where repite user_id para que un id de otra cuenta no escriba.
    */
   async PATCH(req, res) {
+    const { id: userId } = await requireUser(req)
     const id = requireId(req)
     const patch = parseTaskPatch(body(req))
 
-    const row = await loadTaskRow(id)
+    const row = await loadTaskRow(id, userId)
     if (!row) notFound('Tarea no encontrada')
 
     const current = mapTask(row)
     const merged = { ...current, ...patch }
 
-    // El ojito solo aplica dentro de Hoy: sacar una tarea de Hoy la des-oculta,
-    // para que al volver a arrastrarla aparezca en vez de quedar invisible.
     if (merged.inToday === false) {
       merged.hiddenInToday = false
       merged.todayPosition = null
     }
 
+    if (merged.categoryId) {
+      const [category] = (await sql`
+        select id from categories where id = ${merged.categoryId} and user_id = ${userId}
+      `) as Row[]
+      if (!category) notFound('Categoria no encontrada')
+    }
+
     if (merged.inToday && merged.todayPosition == null) {
       const [{ next }] = (await sql`
-        select coalesce(max(today_position), -1) + 1 as next from tasks where in_today = true
+        select coalesce(max(today_position), -1) + 1 as next
+        from tasks
+        where user_id = ${userId} and in_today = true
       `) as Row[]
       merged.todayPosition = Number(next)
     }
@@ -49,8 +53,6 @@ export default route({
       merged.status === 'hecha'
         ? (current.completedAt ?? new Date().toISOString())
         : null
-    // Completar esta semana la deja visible; reabrirla limpia el vencimiento.
-    // Si ya estaba hecha, no tocamos `expired`: el lazy del GET se encarga.
     const expired =
       merged.status === 'hecha'
         ? current.status === 'hecha'
@@ -58,8 +60,6 @@ export default route({
           : false
         : false
 
-    // Los hijos no cambian con este UPDATE, asi que la lectura arranca ya mismo y
-    // corre solapada con la escritura en vez de esperarla.
     const children = loadTaskChildren(id)
 
     const [updated] = (await sql`
@@ -78,18 +78,22 @@ export default route({
         completed_at    = ${completedAt},
         expired         = ${expired},
         updated_at      = now()
-      where id = ${id}
+      where id = ${id} and user_id = ${userId}
       returning *
     `) as Row[]
+
+    if (!updated) notFound('Tarea no encontrada')
 
     const [subtasks, attachments, links] = await children
     res.status(200).json(mapTask(updated, subtasks, attachments, links))
   },
 
   async DELETE(req, res) {
+    const { id: userId } = await requireUser(req)
     const id = requireId(req)
-    // Subtareas y adjuntos caen por `on delete cascade`.
-    const rows = (await sql`delete from tasks where id = ${id} returning id`) as Row[]
+    const rows = (await sql`
+      delete from tasks where id = ${id} and user_id = ${userId} returning id
+    `) as Row[]
     if (rows.length === 0) notFound('Tarea no encontrada')
     res.status(200).json({ ok: true })
   },

@@ -1,3 +1,4 @@
+import { requireUser } from './_lib/auth.ts'
 import {
   mapAttachment,
   mapCategory,
@@ -20,17 +21,14 @@ type Row = Record<string, unknown>
 /**
  * GET /api/state
  *
- * Devuelve todo el estado en una sola llamada. La app es de un usuario y el volumen
- * es chico: una carga unica hace que React Query tenga un solo cache que actualizar,
- * lo que simplifica muchisimo las mutaciones optimistas del drag & drop.
+ * Todo el estado de la cuenta que entro, en una sola llamada. El volumen de
+ * una cuenta es chico: un solo cache hace simples las mutaciones optimistas.
  */
 export default route({
-  async GET(_req, res) {
-    // Lazy: al abrir la app vencen las hechas de semanas ya cerradas. Sin cron.
-    await expireCompletedTasks()
+  async GET(req, res) {
+    const { id: userId } = await requireUser(req)
+    await expireCompletedTasks(userId)
 
-    // `stateVersion` entra al mismo Promise.all, asi que no agrega latencia: el front
-    // se lleva la firma que corresponde a estos datos y puede compararla mas tarde.
     const [
       categories,
       tasks,
@@ -43,16 +41,44 @@ export default route({
       noteTagAssignments,
       version,
     ] = (await Promise.all([
-      sql`select * from categories order by position, created_at`,
-      sql`select * from tasks order by position, created_at`,
-      sql`select * from subtasks order by position, title`,
-      sql`select * from attachments order by created_at`,
-      sql`select * from task_links order by position, created_at`,
-      sql`select * from quick_tasks order by position, created_at`,
-      sql`select * from notes order by updated_at desc, created_at desc`,
-      sql`select * from note_tags order by name`,
-      sql`select * from note_tag_assignments`,
-      stateVersion(),
+      sql`select * from categories where user_id = ${userId} order by position, created_at`,
+      sql`select * from tasks where user_id = ${userId} order by position, created_at`,
+      sql`
+        select s.*
+        from subtasks s
+        join tasks t on t.id = s.task_id
+        where t.user_id = ${userId}
+        order by s.position, s.title
+      `,
+      sql`
+        select a.*
+        from attachments a
+        left join tasks t on t.id = a.task_id
+        left join notes n on n.id = a.note_id
+        where t.user_id = ${userId} or n.user_id = ${userId}
+        order by a.created_at
+      `,
+      sql`
+        select l.*
+        from task_links l
+        join tasks t on t.id = l.task_id
+        where t.user_id = ${userId}
+        order by l.position, l.created_at
+      `,
+      sql`select * from quick_tasks where user_id = ${userId} order by position, created_at`,
+      sql`
+        select * from notes
+        where user_id = ${userId}
+        order by updated_at desc, created_at desc
+      `,
+      sql`select * from note_tags where user_id = ${userId} order by name`,
+      sql`
+        select a.*
+        from note_tag_assignments a
+        join notes n on n.id = a.note_id
+        where n.user_id = ${userId}
+      `,
+      stateVersion(userId),
     ])) as [Row[], Row[], Row[], Row[], Row[], Row[], Row[], Row[], Row[], string]
 
     const subtasksByTask = new Map<string, Subtask[]>()

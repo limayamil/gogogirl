@@ -147,9 +147,11 @@ export function mapTask(
   }
 }
 
-/** La fila cruda de `tasks`, sin hijos. Un solo viaje, para quien no necesita mas. */
-export async function loadTaskRow(id: string): Promise<Row | null> {
-  const [task] = (await sql`select * from tasks where id = ${id}`) as Row[]
+/** La fila cruda de `tasks`, sin hijos. Solo si es de esta cuenta. */
+export async function loadTaskRow(id: string, userId: string): Promise<Row | null> {
+  const [task] = (await sql`
+    select * from tasks where id = ${id} and user_id = ${userId}
+  `) as Row[]
   return task ?? null
 }
 
@@ -169,23 +171,25 @@ export async function loadTaskChildren(
   return [subtasks.map(mapSubtask), attachments.map(mapAttachment), links.map(mapTaskLink)]
 }
 
-/** Trae una tarea completa (subtareas, adjuntos y links) ya mapeada, o null si no existe. */
-export async function loadTask(id: string): Promise<Task | null> {
-  const task = await loadTaskRow(id)
+/** Trae una tarea completa (subtareas, adjuntos y links) ya mapeada, o null si no es de esta cuenta. */
+export async function loadTask(id: string, userId: string): Promise<Task | null> {
+  const task = await loadTaskRow(id, userId)
   if (!task) return null
   const [subtasks, attachments, links] = await loadTaskChildren(id)
   return mapTask(task, subtasks, attachments, links)
 }
 
-/** Trae una nota completa (etiquetas y adjuntos) ya mapeada, o null si no existe. */
-export async function loadNote(id: string): Promise<Note | null> {
-  const [note] = (await sql`select * from notes where id = ${id}`) as Row[]
+/** Trae una nota completa (etiquetas y adjuntos) ya mapeada, o null si no es de esta cuenta. */
+export async function loadNote(id: string, userId: string): Promise<Note | null> {
+  const [note] = (await sql`
+    select * from notes where id = ${id} and user_id = ${userId}
+  `) as Row[]
   if (!note) return null
   const tags = (await sql`
     select t.*
     from note_tags t
     join note_tag_assignments a on a.tag_id = t.id
-    where a.note_id = ${id}
+    where a.note_id = ${id} and t.user_id = ${userId}
     order by t.name
   `) as Row[]
   const attachments = (await sql`
@@ -198,27 +202,45 @@ export async function loadNote(id: string): Promise<Note | null> {
  * Reemplaza las etiquetas de una nota. Crea las que no existen (por nombre,
  * sin importar mayusculas) y borra las que quedaron huerfanas.
  */
-export async function replaceNoteTags(noteId: string, names: string[]): Promise<void> {
+export async function replaceNoteTags(
+  noteId: string,
+  names: string[],
+  userId: string,
+): Promise<void> {
+  // Solo si la nota es de esta cuenta. Si no, no se tocan ni asignaciones ni etiquetas.
+  const [owned] = (await sql`
+    select id from notes where id = ${noteId} and user_id = ${userId}
+  `) as Row[]
+  if (!owned) return
+
   await sql`delete from note_tag_assignments where note_id = ${noteId}`
 
   for (const name of names) {
     const [existing] = (await sql`
-      select id from note_tags where lower(name) = lower(${name}) limit 1
+      select id from note_tags
+      where user_id = ${userId} and lower(name) = lower(${name})
+      limit 1
     `) as Row[]
     const tagId = existing
       ? (existing.id as string)
-      : (((await sql`insert into note_tags (name) values (${name}) returning id`) as Row[])[0]
-          .id as string)
+      : ((
+          (await sql`
+            insert into note_tags (name, user_id) values (${name}, ${userId}) returning id
+          `) as Row[]
+        )[0].id as string)
     await sql`
       insert into note_tag_assignments (note_id, tag_id)
       values (${noteId}, ${tagId})
     `
   }
 
+  // Una etiqueta sin notas se va, pero solo de esta cuenta: la de otra persona
+  // puede llamarse igual y no tiene que desaparecer.
   await sql`
     delete from note_tags
-    where not exists (
-      select 1 from note_tag_assignments a where a.tag_id = note_tags.id
-    )
+    where user_id = ${userId}
+      and not exists (
+        select 1 from note_tag_assignments a where a.tag_id = note_tags.id
+      )
   `
 }

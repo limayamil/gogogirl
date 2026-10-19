@@ -149,6 +149,20 @@ export interface QuickTaskInput {
   position?: number
 }
 
+export interface AuthUser {
+  id: string
+  username: string
+}
+
+/**
+ * `claim`: la cuenta que ya tiene los datos todavia no tiene usuario.
+ * Asignarle uno no crea otra cuenta. `login`: esa cuenta ya fue reclamada.
+ */
+export interface AuthSession {
+  user: AuthUser | null
+  mode: 'claim' | 'login'
+}
+
 export interface NoteInput {
   title: string
   kind?: NoteKind

@@ -9,6 +9,11 @@
  */
 import { createApiHandler, type Route } from '../lib/router.ts'
 
+import authSession from '../../api/auth/session.ts'
+import authClaim from '../../api/auth/claim.ts'
+import authLogin from '../../api/auth/login.ts'
+import authRegister from '../../api/auth/register.ts'
+import authLogout from '../../api/auth/logout.ts'
 import state from '../../api/state.ts'
 import version from '../../api/version.ts'
 import categories from '../../api/categories/index.ts'
@@ -28,6 +33,11 @@ import linkById from '../../api/links/[id].ts'
 import uploadsSign from '../../api/uploads/sign.ts'
 
 const routes: Route[] = [
+  ['/api/auth/session', authSession],
+  ['/api/auth/claim', authClaim],
+  ['/api/auth/login', authLogin],
+  ['/api/auth/register', authRegister],
+  ['/api/auth/logout', authLogout],
   ['/api/state', state],
   ['/api/version', version],
   ['/api/categories', categories],

@@ -1,6 +1,8 @@
 # GoGoGirl
 
-App personal de productividad con tres vistas: **Hoy**, **Categorias** y **Semana**.
+App de productividad con cuentas. Tres vistas: **Hoy**, **Categorias** y **Semana**.
+
+La primera vez, si la cuenta que ya tiene los datos no tiene usuario, la pantalla pide elegir uno y una contrasena. Eso no crea otra cuenta. Despues, la misma pantalla es el login, y desde ahi se puede crear una cuenta nueva, que empieza vacia.
 
 - **Hoy** — lista simple de lo que toca hoy (titulo, color de categoria y status, nada mas),
   con la columna de categorias a la derecha. Arrastra una tarea a Hoy para agendarla: la tarea

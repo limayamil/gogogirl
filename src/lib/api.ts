@@ -1,6 +1,7 @@
 import type {
   AppState,
   Attachment,
+  AuthSession,
   Category,
   Note,
   NoteInput,
@@ -10,15 +11,26 @@ import type {
   TaskInput,
   TaskLink,
 } from '../shared/types'
+import { queryClient, sessionKey } from './queryClient'
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/api${path}`, {
     ...init,
+    credentials: 'same-origin',
     headers: init?.body ? { 'content-type': 'application/json' } : undefined,
   })
 
   if (!response.ok) {
     const detail = await response.json().catch(() => null)
+    // Una sesion vencida no tiene que seguir mostrando los datos de esa cuenta.
+    if (response.status === 401 && !path.startsWith('/auth/')) {
+      queryClient.setQueryData<AuthSession>(sessionKey, (current) => ({
+        user: null,
+        mode: current?.mode ?? 'login',
+      }))
+      queryClient.removeQueries({ queryKey: ['state'] })
+      void queryClient.invalidateQueries({ queryKey: sessionKey })
+    }
     throw new Error(detail?.error ?? `Error ${response.status} en ${path}`)
   }
 
@@ -34,6 +46,15 @@ export interface LinkDraft {
 }
 
 export const api = {
+  getSession: () => request<AuthSession>('/auth/session'),
+  claim: (input: { username: string; password: string }) =>
+    request<AuthSession>('/auth/claim', { method: 'POST', body: json(input) }),
+  login: (input: { username: string; password: string }) =>
+    request<AuthSession>('/auth/login', { method: 'POST', body: json(input) }),
+  register: (input: { username: string; password: string }) =>
+    request<AuthSession>('/auth/register', { method: 'POST', body: json(input) }),
+  logout: () => request<AuthSession>('/auth/logout', { method: 'POST' }),
+
   getState: () => request<AppState>('/state'),
   getVersion: () => request<{ version: string }>('/version'),
 

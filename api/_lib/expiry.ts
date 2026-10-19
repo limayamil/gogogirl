@@ -12,11 +12,11 @@ function completedAtIso(value: unknown): string | null {
  * Marca hechas cuya semana ya cerro. Se llama al cargar el estado: no hay cron.
  * Devuelve cuantas filas paso a expired, por si un test quiere asertarlo.
  */
-export async function expireCompletedTasks(now = new Date()): Promise<number> {
+export async function expireCompletedTasks(userId: string, now = new Date()): Promise<number> {
   const rows = (await sql`
     select id, status, completed_at
     from tasks
-    where status = 'hecha' and expired = false
+    where user_id = ${userId} and status = 'hecha' and expired = false
   `) as Row[]
 
   const ids = rows
@@ -30,7 +30,7 @@ export async function expireCompletedTasks(now = new Date()): Promise<number> {
   await sql`
     update tasks
     set expired = true, updated_at = now()
-    where id = any(${ids}::uuid[])
+    where user_id = ${userId} and id = any(${ids}::uuid[])
   `
   return ids.length
 }

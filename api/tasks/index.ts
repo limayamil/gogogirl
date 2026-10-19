@@ -1,15 +1,23 @@
+import { requireUser } from '../_lib/auth.ts'
 import { loadTask, sql } from '../_lib/db.ts'
-import { body, route } from '../_lib/http.ts'
+import { body, notFound, route } from '../_lib/http.ts'
 import { httpUrl, optionalText, parseTaskCreate, requiredText } from '../_lib/validate.ts'
 
 type Row = Record<string, unknown>
 
 export default route({
   async POST(req, res) {
+    const { id: userId } = await requireUser(req)
     const raw = body(req)
     const input = parseTaskCreate(raw)
 
-    // Las subtareas pueden venir en el mismo payload cuando se crea la tarea desde el modal.
+    if (input.categoryId) {
+      const [category] = (await sql`
+        select id from categories where id = ${input.categoryId} and user_id = ${userId}
+      `) as Row[]
+      if (!category) notFound('Categoria no encontrada')
+    }
+
     const rawSubtasks = Array.isArray(raw.subtasks) ? raw.subtasks : []
     const subtaskTitles = rawSubtasks.map((item, index) =>
       requiredText(
@@ -19,7 +27,6 @@ export default route({
       ),
     )
 
-    // Los links tambien: el modal los junta antes de que la tarea exista.
     const rawLinks = Array.isArray(raw.links) ? raw.links : []
     const links = rawLinks.map((item, index) => {
       const entry = typeof item === 'string' ? { url: item } : ((item ?? {}) as Record<string, unknown>)
@@ -29,38 +36,38 @@ export default route({
       }
     })
 
-    // Las dos posiciones son independientes entre si: una sola espera, no dos.
+    // La posicion se numera dentro de la cuenta: dos personas pueden tener
+    // tareas sin categoria y no tienen que pisarse el orden.
     const [[{ next: position }], [{ next: todayPosition }]] = (await Promise.all([
       sql`
         select coalesce(max(position), -1) + 1 as next
         from tasks
-        where category_id is not distinct from ${input.categoryId ?? null}
+        where user_id = ${userId}
+          and category_id is not distinct from ${input.categoryId ?? null}
       `,
-      sql`select coalesce(max(today_position), -1) + 1 as next from tasks where in_today = true`,
+      sql`
+        select coalesce(max(today_position), -1) + 1 as next
+        from tasks
+        where user_id = ${userId} and in_today = true
+      `,
     ])) as Row[][]
 
     const [created] = (await sql`
       insert into tasks (
         category_id, title, description, notes, urgency, deadline, status,
-        in_today, today_position, position
+        in_today, today_position, position, user_id
       )
       values (
         ${input.categoryId ?? null}, ${input.title}, ${input.description ?? null},
         ${input.notes ?? null}, ${input.urgency ?? 'media'}, ${input.deadline ?? null},
         ${input.status ?? 'pendiente'}, ${input.inToday ?? false},
-        ${input.inToday ? Number(todayPosition) : null}, ${Number(position)}
+        ${input.inToday ? Number(todayPosition) : null}, ${Number(position)}, ${userId}
       )
       returning id
     `) as Row[]
 
     const taskId = created.id as string
 
-    /**
-     * Subtareas y links entran con una sentencia por tabla, no una por fila: `unnest`
-     * expande los arrays en filas del lado de Postgres. Antes esto era un `await` dentro
-     * de un `for`, o sea un round-trip HTTP por subtarea, y si fallaba el cuarto insert
-     * quedaban tres subtareas huerfanas colgando de la tarea recien creada.
-     */
     const inserts: Promise<unknown>[] = []
 
     if (subtaskTitles.length > 0) {
@@ -88,6 +95,6 @@ export default route({
 
     await Promise.all(inserts)
 
-    res.status(201).json(await loadTask(taskId))
+    res.status(201).json(await loadTask(taskId, userId))
   },
 })

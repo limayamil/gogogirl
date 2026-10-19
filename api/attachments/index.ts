@@ -1,28 +1,43 @@
+import { requireUser } from '../_lib/auth.ts'
 import { mapAttachment, sql } from '../_lib/db.ts'
 import { badRequest, body, notFound, route } from '../_lib/http.ts'
 import { int, requiredText, uuid } from '../_lib/validate.ts'
 
 type Row = Record<string, unknown>
 
+/** La clave la arma el servidor en /uploads/sign. No aceptamos una de otra cuenta. */
+function ownedObjectKey(objectKey: string, taskId: string | null, noteId: string | null): void {
+  const prefix = taskId ? `tasks/${taskId}/` : `notes/${noteId}/`
+  if (!objectKey.startsWith(prefix) || objectKey.includes('..')) {
+    badRequest('La clave del archivo no corresponde a ese elemento')
+  }
+}
+
 /** Registra en la base un archivo ya subido al bucket via URL prefirmada. */
 export default route({
   async POST(req, res) {
+    const { id: userId } = await requireUser(req)
     const input = body(req)
     const taskId = input.taskId == null ? null : uuid(input.taskId, 'taskId')
     const noteId = input.noteId == null ? null : uuid(input.noteId, 'noteId')
     if (Boolean(taskId) === Boolean(noteId)) {
-      badRequest('Mandá taskId o noteId, uno solo')
+      badRequest('Manda taskId o noteId, uno solo')
     }
     const objectKey = requiredText(input.objectKey, 'objectKey', 500)
     const fileName = requiredText(input.fileName, 'fileName', 255)
     const contentType = requiredText(input.contentType, 'contentType', 150)
     const sizeBytes = input.sizeBytes == null ? 0 : int(input.sizeBytes, 'sizeBytes')
+    ownedObjectKey(objectKey, taskId, noteId)
 
     if (taskId) {
-      const [task] = (await sql`select id from tasks where id = ${taskId}`) as Row[]
+      const [task] = (await sql`
+        select id from tasks where id = ${taskId} and user_id = ${userId}
+      `) as Row[]
       if (!task) notFound('Tarea no encontrada')
     } else {
-      const [note] = (await sql`select id from notes where id = ${noteId}`) as Row[]
+      const [note] = (await sql`
+        select id from notes where id = ${noteId} and user_id = ${userId}
+      `) as Row[]
       if (!note) notFound('Nota no encontrada')
     }
 
