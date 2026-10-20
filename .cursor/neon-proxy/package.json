@@ -1,0 +1,13 @@
+{
+  "name": "neon-local-http-proxy",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Proxy HTTP local que emula el protocolo de @neondatabase/serverless para desarrollo con un Postgres local.",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  }
+}
