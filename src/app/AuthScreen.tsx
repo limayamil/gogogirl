@@ -130,9 +130,7 @@ export function AuthScreen({ mode }: { mode: AuthSession['mode'] }) {
                 setError(null)
               }}
             >
-              {mode === 'claim' && form === 'claim'
-                ? 'Soy otra persona: crear una cuenta vacía'
-                : 'Crear una cuenta nueva'}
+              Crear una cuenta nueva
             </button>
           ) : (
             <button
@@ -166,7 +164,7 @@ const COPY: Record<FormMode, { title: string; lead: string; submit: string }> = 
   },
   register: {
     title: 'Cuenta nueva',
-    lead: 'Empieza vacía. No recibe las tareas, categorías, notas ni contraseñas que ya existen.',
+    lead: 'Elegí un usuario y una contraseña.',
     submit: 'Crear cuenta',
   },
 }
