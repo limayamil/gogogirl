@@ -21,6 +21,8 @@ const DUMMY_PASSWORD_HASH = '$2b$10$N4HGmfUXYqxIWqemHwrH8u.0A1wD8E4kQRN05ShNE3Sx
 const USERNAME_RE = /^[\p{L}\p{N}._-]+$/u
 
 export const SESSION_COOKIE = 'gogogirl_session'
+/** Otra cookie: el panel interno no es una fila de users y no comparte esta sesion. */
+export const ADMIN_SESSION_COOKIE = 'gogogirl_admin'
 export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30
 
 export function hashPassword(password: string): Promise<string> {
@@ -86,20 +88,29 @@ export function sessionTokenFromRequest(req: ApiRequest): string | null {
   return token || null
 }
 
-export function sessionCookie(token: string, secure: boolean): string {
-  const parts = [
-    `${SESSION_COOKIE}=${token}`,
-    'HttpOnly',
-    'Path=/',
-    'SameSite=Lax',
-    `Max-Age=${SESSION_MAX_AGE_SECONDS}`,
-  ]
+export function adminTokenFromRequest(req: ApiRequest): string | null {
+  const token = parseCookies(header(req, 'cookie'))[ADMIN_SESSION_COOKIE]
+  return token || null
+}
+
+function buildCookie(name: string, value: string, secure: boolean, maxAge: number): string {
+  const parts = [`${name}=${value}`, 'HttpOnly', 'Path=/', 'SameSite=Lax', `Max-Age=${maxAge}`]
   if (secure) parts.push('Secure')
   return parts.join('; ')
 }
 
+export function sessionCookie(token: string, secure: boolean): string {
+  return buildCookie(SESSION_COOKIE, token, secure, SESSION_MAX_AGE_SECONDS)
+}
+
 export function clearSessionCookie(secure: boolean): string {
-  const parts = [`${SESSION_COOKIE}=`, 'HttpOnly', 'Path=/', 'SameSite=Lax', 'Max-Age=0']
-  if (secure) parts.push('Secure')
-  return parts.join('; ')
+  return buildCookie(SESSION_COOKIE, '', secure, 0)
+}
+
+export function adminSessionCookie(token: string, secure: boolean): string {
+  return buildCookie(ADMIN_SESSION_COOKIE, token, secure, SESSION_MAX_AGE_SECONDS)
+}
+
+export function clearAdminSessionCookie(secure: boolean): string {
+  return buildCookie(ADMIN_SESSION_COOKIE, '', secure, 0)
 }

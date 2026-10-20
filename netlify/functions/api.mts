@@ -14,6 +14,11 @@ import authClaim from '../../api/auth/claim.ts'
 import authLogin from '../../api/auth/login.ts'
 import authRegister from '../../api/auth/register.ts'
 import authLogout from '../../api/auth/logout.ts'
+import adminSession from '../../api/admin/session.ts'
+import adminLogin from '../../api/admin/login.ts'
+import adminLogout from '../../api/admin/logout.ts'
+import adminUsers from '../../api/admin/users.ts'
+import adminImpersonate from '../../api/admin/impersonate.ts'
 import state from '../../api/state.ts'
 import version from '../../api/version.ts'
 import categories from '../../api/categories/index.ts'
@@ -38,6 +43,11 @@ const routes: Route[] = [
   ['/api/auth/login', authLogin],
   ['/api/auth/register', authRegister],
   ['/api/auth/logout', authLogout],
+  ['/api/admin/session', adminSession],
+  ['/api/admin/login', adminLogin],
+  ['/api/admin/logout', adminLogout],
+  ['/api/admin/users', adminUsers],
+  ['/api/admin/impersonate', adminImpersonate],
   ['/api/state', state],
   ['/api/version', version],
   ['/api/categories', categories],

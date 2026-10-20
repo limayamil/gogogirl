@@ -48,11 +48,20 @@ export async function unclaimedOwnerId(): Promise<string | null> {
   return rows.length === 1 ? (rows[0].id as string) : null
 }
 
-export async function currentUser(req: ApiRequest): Promise<AuthUser | null> {
+export interface AccountSession {
+  user: AuthUser
+  impersonated: boolean
+}
+
+/**
+ * La cookie de la cuenta, si sigue viva. `impersonated` sale de la fila: una
+ * sesion de "Ver como" no tiene que contar como que esa persona uso la app.
+ */
+export async function readSession(req: ApiRequest): Promise<AccountSession | null> {
   const token = sessionTokenFromRequest(req)
   if (!token) return null
   const [row] = (await sql`
-    select u.id, u.username
+    select u.id, u.username, s.impersonated
     from sessions s
     join users u on u.id = s.user_id
     where s.token_hash = ${hashToken(token)}
@@ -60,33 +69,77 @@ export async function currentUser(req: ApiRequest): Promise<AuthUser | null> {
       and u.username is not null
   `) as Row[]
   if (!row) return null
-  return { id: row.id as string, username: row.username as string }
+  return {
+    user: { id: row.id as string, username: row.username as string },
+    impersonated: Boolean(row.impersonated),
+  }
 }
 
+export async function currentUser(req: ApiRequest): Promise<AuthUser | null> {
+  const session = await readSession(req)
+  return session?.user ?? null
+}
+
+/**
+ * Cada request autenticado pasa por aca. La actividad se anota como mucho
+ * cada 5 minutos: alcanza para "la ultima vez que uso la app" sin escribir
+ * en cada tecla. Una sesion impersonada no cuenta, la cuenta no entro.
+ */
 export async function requireUser(req: ApiRequest): Promise<AuthUser> {
-  const user = await currentUser(req)
-  if (!user) unauthorized()
-  return user
+  const session = await readSession(req)
+  if (!session) unauthorized()
+  if (!session.impersonated) await touchLastSeen(session.user.id)
+  return session.user
+}
+
+async function touchLastSeen(userId: string): Promise<void> {
+  await sql`
+    update users
+    set last_seen_at = now()
+    where id = ${userId}
+      and (last_seen_at is null or last_seen_at < now() - interval '5 minutes')
+  `
 }
 
 async function authMode(): Promise<AuthSession['mode']> {
   return (await unclaimedOwnerId()) ? 'claim' : 'login'
 }
 
-export async function sessionFor(user: AuthUser | null): Promise<AuthSession> {
-  return { user, mode: await authMode() }
+export async function sessionFor(
+  user: AuthUser | null,
+  impersonated = false,
+): Promise<AuthSession> {
+  return {
+    user,
+    mode: await authMode(),
+    impersonating: impersonated && user ? { username: user.username } : null,
+  }
 }
 
-export async function openSession(req: ApiRequest, res: ApiResponse, userId: string): Promise<void> {
+export async function openSession(
+  req: ApiRequest,
+  res: ApiResponse,
+  userId: string,
+  options?: { impersonated?: boolean },
+): Promise<void> {
+  const impersonated = options?.impersonated === true
   const token = randomBytes(32).toString('base64url')
   const expires = new Date(Date.now() + SESSION_MAX_AGE_SECONDS * 1000).toISOString()
   await sql`
-    insert into sessions (user_id, token_hash, expires_at)
-    values (${userId}, ${hashToken(token)}, ${expires})
+    insert into sessions (user_id, token_hash, expires_at, impersonated)
+    values (${userId}, ${hashToken(token)}, ${expires}, ${impersonated})
   `
+  // Entrar (o registrarse) es usar la app. Ver la cuenta como admin no.
+  if (!impersonated) {
+    await sql`update users set last_seen_at = now() where id = ${userId}`
+  }
   res.setHeader('Set-Cookie', sessionCookie(token, cookieSecure(req)))
 }
 
+/**
+ * Borra la cookie de la cuenta. La del panel interno tiene otro nombre, asi
+ * que "Volver" desde "Ver como" no cierra la sesion de admin.
+ */
 export async function closeSession(req: ApiRequest, res: ApiResponse): Promise<void> {
   const token = sessionTokenFromRequest(req)
   if (token) {

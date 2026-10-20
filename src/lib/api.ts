@@ -1,6 +1,7 @@
 import type {
   AppState,
   Attachment,
+  AdminUserSummary,
   AuthSession,
   Category,
   Note,
@@ -23,10 +24,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!response.ok) {
     const detail = await response.json().catch(() => null)
     // Una sesion vencida no tiene que seguir mostrando los datos de esa cuenta.
-    if (response.status === 401 && !path.startsWith('/auth/')) {
+    // El 401 del panel no es la sesion de una cuenta: no hay que cerrarla.
+    if (response.status === 401 && !path.startsWith('/auth/') && !path.startsWith('/admin/')) {
       queryClient.setQueryData<AuthSession>(sessionKey, (current) => ({
         user: null,
         mode: current?.mode ?? 'login',
+        impersonating: null,
       }))
       queryClient.removeQueries({ queryKey: ['state'] })
       void queryClient.invalidateQueries({ queryKey: sessionKey })
@@ -54,6 +57,20 @@ export const api = {
   register: (input: { username: string; password: string }) =>
     request<AuthSession>('/auth/register', { method: 'POST', body: json(input) }),
   logout: () => request<AuthSession>('/auth/logout', { method: 'POST' }),
+
+  getAdminGate: async (): Promise<{ status: number; authenticated: boolean }> => {
+    const response = await fetch('/api/admin/session', { credentials: 'same-origin' })
+    if (response.status === 404) return { status: 404, authenticated: false }
+    const detail = (await response.json().catch(() => null)) as { error?: string; authenticated?: boolean } | null
+    if (!response.ok) throw new Error(detail?.error ?? `Error ${response.status}`)
+    return { status: response.status, authenticated: Boolean(detail?.authenticated) }
+  },
+  adminLogin: (input: { username: string; password: string }) =>
+    request<{ authenticated: boolean }>('/admin/login', { method: 'POST', body: json(input) }),
+  adminLogout: () => request<{ authenticated: boolean }>('/admin/logout', { method: 'POST' }),
+  adminUsers: () => request<{ users: AdminUserSummary[] }>('/admin/users'),
+  impersonate: (userId: string) =>
+    request<AuthSession>('/admin/impersonate', { method: 'POST', body: json({ userId }) }),
 
   getState: () => request<AppState>('/state'),
   getVersion: () => request<{ version: string }>('/version'),

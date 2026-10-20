@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  ADMIN_SESSION_COOKIE,
+  adminSessionCookie,
+  adminTokenFromRequest,
+  clearAdminSessionCookie,
   clearSessionCookie,
   cookieSecure,
   hashPassword,
@@ -60,6 +64,19 @@ describe('cookie de sesion', () => {
     expect(sessionCookie('t', true)).toContain('Secure')
     expect(clearSessionCookie(true)).toContain('Max-Age=0')
     expect(clearSessionCookie(true)).toContain('HttpOnly')
+  })
+
+  it('la cookie del panel es otra, tambien httpOnly', () => {
+    const header = adminSessionCookie('token-admin', false)
+
+    expect(header).toContain(`${ADMIN_SESSION_COOKIE}=token-admin`)
+    expect(header).toContain('HttpOnly')
+    expect(header).not.toContain(SESSION_COOKIE)
+    expect(clearAdminSessionCookie(true)).toContain('Max-Age=0')
+    expect(
+      adminTokenFromRequest(req({ cookie: `${SESSION_COOKIE}=cuenta; ${ADMIN_SESSION_COOKIE}=panel` })),
+    ).toBe('panel')
+    expect(sessionTokenFromRequest(req({ cookie: `${ADMIN_SESSION_COOKIE}=panel` }))).toBeNull()
   })
 
   it('lee el token de la cookie y guarda solo su hash', () => {

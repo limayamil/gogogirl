@@ -1,9 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { AdminScreen } from './app/AdminScreen'
 import { AppShell } from './app/AppShell'
 import { AuthGate } from './app/AuthScreen'
+import { NotFound } from './app/NotFound'
 import { ThemeProvider } from './app/theme'
 import { queryClient } from './lib/queryClient'
 import { TodayView } from './views/TodayView'
@@ -19,6 +21,7 @@ createRoot(document.getElementById('root')!).render(
       <ThemeProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/interno" element={<AdminScreen />} />
             <Route element={<AuthGate />}>
               <Route element={<AppShell />}>
                 <Route path="/" element={<TodayView />} />
@@ -26,9 +29,9 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/semana" element={<WeekView />} />
                 <Route path="/notas" element={<NotesView />} />
                 <Route path="/estadisticas" element={<StatsView />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Route>
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

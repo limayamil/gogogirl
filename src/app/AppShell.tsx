@@ -1,7 +1,8 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
+import { impersonationBanner } from '../lib/impersonation'
 import { sessionKey } from '../lib/queryClient'
 import { toastError } from '../lib/toast'
 import { Fabs } from '../components/Fabs'
@@ -50,7 +51,11 @@ export function AppShell() {
   const { period, raining, palette } = useSky()
   const [skyReady, setSkyReady] = useState(false)
   const [leaving, setLeaving] = useState(false)
+  const [returning, setReturning] = useState(false)
   const client = useQueryClient()
+  const navigate = useNavigate()
+  const session = useQuery({ queryKey: sessionKey, queryFn: api.getSession, retry: false })
+  const banner = impersonationBanner(session.data)
 
   async function onLogout() {
     if (leaving) return
@@ -62,6 +67,21 @@ export function AppShell() {
     } catch (error) {
       toastError(error)
       setLeaving(false)
+    }
+  }
+
+  async function onBack() {
+    if (returning) return
+    setReturning(true)
+    try {
+      // Solo la cookie de la cuenta. La del panel sigue, y /interno la reconoce.
+      const next = await api.logout()
+      client.setQueryData(sessionKey, next)
+      client.removeQueries({ queryKey: ['state'] })
+      navigate('/interno')
+    } catch (error) {
+      toastError(error)
+      setReturning(false)
     }
   }
 
@@ -88,8 +108,18 @@ export function AppShell() {
   )
 
   return (
-    <div className={styles.shell}>
+    <div className={`${styles.shell} ${banner ? styles.withBanner : ''}`}>
       <DocumentTitle />
+      {banner ? (
+        <div className={styles.banner} role="status">
+          <p>
+            Estás viendo la cuenta de <strong>{banner.username}</strong>.
+          </p>
+          <button type="button" onClick={onBack} disabled={returning}>
+            Volver
+          </button>
+        </div>
+      ) : null}
       <header
         className={`${styles.header} ${skyReady ? styles.skyReady : ''}`}
         data-period={period}

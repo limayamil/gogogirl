@@ -161,6 +161,21 @@ export interface AuthUser {
 export interface AuthSession {
   user: AuthUser | null
   mode: 'claim' | 'login'
+  /**
+   * Cuenta abierta con "Ver como". Null en una sesion propia: el aviso no
+   * tiene que aparecerle a quien entro con su usuario.
+   */
+  impersonating: { username: string } | null
+}
+
+/** Fila del panel interno. Sin hash, sin cuerpo de nota y sin notes.password. */
+export interface AdminUserSummary {
+  id: string
+  username: string | null
+  createdAt: string
+  lastSeenAt: string | null
+  taskCount: number
+  noteCount: number
 }
 
 export interface NoteInput {
