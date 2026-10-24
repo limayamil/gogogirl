@@ -7,6 +7,8 @@ import { sessionKey } from '../lib/queryClient'
 import { toastError } from '../lib/toast'
 import { Fabs } from '../components/Fabs'
 import { IconCalendar, IconChart, IconGrid, IconMoon, IconNote, IconSun } from '../components/Icons'
+import { SettingsMenu } from '../components/SettingsMenu'
+import { DisplaySettingsProvider } from './display-settings'
 import { ModalProvider } from './modals'
 import { ToastHost } from './ToastHost'
 import { UpdateBanner } from './UpdateBanner'
@@ -108,6 +110,7 @@ export function AppShell() {
   )
 
   return (
+    <DisplaySettingsProvider>
     <div className={`${styles.shell} ${banner ? styles.withBanner : ''}`}>
       <DocumentTitle />
       {banner ? (
@@ -173,6 +176,7 @@ export function AppShell() {
           <button type="button" className={styles.logout} onClick={onLogout} disabled={leaving}>
             Salir
           </button>
+          <SettingsMenu />
           <button
             type="button"
             className={styles.themeButton}
@@ -194,5 +198,6 @@ export function AppShell() {
         <UpdateBanner />
       </ModalProvider>
     </div>
+    </DisplaySettingsProvider>
   )
 }

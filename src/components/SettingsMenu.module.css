@@ -1,0 +1,91 @@
+.button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--ink-soft);
+  box-shadow: var(--shadow-sm);
+  transition: color var(--dur) ease, transform var(--dur) var(--ease-out), background var(--dur) ease;
+}
+
+.button:hover,
+.button[aria-expanded='true'] {
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.panel {
+  position: fixed;
+  z-index: 45;
+  width: min(320px, calc(100vw - 16px));
+  padding: 14px;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  padding: 2px 8px 4px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--ink-faint);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.row:hover {
+  color: var(--ink);
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  width: 46px;
+  height: 27px;
+  border-radius: var(--r-pill);
+  background: var(--line-strong);
+  padding: 3px;
+  flex: none;
+  transition: background var(--dur-fast) ease;
+}
+
+.switchOn {
+  background: var(--accent);
+  justify-content: flex-end;
+}
+
+.knob {
+  width: 21px;
+  height: 21px;
+  border-radius: var(--r-pill);
+  background: #fff;
+  box-shadow: 0 2px 6px rgb(58 51 64 / 25%);
+}
+
+@media (max-width: 720px) {
+  .button {
+    width: 40px;
+    height: 40px;
+  }
+}
