@@ -13,6 +13,7 @@ import {
 import { useModals } from '../app/modals'
 import { ErrorState, LoadingState } from '../components/Feedback'
 import { StatusToggle } from '../components/StatusToggle'
+import { TaskListLabel } from '../components/TaskListLabel'
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -237,6 +238,7 @@ function WeekCard({ task, categories }: { task: Task; categories: Category[] }) 
         />
         <button type="button" className={styles.cardTitle} onClick={() => openTask({ taskId: task.id })}>
           <span className={task.status === 'hecha' ? styles.done : undefined}>{task.title}</span>
+          <TaskListLabel name={category?.name ?? null} />
         </button>
       </div>
 

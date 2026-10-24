@@ -1,0 +1,9 @@
+.label {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.78em;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ink-faint);
+  overflow-wrap: anywhere;
+}

@@ -15,9 +15,11 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useDisplaySettings } from '../app/display-settings'
 import { useModals } from '../app/modals'
 import { ErrorState, LoadingState } from '../components/Feedback'
 import { StatusToggle } from '../components/StatusToggle'
+import { TaskListLabel } from '../components/TaskListLabel'
 import {
   IconChevronDown,
   IconEye,
@@ -27,7 +29,8 @@ import {
   IconSun,
 } from '../components/Icons'
 import { celebrateFromPointer, shouldCelebrateChecked } from '../lib/confetti'
-import { formatTodayHeading } from '../lib/dates'
+import { formatTodayHeading, todayKey } from '../lib/dates'
+import { dueTodaySuggestions, takeForTodayPatch } from '../lib/display-settings'
 import {
   HIDE_COMPLETED_ON_HOME_KEY,
   homeListStaysVisible,
@@ -92,7 +95,7 @@ export function TodayView() {
 
     if (!task.inToday) {
       if (over === TODAY_ZONE || todayTasks.some((item) => item.id === over)) {
-        updateTask.mutate({ id: task.id, patch: { inToday: true, hiddenInToday: false } })
+        updateTask.mutate({ id: task.id, patch: takeForTodayPatch() })
       }
       return
     }
@@ -119,6 +122,7 @@ export function TodayView() {
       <div className={`${styles.layout} pageEnter`}>
         <TodayPanel
           tasks={todayTasks}
+          candidates={listed}
           categories={categories}
           hiddenCount={hiddenCount}
           showHidden={showHidden}
@@ -156,6 +160,39 @@ function categoryColorKey(categories: Category[], task: Task): string | null {
   return categories.find((c) => c.id === task.categoryId)?.colorKey ?? null
 }
 
+function listName(categories: Category[], task: Task): string | null {
+  if (!task.categoryId) return null
+  return categories.find((category) => category.id === task.categoryId)?.name ?? null
+}
+
+/** Tira compacta arriba del panel. No va en el rail de listas. */
+function DueTodayStrip({ tasks, categories }: { tasks: Task[]; categories: Category[] }) {
+  const { suggestDueToday } = useDisplaySettings()
+  const updateTask = useUpdateTask()
+  const suggestions = dueTodaySuggestions(tasks, todayKey(), suggestDueToday)
+  if (suggestions.length === 0) return null
+
+  return (
+    <ul className={styles.suggest} aria-label="Sugerencias para hoy">
+      {suggestions.map((task) => (
+        <li key={task.id} className={styles.suggestRow}>
+          <span className={styles.suggestCopy}>
+            <span className={styles.suggestTitle}>{task.title}</span>
+            <TaskListLabel name={listName(categories, task)} />
+          </span>
+          <button
+            type="button"
+            className={styles.suggestTake}
+            onClick={() => updateTask.mutate({ id: task.id, patch: takeForTodayPatch() })}
+          >
+            Tomar para hoy
+          </button>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 /**
  * Si estamos reordenando Hoy, una fila gana sobre el panel entero.
  * Si traemos desde las listas, el panel es el destino: si no, las filas se
@@ -183,6 +220,7 @@ function makeTodayCollision(todayIds: Set<string>): CollisionDetection {
 
 function TodayPanel({
   tasks,
+  candidates,
   categories,
   hiddenCount,
   showHidden,
@@ -191,6 +229,8 @@ function TodayPanel({
   error,
 }: {
   tasks: Task[]
+  /** El mismo conjunto que arma el panel, para no sugerir lo que Hoy ya no muestra. */
+  candidates: Task[]
   categories: Category[]
   hiddenCount: number
   showHidden: boolean
@@ -236,6 +276,10 @@ function TodayPanel({
           pantalla no salte de un spinner centrado al panel completo. */}
       {isPending ? <LoadingState /> : null}
       {error ? <ErrorState error={error} /> : null}
+
+      {isPending || error ? null : (
+        <DueTodayStrip tasks={candidates} categories={categories} />
+      )}
 
       {isPending || error ? null : tasks.length === 0 ? (
         <div className={styles.dropHint}>
@@ -320,6 +364,7 @@ function TodayRow({ task, categories }: { task: Task; categories: Category[] }) 
 
         <button type="button" className={styles.rowTitle} onClick={() => openTask({ taskId: task.id })}>
           <span className={task.status === 'hecha' ? styles.rowDone : undefined}>{task.title}</span>
+          <TaskListLabel name={listName(categories, task)} />
         </button>
 
         <button
@@ -407,6 +452,7 @@ function Rail({
           <CategoryGroup
             key={category.id}
             name={category.name}
+            listName={category.name}
             colorKey={category.colorKey}
             tasks={visibleHomeListTasks(own, hideCompleted)}
             onAddTask={() => onAddTask(category.id)}
@@ -417,6 +463,7 @@ function Rail({
       {shownUncategorized.length > 0 ? (
         <CategoryGroup
           name="Sin categoría"
+          listName={null}
           colorKey={null}
           tasks={shownUncategorized}
           onAddTask={() => onAddTask(null)}
@@ -428,11 +475,14 @@ function Rail({
 
 function CategoryGroup({
   name,
+  listName,
   colorKey,
   tasks,
   onAddTask,
 }: {
   name: string
+  /** Null en "Sin categoría": no hay lista que mostrar bajo el título. */
+  listName: string | null
   colorKey: string | null
   tasks: Task[]
   onAddTask: () => void
@@ -472,7 +522,7 @@ function CategoryGroup({
           <ul className={styles.groupList}>
             {tasks.length === 0 ? <li className={styles.groupEmpty}>Sin tareas</li> : null}
             {tasks.map((task) => (
-              <RailTask key={task.id} task={task} tint={color.soft} dot={color.dot} />
+              <RailTask key={task.id} task={task} tint={color.soft} dot={color.dot} listName={listName} />
             ))}
           </ul>
         </div>
@@ -481,7 +531,17 @@ function CategoryGroup({
   )
 }
 
-function RailTask({ task, tint, dot }: { task: Task; tint: string; dot: string }) {
+function RailTask({
+  task,
+  tint,
+  dot,
+  listName,
+}: {
+  task: Task
+  tint: string
+  dot: string
+  listName: string | null
+}) {
   const { openTask } = useModals()
   const updateTask = useUpdateTask()
   // Si ya esta en Hoy, el sortable de alla es el unico dueno del id: registrar
@@ -512,6 +572,7 @@ function RailTask({ task, tint, dot }: { task: Task; tint: string; dot: string }
           onClick={() => openTask({ taskId: task.id })}
         >
           <span className={task.status === 'hecha' ? styles.rowDone : undefined}>{task.title}</span>
+          <TaskListLabel name={listName} />
         </button>
         {task.inToday ? (
           <span className={styles.inToday} style={{ background: dot }} title="Ya está en Hoy">
