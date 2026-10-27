@@ -82,6 +82,10 @@ Los deadlines son **días calendario** (`'YYYY-MM-DD'`), no instantes. `src/lib/
 
 Subida directa del navegador al bucket vía URL prefirmada (`POST /api/uploads/sign` → PUT al bucket → `POST /api/attachments`). Las variables se llaman `S3_*` y no `AWS_*` porque ese prefijo está reservado en entornos serverless. Sin esas variables la app funciona igual: `storageConfigured` es `false` y los endpoints de storage responden 503 con un mensaje explicativo.
 
+### Meets del día
+
+Calendarios de Google por su **dirección secreta iCal** (tabla `calendars`, por `user_id`). La dirección es un secreto: se valida al guardarla (`https://calendar.google.com/calendar/ical/…`, nada más), se usa solo en `api/_lib/calendars.ts` para el fetch y **nunca sale en una respuesta**; el front ve `maskedUrl`. `GET /api/meetings` pide cada feed en el servidor (cache de 5 minutos por instancia), lo expande con `ical.js` en `api/_lib/ics.ts` y devuelve solo lo de hoy en `America/Argentina/Buenos_Aires`, sin mirar la zona del servidor ni del navegador. Un feed que falla vuelve como `ok: false` con su mensaje y no corta los demás. Las notas llegan ya sanitizadas (`sanitize-html`). El ajuste "Mostrar Meets del día" vive en `localStorage` como los otros; apagado, el panel no se monta y no se pide nada.
+
 ## Tests
 
 Vitest, sin config propia. Cubren funciones puras y la migración de cuentas contra PGlite (una copia, con un `ROLLBACK` en el medio). No hay tests de componentes.

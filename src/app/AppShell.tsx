@@ -7,8 +7,9 @@ import { sessionKey } from '../lib/queryClient'
 import { toastError } from '../lib/toast'
 import { Fabs } from '../components/Fabs'
 import { IconCalendar, IconChart, IconGrid, IconMoon, IconNote, IconSun } from '../components/Icons'
+import { MeetsSidebar } from '../components/MeetsSidebar'
 import { SettingsMenu } from '../components/SettingsMenu'
-import { DisplaySettingsProvider } from './display-settings'
+import { DisplaySettingsProvider, useDisplaySettings } from './display-settings'
 import { ModalProvider } from './modals'
 import { ToastHost } from './ToastHost'
 import { UpdateBanner } from './UpdateBanner'
@@ -48,6 +49,14 @@ const RAIN_DROPS = Array.from({ length: 42 }, (_, index) => ({
   opacity: 0.4 + (index % 4) * 0.15,
 }))
 
+/** En pantallas anchas el panel arranca abierto; en el celu, cerrado. */
+function MeetsArea({ userId }: { userId: string | null }) {
+  const { showMeets } = useDisplaySettings()
+  const [open, setOpen] = useState(() => window.matchMedia('(min-width: 1100px)').matches)
+  if (!showMeets || !userId) return null
+  return <MeetsSidebar userId={userId} open={open} onToggle={() => setOpen((value) => !value)} />
+}
+
 export function AppShell() {
   const { mode, toggle } = useThemeMode()
   const { period, raining, palette } = useSky()
@@ -58,6 +67,7 @@ export function AppShell() {
   const navigate = useNavigate()
   const session = useQuery({ queryKey: sessionKey, queryFn: api.getSession, retry: false })
   const banner = impersonationBanner(session.data)
+  const userId = session.data?.user?.id ?? null
 
   async function onLogout() {
     if (leaving) return
@@ -176,7 +186,7 @@ export function AppShell() {
           <button type="button" className={styles.logout} onClick={onLogout} disabled={leaving}>
             Salir
           </button>
-          <SettingsMenu />
+          <SettingsMenu userId={userId} />
           <button
             type="button"
             className={styles.themeButton}
@@ -193,6 +203,7 @@ export function AppShell() {
           <Outlet />
         </main>
 
+        <MeetsArea userId={userId} />
         <Fabs />
         <ToastHost />
         <UpdateBanner />

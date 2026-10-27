@@ -1,7 +1,21 @@
 .shell {
+  --meets-top: var(--header-h);
+  --meets-w: 320px;
   display: flex;
   flex-direction: column;
   min-height: 100%;
+}
+
+/* Con el panel de Meets abierto en pantalla ancha, el contenido y los botones
+   flotantes se corren para no quedar abajo. En el celu el panel tapa. */
+@media (min-width: 1100px) {
+  .shell:has([data-meets-open]) {
+    --meets-offset: calc(var(--meets-w) + var(--space-3));
+  }
+
+  .shell:has([data-meets-open]) .main {
+    padding-right: calc(var(--space-5) + var(--meets-offset));
+  }
 }
 
 .banner {
@@ -39,6 +53,7 @@
 }
 
 .withBanner {
+  --meets-top: calc(var(--header-h) + 48px);
   padding-top: 48px;
 }
 

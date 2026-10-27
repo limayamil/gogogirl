@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useDisplaySettings } from '../app/display-settings'
+import { CalendarSettings } from './CalendarSettings'
 import { IconSettings } from './Icons'
 import styles from './SettingsMenu.module.css'
 
@@ -8,11 +9,17 @@ import styles from './SettingsMenu.module.css'
  * Único acceso a los ajustes: el engranaje del header.
  * El panel es fijo contra el botón porque el header recorta con overflow.
  */
-export function SettingsMenu() {
-  const { showListOnTask, suggestDueToday, setShowListOnTask, setSuggestDueToday } =
-    useDisplaySettings()
+export function SettingsMenu({ userId }: { userId: string | null }) {
+  const {
+    showListOnTask,
+    suggestDueToday,
+    showMeets,
+    setShowListOnTask,
+    setSuggestDueToday,
+    setShowMeets,
+  } = useDisplaySettings()
   const [open, setOpen] = useState(false)
-  const [box, setBox] = useState<{ top: number; right: number } | null>(null)
+  const [box, setBox] = useState<{ top: number; right: number; maxHeight: number } | null>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const panelId = useId()
@@ -24,6 +31,7 @@ export function SettingsMenu() {
       if (!rect) return
       setBox({
         top: rect.bottom + 8,
+        maxHeight: window.innerHeight - rect.bottom - 16,
         right: Math.max(8, window.innerWidth - rect.right),
       })
     }
@@ -77,7 +85,7 @@ export function SettingsMenu() {
               role="dialog"
               aria-label="Ajustes"
               className={styles.panel}
-              style={{ top: box.top, right: box.right }}
+              style={{ top: box.top, right: box.right, maxHeight: box.maxHeight }}
             >
               <p className={styles.title}>Ajustes</p>
               <SettingSwitch
@@ -90,6 +98,8 @@ export function SettingsMenu() {
                 onChange={setSuggestDueToday}
                 label="Sugerir las que vencen hoy"
               />
+              <SettingSwitch checked={showMeets} onChange={setShowMeets} label="Mostrar Meets del día" />
+              {showMeets && userId ? <CalendarSettings userId={userId} /> : null}
             </div>,
             document.body,
           )

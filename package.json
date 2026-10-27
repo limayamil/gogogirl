@@ -28,9 +28,11 @@
     "@tiptap/react": "^3.31.3",
     "@tiptap/starter-kit": "^3.31.3",
     "bcryptjs": "^3.0.3",
+    "ical.js": "^2.2.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.1"
+    "react-router-dom": "^7.9.1",
+    "sanitize-html": "^2.18.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.10",
@@ -38,6 +40,7 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
+    "@types/sanitize-html": "^2.16.2",
     "@vitejs/plugin-react": "^5.0.3",
     "concurrently": "^9.1.0",
     "dotenv": "^16.4.7",

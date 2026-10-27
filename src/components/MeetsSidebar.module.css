@@ -1,0 +1,353 @@
+.panel {
+  position: fixed;
+  top: calc(var(--meets-top, var(--header-h)) + var(--space-3));
+  right: max(var(--space-3), env(safe-area-inset-right));
+  bottom: var(--space-3);
+  z-index: 30;
+  width: var(--meets-w, 320px);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+  animation: fade-in var(--dur) ease;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 12px 10px 20px;
+}
+
+.heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 18px;
+}
+
+.date {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-faint);
+}
+
+.date::first-letter {
+  text-transform: uppercase;
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  color: var(--ink-soft);
+}
+
+.iconButton:hover {
+  color: var(--accent);
+  background: var(--surface-2);
+}
+
+.spinning svg {
+  animation: spin 900ms linear infinite;
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.empty {
+  padding: 12px 8px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.warn svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 0;
+  border-radius: var(--r-sm);
+  border-left: 5px solid var(--line-strong);
+  background: var(--surface-2);
+}
+
+.past {
+  opacity: 0.55;
+}
+
+.itemMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 8px 4px 8px 12px;
+  border-radius: var(--r-sm);
+  text-align: left;
+}
+
+.itemMain:hover .meetingTitle {
+  color: var(--accent);
+}
+
+.time {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.meetingTitle {
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  transition: color var(--dur-fast) ease;
+}
+
+.calendarName {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.join,
+.joinLarge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  background: var(--accent-3);
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+  transition: filter var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
+}
+
+.join {
+  padding: 6px 12px;
+  font-size: 12.5px;
+}
+
+.joinLarge {
+  align-self: flex-start;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.join:hover,
+.joinLarge:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.handle {
+  position: fixed;
+  top: calc(var(--meets-top, var(--header-h)) + var(--space-4));
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px 10px 12px;
+  border-radius: var(--r-pill) 0 0 var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-right: none;
+  box-shadow: var(--shadow-md);
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+.handle:hover {
+  color: var(--accent);
+}
+
+.badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: #fff;
+  font-size: 11.5px;
+}
+
+/* Detalle */
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detailWhen {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.detailCalendar {
+  font-weight: 700;
+  color: var(--ink-faint);
+}
+
+.dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--r-pill);
+}
+
+.detailSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detailLabel {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--ink-faint);
+}
+
+.email {
+  color: var(--ink-faint);
+  font-size: 13px;
+}
+
+.attendees {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attendee {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 10px;
+  border-radius: var(--r-xs);
+  background: var(--surface-2);
+  font-size: 14px;
+}
+
+.attendeeName {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.response {
+  flex: none;
+  padding: 2px 10px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 800;
+  background: var(--surface-sunken);
+  color: var(--ink-soft);
+}
+
+.response[data-response='si'] {
+  background: color-mix(in srgb, var(--accent-3) 22%, transparent);
+  color: color-mix(in srgb, var(--accent-3) 60%, var(--ink));
+}
+
+.response[data-response='no'] {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.response[data-response='tal-vez'] {
+  background: color-mix(in srgb, var(--urgency-media) 25%, transparent);
+  color: color-mix(in srgb, var(--urgency-media) 45%, var(--ink));
+}
+
+.notes {
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.notes a,
+.attachments a {
+  color: var(--accent-2);
+  font-weight: 700;
+}
+
+.notes ul {
+  list-style: disc;
+  padding-left: 20px;
+}
+
+.notes ol {
+  list-style: decimal;
+  padding-left: 20px;
+}
+
+.attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attachments a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .panel {
+    left: max(var(--space-3), env(safe-area-inset-left));
+    width: auto;
+  }
+}
