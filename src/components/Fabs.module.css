@@ -1,6 +1,6 @@
 .dock {
   position: fixed;
-  right: max(var(--space-5), env(safe-area-inset-right));
+  right: calc(max(var(--space-5), env(safe-area-inset-right)) + var(--meets-offset, 0px));
   bottom: max(var(--space-5), env(safe-area-inset-bottom));
   z-index: 40;
   display: flex;

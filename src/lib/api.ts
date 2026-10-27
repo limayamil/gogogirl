@@ -3,7 +3,10 @@ import type {
   Attachment,
   AdminUserSummary,
   AuthSession,
+  CalendarFeed,
+  CalendarFeedInput,
   Category,
+  MeetingsOfDay,
   Note,
   NoteInput,
   QuickTask,
@@ -131,4 +134,12 @@ export const api = {
   }) => request<Attachment>('/attachments', { method: 'POST', body: json(input) }),
   getAttachmentUrl: (id: string) => request<{ url: string }>(`/attachments/${id}`),
   deleteAttachment: (id: string) => request<unknown>(`/attachments/${id}`, { method: 'DELETE' }),
+
+  listCalendars: () => request<{ calendars: CalendarFeed[] }>('/calendars'),
+  createCalendar: (input: CalendarFeedInput & { url: string }) =>
+    request<CalendarFeed>('/calendars', { method: 'POST', body: json(input) }),
+  updateCalendar: (id: string, patch: Partial<CalendarFeedInput>) =>
+    request<CalendarFeed>(`/calendars/${id}`, { method: 'PATCH', body: json(patch) }),
+  deleteCalendar: (id: string) => request<unknown>(`/calendars/${id}`, { method: 'DELETE' }),
+  getMeetings: () => request<MeetingsOfDay>('/meetings'),
 }

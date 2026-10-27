@@ -56,9 +56,9 @@ export function maskIcalUrl(url: string): string {
     const file = segments.at(-1) ?? ''
     const secret = segments.length >= 2 ? segments[segments.length - 2] : ''
     const tail = secret.length > 8 ? secret.slice(-4) : ''
-    return `${ICAL_HOST}/calendar/ical/••••${tail}/${file}`
+    return `${ICAL_HOST}/…/••••${tail}/${file}`
   } catch {
-    return `${ICAL_HOST}/calendar/ical/••••`
+    return `${ICAL_HOST}/…`
   }
 }
 

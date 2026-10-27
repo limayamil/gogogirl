@@ -4,6 +4,7 @@
 
 import ICAL from 'ical.js'
 import sanitizeHtml from 'sanitize-html'
+import { MEETINGS_TIME_ZONE } from '../../src/shared/types.ts'
 import type {
   Meeting,
   MeetingAttachment,
@@ -16,9 +17,7 @@ type Component = InstanceType<typeof ICAL.Component>
 type Time = InstanceType<typeof ICAL.Time>
 type IcalEvent = InstanceType<typeof ICAL.Event>
 
-export const MEETINGS_TIME_ZONE = 'America/Argentina/Buenos_Aires'
-
-// Argentina no tiene horario de verano: el dia arranca siempre a las 00:00 -03:00.
+// El dia arranca siempre a las 00:00 -03:00.
 const OFFSET_MS = 3 * 60 * 60 * 1000
 const DAY_MS = 24 * 60 * 60 * 1000
 

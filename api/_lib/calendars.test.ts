@@ -209,7 +209,7 @@ describe('calendarios por iCal', () => {
     ]) {
       expect(() => icalUrl(bad)).toThrow()
     }
-    expect(maskIcalUrl(URL_A)).toBe('calendar.google.com/calendar/ical/••••2211/basic.ics')
+    expect(maskIcalUrl(URL_A)).toBe('calendar.google.com/…/••••2211/basic.ics')
   })
 
   it('nunca devuelve la direccion secreta despues de guardarla', async () => {
@@ -219,7 +219,7 @@ describe('calendarios por iCal', () => {
       id: created.id,
       name: 'Trabajo',
       colorKey: 'lila',
-      maskedUrl: 'calendar.google.com/calendar/ical/••••2211/basic.ics',
+      maskedUrl: 'calendar.google.com/…/••••2211/basic.ics',
       position: 0,
     })
 

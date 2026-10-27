@@ -6,9 +6,15 @@
 
 export const SHOW_LIST_ON_TASK_KEY = 'gogogirl.showListOnTask'
 export const SUGGEST_DUE_TODAY_KEY = 'gogogirl.suggestDueToday'
+export const SHOW_MEETS_KEY = 'gogogirl.showMeets'
 
 /** Cualquier valor que no sea "true" lo deja apagado: el default es no mostrar la lista. */
 export function readShowListOnTask(stored: string | null): boolean {
+  return stored === 'true'
+}
+
+/** Apagado por defecto: sin prenderlo no se pide ningun calendario. */
+export function readShowMeets(stored: string | null): boolean {
   return stored === 'true'
 }
 

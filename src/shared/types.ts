@@ -207,6 +207,9 @@ export interface CalendarFeedInput {
   url?: string
 }
 
+/** Argentina no tiene horario de verano: el dia de las reuniones es siempre GMT-3. */
+export const MEETINGS_TIME_ZONE = 'America/Argentina/Buenos_Aires'
+
 /** PARTSTAT de iCal, ya traducido. */
 export type MeetingResponse = 'si' | 'no' | 'tal-vez' | 'sin-responder'
 

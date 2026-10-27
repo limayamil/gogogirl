@@ -2,8 +2,13 @@ import { requireUser } from './_lib/auth.ts'
 import { FeedError, loadFeed } from './_lib/calendars.ts'
 import { sql } from './_lib/db.ts'
 import { route } from './_lib/http.ts'
-import { buenosAiresDay, MEETINGS_TIME_ZONE, meetingsForDay, sortMeetings } from './_lib/ics.ts'
-import type { Meeting, MeetingsCalendarStatus, MeetingsOfDay } from '../src/shared/types.ts'
+import { buenosAiresDay, meetingsForDay, sortMeetings } from './_lib/ics.ts'
+import {
+  MEETINGS_TIME_ZONE,
+  type Meeting,
+  type MeetingsCalendarStatus,
+  type MeetingsOfDay,
+} from '../src/shared/types.ts'
 
 type Row = Record<string, unknown>
 
