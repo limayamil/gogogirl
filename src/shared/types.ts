@@ -187,3 +187,73 @@ export interface NoteInput {
   /** Nombres, no ids: el servidor hace upsert de la etiqueta. */
   tags?: string[]
 }
+
+/**
+ * Calendario de Google leido por su direccion secreta iCal. La direccion no
+ * viaja al front despues de guardarla: solo `maskedUrl`, para reconocerla.
+ */
+export interface CalendarFeed {
+  id: string
+  name: string
+  colorKey: string
+  maskedUrl: string
+  position: number
+}
+
+export interface CalendarFeedInput {
+  name: string
+  colorKey: string
+  /** Solo al crear o al reemplazarla. Nunca vuelve en la respuesta. */
+  url?: string
+}
+
+/** PARTSTAT de iCal, ya traducido. */
+export type MeetingResponse = 'si' | 'no' | 'tal-vez' | 'sin-responder'
+
+export interface MeetingPerson {
+  name: string | null
+  email: string | null
+}
+
+export interface MeetingAttendee extends MeetingPerson {
+  response: MeetingResponse
+}
+
+export interface MeetingAttachment {
+  url: string
+  title: string | null
+}
+
+export interface Meeting {
+  /** Unico dentro del dia: calendario + UID + ocurrencia. */
+  id: string
+  calendarId: string
+  title: string
+  /** ISO UTC. En un evento de todo el dia es la medianoche GMT-3 de ese dia. */
+  start: string
+  end: string
+  allDay: boolean
+  location: string | null
+  meetUrl: string | null
+  organizer: MeetingPerson | null
+  attendees: MeetingAttendee[]
+  /** HTML ya sanitizado por el servidor, con los links clickeables. */
+  descriptionHtml: string | null
+  attachments: MeetingAttachment[]
+}
+
+export interface MeetingsCalendarStatus {
+  id: string
+  name: string
+  colorKey: string
+  ok: boolean
+  error: string | null
+}
+
+export interface MeetingsOfDay {
+  /** 'YYYY-MM-DD' en America/Argentina/Buenos_Aires. */
+  date: string
+  timeZone: string
+  meetings: Meeting[]
+  calendars: MeetingsCalendarStatus[]
+}

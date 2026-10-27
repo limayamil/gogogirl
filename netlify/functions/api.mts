@@ -36,6 +36,9 @@ import attachmentById from '../../api/attachments/[id].ts'
 import links from '../../api/links/index.ts'
 import linkById from '../../api/links/[id].ts'
 import uploadsSign from '../../api/uploads/sign.ts'
+import calendars from '../../api/calendars/index.ts'
+import calendarById from '../../api/calendars/[id].ts'
+import meetings from '../../api/meetings.ts'
 
 const routes: Route[] = [
   ['/api/auth/session', authSession],
@@ -65,6 +68,9 @@ const routes: Route[] = [
   ['/api/links', links],
   ['/api/links/:id', linkById],
   ['/api/uploads/sign', uploadsSign],
+  ['/api/calendars', calendars],
+  ['/api/calendars/:id', calendarById],
+  ['/api/meetings', meetings],
 ]
 
 export default createApiHandler(routes)

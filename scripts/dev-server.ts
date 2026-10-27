@@ -45,6 +45,9 @@ const routes: Array<[path: string, module: string]> = [
   ['/api/links', '../api/links/index.ts'],
   ['/api/links/:id', '../api/links/[id].ts'],
   ['/api/uploads/sign', '../api/uploads/sign.ts'],
+  ['/api/calendars', '../api/calendars/index.ts'],
+  ['/api/calendars/:id', '../api/calendars/[id].ts'],
+  ['/api/meetings', '../api/meetings.ts'],
 ]
 
 for (const [path, modulePath] of routes) {
