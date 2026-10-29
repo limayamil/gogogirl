@@ -38,6 +38,8 @@ import linkById from '../../api/links/[id].ts'
 import uploadsSign from '../../api/uploads/sign.ts'
 import tabletTasks from '../../api/tablet-tasks.ts'
 import tabletTasksDone from '../../api/tablet-tasks-done.ts'
+import tabletSync from '../../api/tablet-sync.ts'
+import tabletSubtasksDone from '../../api/tablet-subtasks-done.ts'
 
 const routes: Route[] = [
   ['/api/auth/session', authSession],
@@ -69,6 +71,8 @@ const routes: Route[] = [
   ['/api/uploads/sign', uploadsSign],
   ['/api/tablet/tasks', tabletTasks],
   ['/api/tablet/tasks/done', tabletTasksDone],
+  ['/api/tablet/sync', tabletSync],
+  ['/api/tablet/subtasks/done', tabletSubtasksDone],
 ]
 
 export default createApiHandler(routes)
