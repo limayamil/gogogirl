@@ -24,7 +24,7 @@ describe('tablas de rutas', () => {
   it('incluyen las rutas de la tablet', async () => {
     for (const file of ['scripts/dev-server.ts', 'netlify/functions/api.mts']) {
       expect(await paths(file)).toEqual(
-        expect.arrayContaining(['/api/tablet/tasks', '/api/tablet/tasks/done']),
+        expect.arrayContaining(['/api/tablet/tasks', '/api/tablet/tasks/done', '/api/tablet/sync', '/api/tablet/subtasks/done']),
       )
     }
   })

@@ -47,6 +47,8 @@ const routes: Array<[path: string, module: string]> = [
   ['/api/uploads/sign', '../api/uploads/sign.ts'],
   ['/api/tablet/tasks', '../api/tablet-tasks.ts'],
   ['/api/tablet/tasks/done', '../api/tablet-tasks-done.ts'],
+  ['/api/tablet/sync', '../api/tablet-sync.ts'],
+  ['/api/tablet/subtasks/done', '../api/tablet-subtasks-done.ts'],
 ]
 
 for (const [path, modulePath] of routes) {
