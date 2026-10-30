@@ -12,6 +12,34 @@
   margin-bottom: var(--space-5);
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* Misma pastilla que «Ocultar hechas» en el rail de Hoy, a la izquierda de Nueva. */
+.hideCompleted {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+  transition: color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
+}
+
+.hideCompleted:hover,
+.hideCompletedOn {
+  color: var(--accent);
+}
+
 .newCategory {
   display: flex;
   align-items: center;
@@ -241,6 +269,10 @@
   .header {
     justify-content: flex-start;
     margin-bottom: var(--space-4);
+  }
+
+  .headerActions {
+    justify-content: flex-start;
   }
 
   .card {

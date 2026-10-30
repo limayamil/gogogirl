@@ -4,12 +4,16 @@ import { StatusToggle } from '../components/StatusToggle'
 import { TaskListLabel } from '../components/TaskListLabel'
 import {
   IconCalendar,
+  IconEye,
+  IconEyeOff,
   IconFlag,
   IconList,
   IconPaperclip,
   IconPlus,
   IconSun,
 } from '../components/Icons'
+import { homeListStaysVisible, visibleHomeListTasks } from '../lib/hide-completed'
+import { useHideCompletedLists } from '../lib/use-hide-completed'
 import { useColorOf } from '../lib/palette'
 import { formatShortDate } from '../lib/dates'
 import { richTextExcerpt } from '../lib/rich-text'
@@ -32,20 +36,34 @@ export function CategoriesView() {
   const categories = data?.categories ?? []
   const tasks = (data?.tasks ?? []).filter((task) => !isExpiredCompleted(task))
   const uncategorized = tasks.filter((task) => task.categoryId === null)
+  // Misma preferencia que el rail de Hoy.
+  const [hideCompleted, setHideCompleted] = useHideCompletedLists()
+  const shownUncategorized = visibleHomeListTasks(uncategorized, hideCompleted)
 
   return (
     <div className={`${styles.page} pageEnter`}>
       <header className={styles.header}>
         <h1 className="visuallyHidden">Categorías</h1>
-        <button
-          type="button"
-          className={styles.newCategory}
-          onClick={() => openCategory(null)}
-          aria-label="Nueva categoría"
-        >
-          <IconPlus size={16} />
-          Nueva
-        </button>
+        <div className={styles.headerActions}>
+          <button
+            type="button"
+            className={`${styles.hideCompleted} ${hideCompleted ? styles.hideCompletedOn : ''}`}
+            aria-pressed={hideCompleted}
+            onClick={() => setHideCompleted((value) => !value)}
+          >
+            {hideCompleted ? <IconEye size={15} /> : <IconEyeOff size={15} />}
+            {hideCompleted ? 'Ver hechas' : 'Ocultar hechas'}
+          </button>
+          <button
+            type="button"
+            className={styles.newCategory}
+            onClick={() => openCategory(null)}
+            aria-label="Nueva categoría"
+          >
+            <IconPlus size={16} />
+            Nueva
+          </button>
+        </div>
       </header>
 
       {/* El encabezado no depende de los datos: dejarlo montado evita que la pantalla
@@ -73,6 +91,9 @@ export function CategoriesView() {
         {categories.map((category) => {
           const color = colorOf(category.colorKey)
           const own = tasks.filter((task) => task.categoryId === category.id)
+          // Toda hecha: la tarjeta desaparece. Mixta: sigue, sin las hechas.
+          if (!homeListStaysVisible(own, hideCompleted)) return null
+          const shown = visibleHomeListTasks(own, hideCompleted)
           return (
             <section key={category.id} className={styles.card} style={{ backgroundColor: color.bg }}>
               <header className={styles.cardHeader}>
@@ -84,7 +105,7 @@ export function CategoriesView() {
                 >
                   {category.name}
                   <span className={styles.cardCount}>
-                    {own.filter((task) => task.status !== 'hecha').length}
+                    {shown.filter((task) => task.status !== 'hecha').length}
                   </span>
                 </button>
                 <button
@@ -98,11 +119,11 @@ export function CategoriesView() {
                 </button>
               </header>
 
-              {own.length === 0 ? (
+              {shown.length === 0 ? (
                 <p className={styles.cardEmpty}>Sin tareas todavía</p>
               ) : (
                 <ul className={styles.taskList}>
-                  {own.map((task) => (
+                  {shown.map((task) => (
                     <TaskCard
                       key={task.id}
                       task={task}
@@ -117,16 +138,16 @@ export function CategoriesView() {
           )
         })}
 
-        {uncategorized.length > 0 ? (
+        {shownUncategorized.length > 0 ? (
           <section className={styles.card} style={{ backgroundColor: 'var(--surface-2)' }}>
             <header className={styles.cardHeader}>
               <span className={styles.cardTitle}>
                 Sin categoría
-                <span className={styles.cardCount}>{uncategorized.length}</span>
+                <span className={styles.cardCount}>{shownUncategorized.length}</span>
               </span>
             </header>
             <ul className={styles.taskList}>
-              {uncategorized.map((task) => (
+              {shownUncategorized.map((task) => (
                 <TaskCard
                   key={task.id}
                   task={task}
