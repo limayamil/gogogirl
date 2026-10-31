@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { nextTodayPositions } from './today-order'
+import { nextTodayPositions, reorderVisibleToday, sortTodayTasks } from './today-order'
 
 describe('nextTodayPositions', () => {
   it('mueve una tarea hacia arriba y reindexa 0..n-1', () => {
@@ -39,5 +39,80 @@ describe('nextTodayPositions', () => {
     const ids = ['a', 'b', 'c']
     nextTodayPositions(ids, 'c', 'a')
     expect(ids).toEqual(['a', 'b', 'c'])
+  })
+})
+
+describe('sortTodayTasks', () => {
+  const tasks = [
+    { id: 'cerrar', status: 'hecha', todayPosition: 0 },
+    { id: 'curso', status: 'en_progreso', todayPosition: 1 },
+    { id: 'alfa', status: 'pendiente', todayPosition: 2 },
+    { id: 'archivar', status: 'hecha', todayPosition: 3 },
+  ]
+
+  it('apagado respeta todayPosition', () => {
+    expect(sortTodayTasks(tasks, false).map((task) => task.id)).toEqual([
+      'cerrar',
+      'curso',
+      'alfa',
+      'archivar',
+    ])
+  })
+
+  it('prende y manda las hechas al final sin mezclar el resto', () => {
+    expect(sortTodayTasks(tasks, true).map((task) => task.id)).toEqual([
+      'curso',
+      'alfa',
+      'cerrar',
+      'archivar',
+    ])
+  })
+
+  it('no esconde las hechas: eso lo sigue haciendo Ocultar hechas', () => {
+    const sorted = sortTodayTasks(tasks, true)
+    expect(sorted.filter((task) => task.status === 'hecha').map((task) => task.id)).toEqual([
+      'cerrar',
+      'archivar',
+    ])
+    expect(sorted).toHaveLength(tasks.length)
+  })
+})
+
+describe('reorderVisibleToday', () => {
+  it('reordena el orden visible y deja las ocultas en su hueco', () => {
+    expect(reorderVisibleToday(['a', 'hidden', 'b'], ['a', 'b'], 'b', 'a')).toEqual([
+      { id: 'b', todayPosition: 0 },
+      { id: 'hidden', todayPosition: 1 },
+      { id: 'a', todayPosition: 2 },
+    ])
+  })
+
+  it('mueve dentro del orden en pantalla, no del guardado', () => {
+    // Guardado: hecha, p1, p2. En pantalla, con completadas al final: p1, p2, hecha.
+    const stored = ['hecha', 'p1', 'p2']
+    const visible = ['p1', 'p2', 'hecha']
+    const positions = reorderVisibleToday(stored, visible, 'p2', 'p1')
+    expect(positions).toEqual([
+      { id: 'p2', todayPosition: 0 },
+      { id: 'p1', todayPosition: 1 },
+      { id: 'hecha', todayPosition: 2 },
+    ])
+
+    const byId = new Map(
+      [
+        { id: 'hecha', status: 'hecha', todayPosition: 0 },
+        { id: 'p1', status: 'pendiente', todayPosition: 1 },
+        { id: 'p2', status: 'pendiente', todayPosition: 2 },
+      ].map((task) => [task.id, task]),
+    )
+    const resorted = sortTodayTasks(
+      (positions ?? []).map((item) => ({ ...byId.get(item.id)!, todayPosition: item.todayPosition })),
+      true,
+    )
+    expect(resorted.map((task) => task.id)).toEqual(['p2', 'p1', 'hecha'])
+  })
+
+  it('no hace nada si el destino es la misma fila visible', () => {
+    expect(reorderVisibleToday(['a', 'b'], ['a', 'b'], 'a', 'a')).toBeNull()
   })
 })

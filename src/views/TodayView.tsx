@@ -12,6 +12,7 @@ import {
   type CollisionDetection,
   type DragEndEvent,
   type DragStartEvent,
+  type Modifier,
 } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -25,6 +26,7 @@ import {
   IconEye,
   IconEyeOff,
   IconFolder,
+  IconGrip,
   IconPlus,
   IconSun,
 } from '../components/Icons'
@@ -36,7 +38,7 @@ import { useHideCompletedLists } from '../lib/use-hide-completed'
 import { useColorOf } from '../lib/palette'
 import { isExpiredCompleted } from '../shared/expiry'
 import { useAppState, useReorderToday, useUpdateSubtask, useUpdateTask } from '../lib/store'
-import { nextTodayPositions } from '../lib/today-order'
+import { reorderVisibleToday, sortTodayTasks } from '../lib/today-order'
 import type { Category, Task } from '../shared/types'
 import styles from './TodayView.module.css'
 
@@ -50,11 +52,12 @@ export function TodayView() {
   const reorderToday = useReorderToday()
 
   const colorOf = useColorOf()
+  const { completedLastOnHome } = useDisplaySettings()
   const [showHidden, setShowHidden] = useState(false)
   const [dragging, setDragging] = useState<Task | null>(null)
 
-  // Un drag recien arranca despues de 6px: asi un click simple sigue abriendo el modal.
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
+  // La manija arranca el drag recién después de ~8px: un toque quieto no reordena.
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
 
   const tasks = data?.tasks ?? []
   const categories = data?.categories ?? []
@@ -63,10 +66,11 @@ export function TodayView() {
 
   const todayTasks = useMemo(
     () =>
-      listed
-        .filter((task) => task.inToday && (showHidden || !task.hiddenInToday))
-        .sort((a, b) => (a.todayPosition ?? 0) - (b.todayPosition ?? 0)),
-    [listed, showHidden],
+      sortTodayTasks(
+        listed.filter((task) => task.inToday && (showHidden || !task.hiddenInToday)),
+        completedLastOnHome,
+      ),
+    [listed, showHidden, completedLastOnHome],
   )
 
   const hiddenCount = listed.filter((t) => t.inToday && t.hiddenInToday).length
@@ -83,11 +87,8 @@ export function TodayView() {
     if (!task || overId == null) return
     const over = String(overId)
 
-    // Soltar en las listas saca la tarea de Hoy; sigue viviendo en su categoria.
-    if (over === RAIL_ZONE) {
-      if (task.inToday) updateTask.mutate({ id: task.id, patch: { inToday: false } })
-      return
-    }
+    // Reordenar es vertical: soltar hacia las listas no saca la tarea de Hoy.
+    if (over === RAIL_ZONE) return
 
     if (!task.inToday) {
       if (over === TODAY_ZONE || todayTasks.some((item) => item.id === over)) {
@@ -98,20 +99,28 @@ export function TodayView() {
 
     if (over === TODAY_ZONE) return
 
-    const orderedIds = tasks
+    const storedIds = listed
       .filter((item) => item.inToday)
       .sort((a, b) => (a.todayPosition ?? 0) - (b.todayPosition ?? 0))
       .map((item) => item.id)
-    const positions = nextTodayPositions(orderedIds, task.id, over)
+    const positions = reorderVisibleToday(
+      storedIds,
+      todayTasks.map((item) => item.id),
+      task.id,
+      over,
+    )
     if (positions) reorderToday.mutate(positions)
   }
 
-  const collisionDetection = makeTodayCollision(new Set(todayTasks.map((task) => task.id)))
+  const todayIds = useMemo(() => new Set(todayTasks.map((task) => task.id)), [todayTasks])
+  const modifiers = useMemo(() => [verticalAxisWhenReordering(todayIds)], [todayIds])
+  const collisionDetection = useMemo(() => makeTodayCollision(todayIds), [todayIds])
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={collisionDetection}
+      modifiers={modifiers}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
@@ -190,26 +199,44 @@ function DueTodayStrip({ tasks, categories }: { tasks: Task[]; categories: Categ
 }
 
 /**
- * Si estamos reordenando Hoy, una fila gana sobre el panel entero.
- * Si traemos desde las listas, el panel es el destino: si no, las filas se
- * apartarian como si insertaramos ahi, pero la tarea siempre entra al final.
+ * Reordenar Hoy solo choca con filas de Hoy. El modificador ya traba el eje X;
+ * acá se descarta la zona de listas para que ese gesto no las use de destino.
+ * Traer desde las listas sigue cayendo en el panel: si ganara una fila, parecería
+ * que insertamos ahí, pero la tarea siempre entra al final.
  */
 function makeTodayCollision(todayIds: Set<string>): CollisionDetection {
   return (args) => {
-    const pointerHits = pointerWithin(args)
     const draggingToday = todayIds.has(String(args.active.id))
 
     if (draggingToday) {
-      const itemHit = pointerHits.find((hit) => hit.id !== TODAY_ZONE && hit.id !== RAIL_ZONE)
-      if (itemHit) return [itemHit]
-      if (pointerHits.length > 0) return pointerHits
-      return closestCenter(args)
+      const rows = args.droppableContainers.filter((container) => todayIds.has(String(container.id)))
+      const overRow = pointerWithin({ ...args, droppableContainers: rows })
+      if (overRow.length > 0) return overRow
+
+      const pointerHits = pointerWithin(args)
+      const overRail = pointerHits.some((hit) => hit.id === RAIL_ZONE)
+      const overToday = pointerHits.some((hit) => hit.id === TODAY_ZONE)
+      if (overRail || !overToday) return []
+      return closestCenter({ ...args, droppableContainers: rows })
     }
 
+    const pointerHits = pointerWithin(args)
     const zone = pointerHits.find((hit) => hit.id === TODAY_ZONE || hit.id === RAIL_ZONE)
     if (zone) return [zone]
     return pointerHits.length > 0 ? pointerHits : closestCenter(args)
   }
+}
+
+/** El overlay de una fila de Hoy no se corre de costado: Listas queda fuera del gesto. */
+function verticalAxisWhenReordering(todayIds: ReadonlySet<string>): Modifier {
+  return ({ transform, active }) => {
+    if (!active || !todayIds.has(String(active.id))) return transform
+    return { ...transform, x: 0 }
+  }
+}
+
+function keepClick(event: { stopPropagation: () => void }) {
+  event.stopPropagation()
 }
 
 // --- Panel de Hoy ---------------------------------------------------------
@@ -309,14 +336,14 @@ function TodayPanel({
   )
 }
 
-/** Fila de Hoy: titulo, status y, si hay subtareas, un chevron para verlas. */
-function TodayRow({ task, categories }: { task: Task; categories: Category[] }) {
+/** Fila de Hoy: la manija reordena; titulo, estado y ojo siguen siendo clicks. */
+export function TodayRow({ task, categories }: { task: Task; categories: Category[] }) {
   const { openTask } = useModals()
   const updateTask = useUpdateTask()
   const [open, setOpen] = useState(false)
   const hasSubtasks = task.subtasks.length > 0
   const color = useColorOf()(categoryColorKey(categories, task))
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({
     id: task.id,
   })
 
@@ -333,48 +360,68 @@ function TodayRow({ task, categories }: { task: Task; categories: Category[] }) 
         transition,
       }}
     >
-      <div className={styles.todayRowMain} {...attributes} {...listeners}>
-        <span className={styles.rowBar} style={{ background: color.dot }} />
-
-        {hasSubtasks ? (
-          <button
-            type="button"
-            className={styles.rowChevron}
-            aria-expanded={open}
-            title={open ? 'Ocultar subtareas' : 'Ver subtareas'}
-            aria-label={open ? 'Ocultar subtareas' : 'Ver subtareas'}
-            onPointerDown={(event) => event.stopPropagation()}
-            onClick={(event) => {
-              event.stopPropagation()
-              setOpen((value) => !value)
-            }}
-          >
-            <IconChevronDown size={16} className={open ? undefined : styles.chevronClosed} />
-          </button>
-        ) : null}
-
-        <StatusToggle
-          status={task.status}
-          onChange={(status) => updateTask.mutate({ id: task.id, patch: { status } })}
-        />
-
-        <button type="button" className={styles.rowTitle} onClick={() => openTask({ taskId: task.id })}>
-          <span className={task.status === 'hecha' ? styles.rowDone : undefined}>{task.title}</span>
-          <TaskListLabel name={listName(categories, task)} />
-        </button>
-
+      {isOver && !isDragging ? <span className={styles.insertLine} aria-hidden="true" /> : null}
+      <div className={styles.todayRowBody}>
         <button
           type="button"
-          className={styles.rowEye}
-          title={task.hiddenInToday ? 'Volver a mostrar en Hoy' : 'Ocultar de Hoy'}
-          aria-label={task.hiddenInToday ? 'Volver a mostrar en Hoy' : 'Ocultar de Hoy'}
-          onClick={(event) => {
-            event.stopPropagation()
-            updateTask.mutate({ id: task.id, patch: { hiddenInToday: !task.hiddenInToday } })
-          }}
+          className={styles.dragHandle}
+          aria-label="Reordenar"
+          title="Arrastrá para reordenar"
+          {...attributes}
+          {...listeners}
         >
-          {task.hiddenInToday ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+          <IconGrip size={18} />
         </button>
+
+        <div className={styles.todayRowMain}>
+          <span className={styles.rowBar} style={{ background: color.dot }} />
+
+          {hasSubtasks ? (
+            <button
+              type="button"
+              className={styles.rowChevron}
+              aria-expanded={open}
+              title={open ? 'Ocultar subtareas' : 'Ver subtareas'}
+              aria-label={open ? 'Ocultar subtareas' : 'Ver subtareas'}
+              onPointerDown={keepClick}
+              onClick={(event) => {
+                event.stopPropagation()
+                setOpen((value) => !value)
+              }}
+            >
+              <IconChevronDown size={16} className={open ? undefined : styles.chevronClosed} />
+            </button>
+          ) : null}
+
+          <StatusToggle
+            status={task.status}
+            onChange={(status) => updateTask.mutate({ id: task.id, patch: { status } })}
+          />
+
+          <button
+            type="button"
+            className={styles.rowTitle}
+            onPointerDown={keepClick}
+            onClick={() => openTask({ taskId: task.id })}
+          >
+            <span className={task.status === 'hecha' ? styles.rowDone : undefined}>{task.title}</span>
+            <TaskListLabel name={listName(categories, task)} />
+          </button>
+
+          <button
+            type="button"
+            className={styles.rowEye}
+            title={task.hiddenInToday ? 'Volver a mostrar en Hoy' : 'Ocultar de Hoy'}
+            aria-label={task.hiddenInToday ? 'Volver a mostrar en Hoy' : 'Ocultar de Hoy'}
+            onPointerDown={keepClick}
+            onClick={(event) => {
+              event.stopPropagation()
+              updateTask.mutate({ id: task.id, patch: { hiddenInToday: !task.hiddenInToday } })
+            }}
+          >
+            {task.hiddenInToday ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+          </button>
+        </div>
       </div>
 
       {hasSubtasks && open ? <SubtaskList task={task} /> : null}
