@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -31,12 +31,8 @@ import {
 import { celebrateFromPointer, shouldCelebrateChecked } from '../lib/confetti'
 import { formatTodayHeading, todayKey } from '../lib/dates'
 import { dueTodaySuggestions, takeForTodayPatch } from '../lib/display-settings'
-import {
-  HIDE_COMPLETED_ON_HOME_KEY,
-  homeListStaysVisible,
-  readHideCompletedOnHome,
-  visibleHomeListTasks,
-} from '../lib/hide-completed'
+import { homeListStaysVisible, visibleHomeListTasks } from '../lib/hide-completed'
+import { useHideCompletedLists } from '../lib/use-hide-completed'
 import { useColorOf } from '../lib/palette'
 import { isExpiredCompleted } from '../shared/expiry'
 import { useAppState, useReorderToday, useUpdateSubtask, useUpdateTask } from '../lib/store'
@@ -405,14 +401,8 @@ function Rail({
   onAddTask: (categoryId: string | null) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: RAIL_ZONE })
-  // Solo pinta el rail: no toca tareas guardadas ni las otras pantallas.
-  const [hideCompleted, setHideCompleted] = useState(() =>
-    readHideCompletedOnHome(localStorage.getItem(HIDE_COMPLETED_ON_HOME_KEY)),
-  )
-
-  useEffect(() => {
-    localStorage.setItem(HIDE_COMPLETED_ON_HOME_KEY, hideCompleted ? 'true' : 'false')
-  }, [hideCompleted])
+  // Misma preferencia que Categorías: no toca tareas guardadas.
+  const [hideCompleted, setHideCompleted] = useHideCompletedLists()
 
   const shownUncategorized = visibleHomeListTasks(uncategorized, hideCompleted)
 
