@@ -160,6 +160,16 @@ export const IconFlag = ({ size = 20, className }: Props) => (
   </svg>
 )
 
+/** Seis puntos para la manija de reordenar. El trazo del resto de íconos acá no se lee. */
+export const IconGrip = ({ size = 18, className }: Props) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+    <path
+      fill="currentColor"
+      d="M9 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm9-13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"
+    />
+  </svg>
+)
+
 export const IconList = ({ size = 20, className }: Props) => (
   <svg {...base(size)} className={className} aria-hidden="true">
     <path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" />

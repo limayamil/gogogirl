@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
+  COMPLETED_LAST_ON_HOME_KEY,
   SHOW_LIST_ON_TASK_KEY,
   SUGGEST_DUE_TODAY_KEY,
   dueTodaySuggestions,
+  readCompletedLastOnHome,
   readShowListOnTask,
   readSuggestDueToday,
   takeForTodayPatch,
@@ -45,6 +47,16 @@ describe('lista bajo el titulo', () => {
     expect(taskListName(null, true)).toBeNull()
     expect(taskListName('   ', true)).toBeNull()
     expect(taskListName(null, false)).toBeNull()
+  })
+})
+
+describe('completadas al final', () => {
+  it('viene apagado y solo se prende con true', () => {
+    expect(COMPLETED_LAST_ON_HOME_KEY).toBe('gogogirl.completedLastOnHome')
+    expect(readCompletedLastOnHome(null)).toBe(false)
+    expect(readCompletedLastOnHome('')).toBe(false)
+    expect(readCompletedLastOnHome('false')).toBe(false)
+    expect(readCompletedLastOnHome('true')).toBe(true)
   })
 })
 

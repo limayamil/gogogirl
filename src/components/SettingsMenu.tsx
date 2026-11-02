@@ -9,8 +9,14 @@ import styles from './SettingsMenu.module.css'
  * El panel es fijo contra el botón porque el header recorta con overflow.
  */
 export function SettingsMenu() {
-  const { showListOnTask, suggestDueToday, setShowListOnTask, setSuggestDueToday } =
-    useDisplaySettings()
+  const {
+    showListOnTask,
+    suggestDueToday,
+    completedLastOnHome,
+    setShowListOnTask,
+    setSuggestDueToday,
+    setCompletedLastOnHome,
+  } = useDisplaySettings()
   const [open, setOpen] = useState(false)
   const [box, setBox] = useState<{ top: number; right: number } | null>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -89,6 +95,11 @@ export function SettingsMenu() {
                 checked={suggestDueToday}
                 onChange={setSuggestDueToday}
                 label="Sugerir las que vencen hoy"
+              />
+              <SettingSwitch
+                checked={completedLastOnHome}
+                onChange={setCompletedLastOnHome}
+                label="Completadas al final"
               />
             </div>,
             document.body,

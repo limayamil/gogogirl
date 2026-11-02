@@ -6,6 +6,7 @@
 
 export const SHOW_LIST_ON_TASK_KEY = 'gogogirl.showListOnTask'
 export const SUGGEST_DUE_TODAY_KEY = 'gogogirl.suggestDueToday'
+export const COMPLETED_LAST_ON_HOME_KEY = 'gogogirl.completedLastOnHome'
 
 /** Cualquier valor que no sea "true" lo deja apagado: el default es no mostrar la lista. */
 export function readShowListOnTask(stored: string | null): boolean {
@@ -15,6 +16,11 @@ export function readShowListOnTask(stored: string | null): boolean {
 /** Solo "false" lo apaga. Si no hay nada guardado, la tira se muestra. */
 export function readSuggestDueToday(stored: string | null): boolean {
   return stored !== 'false'
+}
+
+/** Cualquier valor que no sea "true" lo deja apagado: las hechas siguen en su lugar. */
+export function readCompletedLastOnHome(stored: string | null): boolean {
+  return stored === 'true'
 }
 
 /**
