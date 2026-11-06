@@ -27,10 +27,10 @@
 
 .todayHeader {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  align-items: flex-start;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-3);
   margin-bottom: var(--space-5);
 }
 
@@ -39,7 +39,7 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.28em 0.35em;
-  flex: 0 1 auto;
+  flex: 1;
   min-width: 0;
   font-size: clamp(26px, 3.2vw, 36px);
   font-weight: 700;
@@ -85,6 +85,7 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .todayAdd {
