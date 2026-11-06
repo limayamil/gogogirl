@@ -261,7 +261,6 @@ function TodayPanel({
   isPending: boolean
   error: unknown
 }) {
-  const { openTask } = useModals()
   const { setNodeRef, isOver } = useDroppable({ id: TODAY_ZONE })
   const today = formatTodayHeading(new Date())
   const comma = today.indexOf(',')
@@ -278,18 +277,7 @@ function TodayPanel({
         {/* El nav ya dice Hoy: el heading es la fecha, con el dia en coral
            como el saludo amable de las referencias, sin copiar su copy. */}
         <h1 className={styles.todayTitle}>
-          <span className={styles.todayDay}>
-            <span className={styles.todayFriendly}>{weekday}</span>
-            <button
-              type="button"
-              className={styles.dayAdd}
-              onClick={() => openTask({ taskId: null })}
-              aria-label="Nueva tarea"
-              title="Nueva tarea"
-            >
-              <IconPlus size={16} />
-            </button>
-          </span>
+          <span className={styles.todayFriendly}>{weekday}</span>
           {rest ? <span className={styles.todayRest}>{rest}</span> : null}
         </h1>
 
@@ -459,6 +447,7 @@ function Rail({
   onAddCategory: () => void
   onAddTask: (categoryId: string | null) => void
 }) {
+  const { openTask } = useModals()
   const { setNodeRef, isOver } = useDroppable({ id: RAIL_ZONE })
   // Misma preferencia que Categorías: no toca tareas guardadas.
   const [hideCompleted, setHideCompleted] = useHideCompletedLists()
@@ -478,6 +467,15 @@ function Rail({
           >
             {hideCompleted ? <IconEye size={15} /> : <IconEyeOff size={15} />}
             {hideCompleted ? 'Ver hechas' : 'Ocultar hechas'}
+          </button>
+          <button
+            type="button"
+            className={styles.taskAdd}
+            onClick={() => openTask({ taskId: null })}
+            aria-label="Nueva tarea"
+            title="Nueva tarea"
+          >
+            <IconPlus size={16} />
           </button>
           <button type="button" className={styles.railAdd} onClick={onAddCategory}>
             <IconPlus size={15} />

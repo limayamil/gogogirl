@@ -24,7 +24,6 @@ import {
 import { formatMonthDay, newTaskOnDay } from '../lib/calendar'
 import { useColorOf } from '../lib/palette'
 import {
-  DAY_NAMES,
   addDays,
   formatDayNumber,
   formatShortDate,
@@ -36,6 +35,8 @@ import { useAppState, useUpdateTask } from '../lib/store'
 import { toastUndo } from '../lib/toast'
 import type { Category, Task } from '../shared/types'
 import styles from './WeekView.module.css'
+
+const WEEKDAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const
 
 /** Semana de lunes a domingo. Solo aparecen las tareas que tienen deadline. */
 export function WeekView() {
@@ -169,7 +170,7 @@ export function WeekView() {
             <DayColumn
               key={day}
               dayKey={day}
-              label={DAY_NAMES[index]}
+              label={WEEKDAY_LABELS[index]}
               tasks={byDay.get(day) ?? []}
               categories={categories}
             />
@@ -205,19 +206,17 @@ function DayColumn({
       className={`${styles.day} ${isOver ? styles.dayOver : ''} ${isToday ? styles.dayToday : ''}`}
     >
       <header className={styles.dayHeader}>
-        <span className={styles.dayNameRow}>
-          <span className={styles.dayName}>{label}</span>
-          <button
-            type="button"
-            className={styles.dayAdd}
-            onClick={() => openTask(newTaskOnDay(dayKey))}
-            aria-label={`Nueva tarea para el ${formatMonthDay(dayKey)}`}
-            title="Nueva tarea"
-          >
-            <IconPlus size={13} />
-          </button>
-        </span>
+        <span className={styles.dayName}>{label}</span>
         <span className={styles.dayNumber}>{formatDayNumber(dayKey)}</span>
+        <button
+          type="button"
+          className={styles.dayAdd}
+          onClick={() => openTask(newTaskOnDay(dayKey))}
+          aria-label={`Nueva tarea para el ${formatMonthDay(dayKey)}`}
+          title="Nueva tarea"
+        >
+          <IconPlus size={13} />
+        </button>
       </header>
 
       <ul className={styles.dayList}>
