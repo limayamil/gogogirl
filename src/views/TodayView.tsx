@@ -261,6 +261,7 @@ function TodayPanel({
   isPending: boolean
   error: unknown
 }) {
+  const { openTask } = useModals()
   const { setNodeRef, isOver } = useDroppable({ id: TODAY_ZONE })
   const today = formatTodayHeading(new Date())
   const comma = today.indexOf(',')
@@ -281,18 +282,29 @@ function TodayPanel({
           {rest ? <span className={styles.todayRest}>{rest}</span> : null}
         </h1>
 
-        {hiddenCount > 0 ? (
+        <div className={styles.todayTools}>
           <button
             type="button"
-            className={styles.hiddenToggle}
-            onClick={onToggleHidden}
-            title={showHidden ? 'Ocultar tareas escondidas' : `Ver ${hiddenCount} oculta(s)`}
-            aria-label={showHidden ? 'Ocultar tareas escondidas' : `Ver ${hiddenCount} oculta(s)`}
+            className={styles.todayAdd}
+            onClick={() => openTask({ taskId: null })}
+            aria-label="Nueva tarea"
+            title="Nueva tarea"
           >
-            {showHidden ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-            <span>{showHidden ? 'Ocultar' : hiddenCount}</span>
+            <IconPlus size={16} />
           </button>
-        ) : null}
+          {hiddenCount > 0 ? (
+            <button
+              type="button"
+              className={styles.hiddenToggle}
+              onClick={onToggleHidden}
+              title={showHidden ? 'Ocultar tareas escondidas' : `Ver ${hiddenCount} oculta(s)`}
+              aria-label={showHidden ? 'Ocultar tareas escondidas' : `Ver ${hiddenCount} oculta(s)`}
+            >
+              {showHidden ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+              <span>{showHidden ? 'Ocultar' : hiddenCount}</span>
+            </button>
+          ) : null}
+        </div>
       </header>
 
       {/* El heading no depende de los datos: se queda montado para que la

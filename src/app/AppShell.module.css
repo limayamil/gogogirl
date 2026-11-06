@@ -350,9 +350,9 @@
   padding: var(--space-5) var(--space-5) max(140px, calc(120px + env(safe-area-inset-bottom)));
 }
 
-/* Con cinco pestañas el texto no entra en el centro del header antes que el
+/* Con seis pestañas el texto no entra en el centro del header antes que el
    layout mobile: se esconden las labels y quedan los iconos. */
-@media (max-width: 1240px) {
+@media (max-width: 1360px) {
   .tab {
     position: relative;
     padding: 8px 12px;

@@ -6,7 +6,7 @@ import { impersonationBanner } from '../lib/impersonation'
 import { sessionKey } from '../lib/queryClient'
 import { toastError } from '../lib/toast'
 import { Fabs } from '../components/Fabs'
-import { IconCalendar, IconChart, IconGrid, IconMoon, IconNote, IconSun } from '../components/Icons'
+import { IconCalendar, IconChart, IconGrid, IconMonth, IconMoon, IconNote, IconSun } from '../components/Icons'
 import { SettingsMenu } from '../components/SettingsMenu'
 import { DisplaySettingsProvider } from './display-settings'
 import { ModalProvider } from './modals'
@@ -20,6 +20,7 @@ const TABS = [
   { to: '/', label: 'Hoy', Icon: IconSun },
   { to: '/categorias', label: 'Categorías', Icon: IconGrid },
   { to: '/semana', label: 'Semana', Icon: IconCalendar },
+  { to: '/mes', label: 'Mes', Icon: IconMonth },
   { to: '/notas', label: 'Notas', Icon: IconNote },
   { to: '/estadisticas', label: 'Estadísticas', Icon: IconChart },
 ]
@@ -28,6 +29,7 @@ const TITLES: Record<string, string> = {
   '/': 'Hoy · GoGoGirl',
   '/categorias': 'Categorías · GoGoGirl',
   '/semana': 'Semana · GoGoGirl',
+  '/mes': 'Mes · GoGoGirl',
   '/notas': 'Notas · GoGoGirl',
   '/estadisticas': 'Estadísticas · GoGoGirl',
 }
