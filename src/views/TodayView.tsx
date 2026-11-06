@@ -283,6 +283,15 @@ function TodayPanel({
         </h1>
 
         <div className={styles.todayTools}>
+          <button
+            type="button"
+            className={styles.todayAdd}
+            onClick={() => openTask({ taskId: null })}
+            aria-label="Nueva tarea"
+            title="Nueva tarea"
+          >
+            <IconPlus size={16} />
+          </button>
           {hiddenCount > 0 ? (
             <button
               type="button"
@@ -295,15 +304,6 @@ function TodayPanel({
               <span>{showHidden ? 'Ocultar' : hiddenCount}</span>
             </button>
           ) : null}
-          <button
-            type="button"
-            className={styles.todayAdd}
-            onClick={() => openTask({ taskId: null })}
-            aria-label="Nueva tarea"
-            title="Nueva tarea"
-          >
-            <IconPlus size={16} />
-          </button>
         </div>
       </header>
 
