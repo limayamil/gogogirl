@@ -80,6 +80,28 @@
   color: var(--ink);
 }
 
+.todayTools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.todayAdd {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+
+.todayAdd:hover {
+  color: var(--accent);
+}
+
 .suggest {
   display: flex;
   flex-direction: column;
@@ -382,23 +404,6 @@ button.dragHandle:active {
 .railAdd:hover,
 .railAddOn {
   color: var(--accent);
-}
-
-.taskAdd {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-  color: var(--accent-ink);
-  flex-shrink: 0;
-}
-
-.taskAdd:hover {
-  background: var(--accent);
-  color: #fff;
 }
 
 .railEmpty {

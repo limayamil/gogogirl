@@ -261,6 +261,7 @@ function TodayPanel({
   isPending: boolean
   error: unknown
 }) {
+  const { openTask } = useModals()
   const { setNodeRef, isOver } = useDroppable({ id: TODAY_ZONE })
   const today = formatTodayHeading(new Date())
   const comma = today.indexOf(',')
@@ -281,18 +282,29 @@ function TodayPanel({
           {rest ? <span className={styles.todayRest}>{rest}</span> : null}
         </h1>
 
-        {hiddenCount > 0 ? (
+        <div className={styles.todayTools}>
+          {hiddenCount > 0 ? (
+            <button
+              type="button"
+              className={styles.hiddenToggle}
+              onClick={onToggleHidden}
+              title={showHidden ? 'Ocultar tareas escondidas' : `Ver ${hiddenCount} oculta(s)`}
+              aria-label={showHidden ? 'Ocultar tareas escondidas' : `Ver ${hiddenCount} oculta(s)`}
+            >
+              {showHidden ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+              <span>{showHidden ? 'Ocultar' : hiddenCount}</span>
+            </button>
+          ) : null}
           <button
             type="button"
-            className={styles.hiddenToggle}
-            onClick={onToggleHidden}
-            title={showHidden ? 'Ocultar tareas escondidas' : `Ver ${hiddenCount} oculta(s)`}
-            aria-label={showHidden ? 'Ocultar tareas escondidas' : `Ver ${hiddenCount} oculta(s)`}
+            className={styles.todayAdd}
+            onClick={() => openTask({ taskId: null })}
+            aria-label="Nueva tarea"
+            title="Nueva tarea"
           >
-            {showHidden ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-            <span>{showHidden ? 'Ocultar' : hiddenCount}</span>
+            <IconPlus size={16} />
           </button>
-        ) : null}
+        </div>
       </header>
 
       {/* El heading no depende de los datos: se queda montado para que la
@@ -447,7 +459,6 @@ function Rail({
   onAddCategory: () => void
   onAddTask: (categoryId: string | null) => void
 }) {
-  const { openTask } = useModals()
   const { setNodeRef, isOver } = useDroppable({ id: RAIL_ZONE })
   // Misma preferencia que Categorías: no toca tareas guardadas.
   const [hideCompleted, setHideCompleted] = useHideCompletedLists()
@@ -467,15 +478,6 @@ function Rail({
           >
             {hideCompleted ? <IconEye size={15} /> : <IconEyeOff size={15} />}
             {hideCompleted ? 'Ver hechas' : 'Ocultar hechas'}
-          </button>
-          <button
-            type="button"
-            className={styles.taskAdd}
-            onClick={() => openTask({ taskId: null })}
-            aria-label="Nueva tarea"
-            title="Nueva tarea"
-          >
-            <IconPlus size={16} />
           </button>
           <button type="button" className={styles.railAdd} onClick={onAddCategory}>
             <IconPlus size={15} />
