@@ -5,6 +5,7 @@ import {
   formatDayHeading,
   formatMonthTitle,
   groupTasksByDeadline,
+  isWeekendDay,
   monthCells,
   monthOf,
   newTaskOnDay,
@@ -83,5 +84,21 @@ describe('agrupar tareas en el mes de Buenos Aires', () => {
     expect(formatDayHeading('2026-11-06')).toBe('Viernes, 6 de noviembre')
     expect(shiftMonth({ year: 2026, month: 12 }, 1)).toEqual({ year: 2027, month: 1 })
     expect(shiftMonth({ year: 2026, month: 1 }, -1)).toEqual({ year: 2025, month: 12 })
+  })
+
+  it('saca sábado y domingo sin correr el día en Buenos Aires', () => {
+    expect(isWeekendDay('2026-11-06')).toBe(false)
+    expect(isWeekendDay('2026-10-31')).toBe(true)
+    expect(isWeekendDay('2026-11-01')).toBe(true)
+    // La medianoche UTC del domingo 1 cae el sábado 31 en Argentina. El día no se corre.
+    expect(dateKeyInAppZone(new Date('2026-11-01T00:00:00.000Z'))).toBe('2026-10-31')
+
+    const november = monthCells({ year: 2026, month: 11 })
+    const weekdays = november.filter((cell) => !isWeekendDay(cell.key))
+    expect(weekdays).toHaveLength((november.length / 7) * 5)
+    expect(weekdays[0].key).toBe('2026-10-26')
+    expect(weekdays.some((cell) => cell.key === '2026-10-31')).toBe(false)
+    expect(weekdays.some((cell) => cell.key === '2026-11-01')).toBe(false)
+    expect(weekdays.find((cell) => cell.key === '2026-11-06')?.inMonth).toBe(true)
   })
 })

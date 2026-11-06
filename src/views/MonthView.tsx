@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useModals } from '../app/modals'
 import { ErrorState, LoadingState } from '../components/Feedback'
-import { IconChevronLeft, IconChevronRight } from '../components/Icons'
+import { IconChevronLeft, IconChevronRight, IconEye, IconEyeOff } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { DAY_NAMES } from '../lib/dates'
 import {
   formatDayHeading,
   formatMonthTitle,
   groupTasksByDeadline,
+  isWeekendDay,
   monthCells,
   monthOf,
   shiftMonth,
@@ -25,11 +26,14 @@ export function MonthView() {
   const { openTask } = useModals()
   const [cursor, setCursor] = useState<YearMonth>(() => monthOf(new Date()))
   const [openDay, setOpenDay] = useState<string | null>(null)
+  const [showWeekend, setShowWeekend] = useState(false)
 
   const tasks = data?.tasks ?? []
   const categories = data?.categories ?? []
   const grouped = useMemo(() => groupTasksByDeadline(tasks), [tasks])
   const cells = useMemo(() => monthCells(cursor), [cursor])
+  const visibleCells = showWeekend ? cells : cells.filter((cell) => !isWeekendDay(cell.key))
+  const weekdayNames = showWeekend ? DAY_NAMES : DAY_NAMES.slice(0, 5)
   const today = dateKeyInAppZone(new Date())
   const withoutDeadline = tasks.filter((task) => !task.deadline && task.status !== 'hecha').length
   const dayTasks = openDay ? (grouped.get(openDay) ?? []) : []
@@ -48,39 +52,58 @@ export function MonthView() {
           ) : null}
         </div>
 
-        <div className={styles.nav}>
+        <div className={styles.headerActions}>
           <button
             type="button"
-            className={styles.navButton}
-            onClick={() => setCursor((current) => shiftMonth(current, -1))}
-            aria-label="Mes anterior"
+            className={`${styles.weekendToggle} ${showWeekend ? styles.weekendToggleActive : ''}`}
+            onClick={() => setShowWeekend((visible) => !visible)}
+            aria-expanded={showWeekend}
+            aria-controls="month-grid"
+            title={showWeekend ? 'Ocultar fin de semana' : 'Ver fin de semana'}
+            aria-label={showWeekend ? 'Ocultar fin de semana' : 'Ver fin de semana'}
           >
-            <IconChevronLeft size={18} />
+            {showWeekend ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+            <span className={styles.weekendLabel}>Fin de semana</span>
           </button>
-          <button type="button" className={styles.navToday} onClick={() => setCursor(monthOf(new Date()))}>
-            Este mes
-          </button>
-          <button
-            type="button"
-            className={styles.navButton}
-            onClick={() => setCursor((current) => shiftMonth(current, 1))}
-            aria-label="Mes siguiente"
-          >
-            <IconChevronRight size={18} />
-          </button>
+
+          <div className={styles.nav}>
+            <button
+              type="button"
+              className={styles.navButton}
+              onClick={() => setCursor((current) => shiftMonth(current, -1))}
+              aria-label="Mes anterior"
+            >
+              <IconChevronLeft size={18} />
+            </button>
+            <button type="button" className={styles.navToday} onClick={() => setCursor(monthOf(new Date()))}>
+              Este mes
+            </button>
+            <button
+              type="button"
+              className={styles.navButton}
+              onClick={() => setCursor((current) => shiftMonth(current, 1))}
+              aria-label="Mes siguiente"
+            >
+              <IconChevronRight size={18} />
+            </button>
+          </div>
         </div>
       </header>
 
       {isPending ? <LoadingState /> : null}
       {error ? <ErrorState error={error} /> : null}
 
-      <div className={styles.grid} aria-label={`Días de ${formatMonthTitle(cursor)}`}>
-        {DAY_NAMES.map((name) => (
+      <div
+        id="month-grid"
+        className={`${styles.grid} ${showWeekend ? '' : styles.gridWeekdays}`}
+        aria-label={`Días de ${formatMonthTitle(cursor)}`}
+      >
+        {weekdayNames.map((name) => (
           <span key={name} className={styles.weekday} aria-hidden="true">
             {name}
           </span>
         ))}
-        {cells.map((cell) => {
+        {visibleCells.map((cell) => {
           const due = grouped.get(cell.key) ?? []
           return (
             <button
