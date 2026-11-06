@@ -61,6 +61,14 @@ export interface MonthCell {
   inMonth: boolean
 }
 
+/** Sábado o domingo de esa clave de día. Misma aritmética UTC que `mondayOf`. */
+export function isWeekendDay(dateKeyValue: string): boolean {
+  const [year, month, day] = dateKeyValue.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  const weekday = date.getUTCDay()
+  return weekday === 0 || weekday === 6
+}
+
 /**
  * Grilla de lunes a domingo del mes, con los días de los meses vecinos que
  * hacen falta para completar la semana. El mes es el de Buenos Aires.
