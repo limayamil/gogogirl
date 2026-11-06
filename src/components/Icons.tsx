@@ -35,6 +35,19 @@ export const IconCalendar = ({ size = 20, className }: Props) => (
   </svg>
 )
 
+/** Mes: misma hoja que Semana, con la grilla de días para distinguir la pestaña. */
+export const IconMonth = ({ size = 20, className }: Props) => (
+  <svg {...base(size)} className={className} aria-hidden="true">
+    <rect x="3" y="4" width="18" height="16" rx="3" />
+    <path d="M3 9h18M8 3v4M16 3v4" />
+    <circle cx="8" cy="13.5" r="1" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="13.5" r="1" fill="currentColor" stroke="none" />
+    <circle cx="16" cy="13.5" r="1" fill="currentColor" stroke="none" />
+    <circle cx="8" cy="17" r="1" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="17" r="1" fill="currentColor" stroke="none" />
+  </svg>
+)
+
 /** 1, 2 o 3 barras de señal. El botón pinta el color; el ícono no elige la urgencia. */
 const SIGNAL_BARS: Record<1 | 2 | 3, string> = {
   1: 'M12 19V9',

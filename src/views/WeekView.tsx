@@ -19,7 +19,9 @@ import {
   IconChevronRight,
   IconEye,
   IconEyeOff,
+  IconPlus,
 } from '../components/Icons'
+import { formatMonthDay, newTaskOnDay } from '../lib/calendar'
 import { useColorOf } from '../lib/palette'
 import {
   DAY_NAMES,
@@ -193,6 +195,7 @@ function DayColumn({
   tasks: Task[]
   categories: Category[]
 }) {
+  const { openTask } = useModals()
   const { setNodeRef, isOver } = useDroppable({ id: dayKey })
   const isToday = dayKey === todayKey()
 
@@ -202,7 +205,18 @@ function DayColumn({
       className={`${styles.day} ${isOver ? styles.dayOver : ''} ${isToday ? styles.dayToday : ''}`}
     >
       <header className={styles.dayHeader}>
-        <span className={styles.dayName}>{label}</span>
+        <span className={styles.dayNameRow}>
+          <span className={styles.dayName}>{label}</span>
+          <button
+            type="button"
+            className={styles.dayAdd}
+            onClick={() => openTask(newTaskOnDay(dayKey))}
+            aria-label={`Nueva tarea para el ${formatMonthDay(dayKey)}`}
+            title="Nueva tarea"
+          >
+            <IconPlus size={13} />
+          </button>
+        </span>
         <span className={styles.dayNumber}>{formatDayNumber(dayKey)}</span>
       </header>
 
