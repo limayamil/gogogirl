@@ -85,17 +85,18 @@
 .cell {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
-  gap: 10px;
-  aspect-ratio: 1;
+  gap: 6px;
   min-width: 0;
-  padding: 14px 4px 8px;
+  min-height: 112px;
+  padding: 8px 6px;
   border-radius: var(--r-md);
   background-color: var(--surface);
   background-image: var(--grad-wash);
   box-shadow: var(--shadow-card);
   color: var(--ink);
+  text-align: left;
 }
 
 .cell:hover {
@@ -124,24 +125,39 @@
 }
 
 .dayNumber {
-  font-size: 16px;
+  align-self: center;
+  font-size: 15px;
   font-weight: 800;
   line-height: 1;
 }
 
-.dots {
+.pills {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-height: 8px;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
 }
 
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: var(--r-pill);
-  background: var(--accent);
+.pill {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pillDone {
+  text-decoration: line-through;
 }
 
 .emptyDay {
@@ -228,7 +244,8 @@
 
   .cell {
     gap: 4px;
-    padding: 6px 2px 5px;
+    min-height: 88px;
+    padding: 6px 3px;
     border-radius: 16px;
   }
 
@@ -236,13 +253,9 @@
     font-size: 13px;
   }
 
-  .dot {
-    width: 5px;
-    height: 5px;
-  }
-
-  .dots {
-    gap: 3px;
-    min-height: 5px;
+  .pill {
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 14px;
   }
 }

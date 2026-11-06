@@ -5,7 +5,6 @@ import { IconChevronLeft, IconChevronRight } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { DAY_NAMES } from '../lib/dates'
 import {
-  dotCount,
   formatDayHeading,
   formatMonthTitle,
   groupTasksByDeadline,
@@ -82,7 +81,7 @@ export function MonthView() {
           </span>
         ))}
         {cells.map((cell) => {
-          const count = grouped.get(cell.key)?.length ?? 0
+          const due = grouped.get(cell.key) ?? []
           return (
             <button
               key={cell.key}
@@ -92,14 +91,10 @@ export function MonthView() {
               }`}
               onClick={() => setOpenDay(cell.key)}
               aria-current={cell.key === today ? 'date' : undefined}
-              aria-label={dayLabel(cell.key, count)}
+              aria-label={dayLabel(cell.key, due.length)}
             >
               <span className={styles.dayNumber}>{Number(cell.key.slice(8))}</span>
-              <span className={styles.dots} aria-hidden="true">
-                {Array.from({ length: dotCount(count) }, (_, index) => (
-                  <span key={index} className={styles.dot} />
-                ))}
-              </span>
+              <DayPills tasks={due} categories={categories} />
             </button>
           )
         })}
@@ -128,6 +123,30 @@ export function MonthView() {
         </Modal>
       ) : null}
     </div>
+  )
+}
+
+function DayPills({ tasks, categories }: { tasks: Task[]; categories: Category[] }) {
+  const colorOf = useColorOf()
+  if (tasks.length === 0) return null
+
+  return (
+    <span className={styles.pills}>
+      {tasks.map((task) => {
+        const category = categories.find((item) => item.id === task.categoryId)
+        const color = colorOf(category?.colorKey)
+        return (
+          <span
+            key={task.id}
+            className={`${styles.pill} ${task.status === 'hecha' ? styles.pillDone : ''}`}
+            style={{ background: color.bg, color: color.ink }}
+            title={task.title}
+          >
+            {task.title}
+          </span>
+        )
+      })}
+    </span>
   )
 }
 
